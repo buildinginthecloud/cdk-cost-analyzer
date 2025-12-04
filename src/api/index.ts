@@ -7,6 +7,8 @@ import { AnalyzeOptions, CostAnalysisResult } from './types';
 export * from './types';
 export { TemplateParseError } from '../parser/TemplateParser';
 export { PricingAPIError, UnsupportedResourceError } from '../pricing/types';
+export * from '../integrations';
+export * from '../reporter/types';
 
 export async function analyzeCosts(options: AnalyzeOptions): Promise<CostAnalysisResult> {
   const region = options.region || 'eu-central-1';

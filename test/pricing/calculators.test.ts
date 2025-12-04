@@ -3,6 +3,9 @@ import { EC2Calculator } from '../../src/pricing/calculators/EC2Calculator';
 import { S3Calculator } from '../../src/pricing/calculators/S3Calculator';
 import { LambdaCalculator } from '../../src/pricing/calculators/LambdaCalculator';
 import { RDSCalculator } from '../../src/pricing/calculators/RDSCalculator';
+import { DynamoDBCalculator } from '../../src/pricing/calculators/DynamoDBCalculator';
+import { ECSCalculator } from '../../src/pricing/calculators/ECSCalculator';
+import { APIGatewayCalculator } from '../../src/pricing/calculators/APIGatewayCalculator';
 
 describe('Resource Cost Calculators', () => {
   describe('EC2Calculator', () => {
@@ -38,6 +41,37 @@ describe('Resource Cost Calculators', () => {
     it('should support AWS::RDS::DBInstance', () => {
       expect(calculator.supports('AWS::RDS::DBInstance')).toBe(true);
       expect(calculator.supports('AWS::S3::Bucket')).toBe(false);
+    });
+  });
+
+  describe('DynamoDBCalculator', () => {
+    const calculator = new DynamoDBCalculator();
+
+    it('should support AWS::DynamoDB::Table', () => {
+      expect(calculator.supports('AWS::DynamoDB::Table')).toBe(true);
+      expect(calculator.supports('AWS::S3::Bucket')).toBe(false);
+    });
+  });
+
+  describe('ECSCalculator', () => {
+    const calculator = new ECSCalculator();
+
+    it('should support AWS::ECS::Service', () => {
+      expect(calculator.supports('AWS::ECS::Service')).toBe(true);
+      expect(calculator.supports('AWS::S3::Bucket')).toBe(false);
+    });
+  });
+
+  describe('APIGatewayCalculator', () => {
+    const calculator = new APIGatewayCalculator();
+
+    it('should support AWS::ApiGateway::RestApi', () => {
+      expect(calculator.supports('AWS::ApiGateway::RestApi')).toBe(true);
+      expect(calculator.supports('AWS::S3::Bucket')).toBe(false);
+    });
+
+    it('should support AWS::ApiGatewayV2::Api', () => {
+      expect(calculator.supports('AWS::ApiGatewayV2::Api')).toBe(true);
     });
   });
 });

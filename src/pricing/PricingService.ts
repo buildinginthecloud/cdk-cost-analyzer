@@ -10,6 +10,9 @@ import { EC2Calculator } from './calculators/EC2Calculator';
 import { S3Calculator } from './calculators/S3Calculator';
 import { LambdaCalculator } from './calculators/LambdaCalculator';
 import { RDSCalculator } from './calculators/RDSCalculator';
+import { DynamoDBCalculator } from './calculators/DynamoDBCalculator';
+import { ECSCalculator } from './calculators/ECSCalculator';
+import { APIGatewayCalculator } from './calculators/APIGatewayCalculator';
 
 export class PricingService implements IPricingService {
   private calculators: ResourceCostCalculator[];
@@ -22,6 +25,9 @@ export class PricingService implements IPricingService {
       new S3Calculator(),
       new LambdaCalculator(),
       new RDSCalculator(),
+      new DynamoDBCalculator(),
+      new ECSCalculator(),
+      new APIGatewayCalculator(),
     ];
   }
 
