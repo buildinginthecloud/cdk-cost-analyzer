@@ -2,7 +2,6 @@
 
 import { Command } from 'commander';
 import * as fs from 'fs';
-import * as path from 'path';
 import { analyzeCosts } from '../api';
 
 const program = new Command();
@@ -14,7 +13,7 @@ program
   .argument('<base>', 'Path to base CloudFormation template')
   .argument('<target>', 'Path to target CloudFormation template')
   .option('--region <region>', 'AWS region', 'eu-central-1')
-  .option('--format <format>', 'Output format: text|json', 'text')
+  .option('--format <format>', 'Output format: text|json|markdown', 'text')
   .action(async (basePath: string, targetPath: string, options: { region: string; format: string }) => {
     try {
       if (!fs.existsSync(basePath)) {
@@ -34,6 +33,7 @@ program
         baseTemplate,
         targetTemplate,
         region: options.region,
+        format: options.format as 'text' | 'json' | 'markdown',
       });
 
       if (options.format === 'json') {

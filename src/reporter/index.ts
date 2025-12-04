@@ -1,2 +1,2 @@
+export { Reporter } from './Reporter';
 export * from './types';
-export * from './Reporter';

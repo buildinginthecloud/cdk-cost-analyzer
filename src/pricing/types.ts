@@ -1,4 +1,4 @@
-import { ResourceWithId, ModifiedResource, ResourceDiff } from '../diff/types';
+import { ResourceWithId, ResourceDiff } from '../diff/types';
 
 export interface PricingService {
   getResourceCost(resource: ResourceWithId, region: string): Promise<MonthlyCost>;

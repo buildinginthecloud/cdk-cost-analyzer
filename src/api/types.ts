@@ -4,6 +4,7 @@ export interface AnalyzeOptions {
   baseTemplate: string;
   targetTemplate: string;
   region?: string;
+  format?: 'text' | 'json' | 'markdown';
 }
 
 export interface CostAnalysisResult {

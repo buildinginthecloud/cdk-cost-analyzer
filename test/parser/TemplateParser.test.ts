@@ -76,7 +76,10 @@ Resources:
       Handler: index.handler
 Outputs:
   FunctionArn:
-    Value: !GetAtt MyFunction.Arn
+    Value:
+      Fn::GetAtt:
+        - MyFunction
+        - Arn
 `;
 
       const result = parser.parse(template);

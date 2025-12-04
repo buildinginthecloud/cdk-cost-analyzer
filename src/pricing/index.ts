@@ -1,7 +1,7 @@
+export { PricingService } from './PricingService';
+export { PricingClient } from './PricingClient';
+export { EC2Calculator } from './calculators/EC2Calculator';
+export { S3Calculator } from './calculators/S3Calculator';
+export { LambdaCalculator } from './calculators/LambdaCalculator';
+export { RDSCalculator } from './calculators/RDSCalculator';
 export * from './types';
-export * from './PricingService';
-export * from './PricingClient';
-export * from './calculators/EC2Calculator';
-export * from './calculators/S3Calculator';
-export * from './calculators/LambdaCalculator';
-export * from './calculators/RDSCalculator';

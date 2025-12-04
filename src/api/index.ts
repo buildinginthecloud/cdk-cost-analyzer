@@ -10,6 +10,7 @@ export { PricingAPIError, UnsupportedResourceError } from '../pricing/types';
 
 export async function analyzeCosts(options: AnalyzeOptions): Promise<CostAnalysisResult> {
   const region = options.region || 'eu-central-1';
+  const format = options.format || 'text';
 
   if (!options.baseTemplate || !options.targetTemplate) {
     throw new Error('Both baseTemplate and targetTemplate are required');
@@ -27,7 +28,7 @@ export async function analyzeCosts(options: AnalyzeOptions): Promise<CostAnalysi
 
   const costDelta = await pricingService.getCostDelta(diff, region);
 
-  const summary = reporter.generateReport(costDelta, 'text');
+  const summary = reporter.generateReport(costDelta, format);
 
   return {
     totalDelta: costDelta.totalDelta,

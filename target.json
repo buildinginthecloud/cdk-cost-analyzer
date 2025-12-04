@@ -1,0 +1,14 @@
+{
+  "Resources": {
+    "MyBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {}
+    },
+    "MyInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType": "t3.micro"
+      }
+    }
+  }
+}

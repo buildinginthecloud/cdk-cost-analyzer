@@ -9,7 +9,7 @@ export class S3Calculator implements ResourceCostCalculator {
   }
 
   async calculateCost(
-    resource: ResourceWithId,
+    _resource: ResourceWithId,
     region: string,
     pricingClient: PricingClient
   ): Promise<MonthlyCost> {

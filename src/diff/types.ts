@@ -1,4 +1,4 @@
-import { CloudFormationTemplate, Resource } from '../parser/types';
+import { CloudFormationTemplate } from '../parser/types';
 
 export interface DiffEngine {
   diff(base: CloudFormationTemplate, target: CloudFormationTemplate): ResourceDiff;

@@ -1,10 +1,8 @@
-import { ResourceWithId, ResourceDiff, ModifiedResource } from '../diff/types';
+import { ResourceWithId, ResourceDiff } from '../diff/types';
 import {
   PricingService as IPricingService,
   MonthlyCost,
   CostDelta,
-  ResourceCost,
-  ModifiedResourceCost,
   ResourceCostCalculator,
 } from './types';
 import { PricingClient } from './PricingClient';

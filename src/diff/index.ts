@@ -1,2 +1,2 @@
+export { DiffEngine } from './DiffEngine';
 export * from './types';
-export * from './DiffEngine';
