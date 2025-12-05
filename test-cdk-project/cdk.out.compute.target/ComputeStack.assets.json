@@ -1,0 +1,21 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "f15b638c5d58baa53ba23b11ce31bd387f3280abbaec2d2affc41e135fd828d1": {
+      "displayName": "ComputeStack Template",
+      "source": {
+        "path": "ComputeStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "585008061383-eu-central-1-4c6fe424": {
+          "bucketName": "cdk-hnb659fds-assets-585008061383-eu-central-1",
+          "objectKey": "f15b638c5d58baa53ba23b11ce31bd387f3280abbaec2d2affc41e135fd828d1.json",
+          "region": "eu-central-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::585008061383:role/cdk-hnb659fds-file-publishing-role-585008061383-eu-central-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

@@ -1,0 +1,16 @@
+{
+    "Resources": {
+        "MyBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {}
+        },
+        "MyFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Runtime": "nodejs18.x",
+                "Handler": "index.handler",
+                "MemorySize": 128
+            }
+        }
+    }
+}

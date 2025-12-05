@@ -1,0 +1,44 @@
+{
+  "name": "cdk-cost-analyzer",
+  "version": "1.0.0",
+  "description": "Analyze AWS CDK infrastructure changes and provide cost impact summaries",
+  "main": "dist/api/index.js",
+  "types": "dist/api/index.d.ts",
+  "bin": {
+    "cdk-cost-analyzer": "dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run --silent",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "aws",
+    "cdk",
+    "cost",
+    "analysis",
+    "cloudformation"
+  ],
+  "author": "ANWB",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "dependencies": {
+    "@aws-sdk/client-pricing": "^3.705.0",
+    "commander": "^12.1.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.1",
+    "fast-check": "^3.23.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.6"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
