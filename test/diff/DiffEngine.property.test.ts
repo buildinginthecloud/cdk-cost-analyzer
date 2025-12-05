@@ -32,20 +32,42 @@ describe('DiffEngine - Property Tests', () => {
           const baseIds = new Set(Object.keys(baseResources));
           const targetIds = new Set(Object.keys(targetResources));
 
+          // Verify added resources (in target but not in base)
           const expectedAdded = [...targetIds].filter(id => !baseIds.has(id));
-          const expectedRemoved = [...baseIds].filter(id => !targetIds.has(id));
-
           expect(diff.added.map(r => r.logicalId).sort()).toEqual(expectedAdded.sort());
+
+          // Verify removed resources (in base but not in target)
+          const expectedRemoved = [...baseIds].filter(id => !targetIds.has(id));
           expect(diff.removed.map(r => r.logicalId).sort()).toEqual(expectedRemoved.sort());
 
+          // Verify modified resources (in both but with different properties)
+          const commonIds = [...baseIds].filter(id => targetIds.has(id));
+          diff.modified.forEach(resource => {
+            expect(commonIds).toContain(resource.logicalId);
+            expect(baseResources[resource.logicalId]).toBeDefined();
+            expect(targetResources[resource.logicalId]).toBeDefined();
+          });
+
+          // Verify added resources have correct type and properties
           diff.added.forEach(resource => {
             expect(targetResources[resource.logicalId]).toBeDefined();
             expect(resource.type).toBe(targetResources[resource.logicalId].Type);
+            expect(resource.properties).toEqual(targetResources[resource.logicalId].Properties || {});
           });
 
+          // Verify removed resources have correct type and properties
           diff.removed.forEach(resource => {
             expect(baseResources[resource.logicalId]).toBeDefined();
             expect(resource.type).toBe(baseResources[resource.logicalId].Type);
+            expect(resource.properties).toEqual(baseResources[resource.logicalId].Properties || {});
+          });
+
+          // Verify modified resources have correct old and new properties
+          diff.modified.forEach(resource => {
+            expect(resource.oldProperties).toEqual(baseResources[resource.logicalId].Properties || {});
+            expect(resource.newProperties).toEqual(targetResources[resource.logicalId].Properties || {});
+            // Ensure properties actually differ
+            expect(JSON.stringify(resource.oldProperties)).not.toBe(JSON.stringify(resource.newProperties));
           });
         }
       ),

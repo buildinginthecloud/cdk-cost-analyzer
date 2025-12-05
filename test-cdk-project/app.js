@@ -43,7 +43,7 @@ class TargetStack extends Stack {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'index.handler',
       code: lambda.Code.fromInline('exports.handler = async () => ({ statusCode: 200 });'),
-      memorySize: 512,
+      memorySize: 1024,
     });
 
     // Add another Lambda function (NEW)
@@ -51,7 +51,7 @@ class TargetStack extends Stack {
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: 'index.handler',
       code: lambda.Code.fromInline('exports.handler = async () => ({ statusCode: 200 });'),
-      memorySize: 256,
+      memorySize: 2560,
     });
 
     // Add another S3 bucket (NEW)

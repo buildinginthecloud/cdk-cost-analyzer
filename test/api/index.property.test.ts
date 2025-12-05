@@ -53,32 +53,134 @@ describe('analyzeCosts API - Property Tests', () => {
         expect(Array.isArray(result.modifiedResources)).toBe(true);
         expect(typeof result.summary).toBe('string');
       }),
-      { numRuns: 30 }
+      { numRuns: 100 }
     );
   });
 
   // Feature: cdk-cost-analyzer, Property 16: API throws errors for invalid inputs
-  it('should throw descriptive errors for invalid templates', () => {
-    const invalidTemplates = [
+  it('should throw descriptive errors for malformed JSON templates', () => {
+    const invalidJsonArb = fc.constantFrom(
       'invalid json',
-      '{ "no resources": "here" }',
-      '',
-      'null',
-    ];
+      '{ incomplete',
+      '{ "key": }',
+      '[1, 2, 3',
+      'not json at all',
+      '{"key": undefined}',
+    );
 
     fc.assert(
       fc.asyncProperty(
-        fc.constantFrom(...invalidTemplates),
-        async (invalidTemplate) => {
-          await expect(
-            analyzeCosts({
-              baseTemplate: invalidTemplate,
-              targetTemplate: JSON.stringify({ Resources: {} }),
-            })
-          ).rejects.toThrow();
+        invalidJsonArb,
+        fc.constantFrom('base', 'target'),
+        async (invalidJson, templateType) => {
+          const validTemplate = JSON.stringify({ Resources: { Bucket: { Type: 'AWS::S3::Bucket', Properties: {} } } });
+          
+          const options = templateType === 'base' 
+            ? { baseTemplate: invalidJson, targetTemplate: validTemplate }
+            : { baseTemplate: validTemplate, targetTemplate: invalidJson };
+
+          await expect(analyzeCosts(options)).rejects.toThrow();
         }
       ),
-      { numRuns: invalidTemplates.length }
+      { numRuns: 100 }
+    );
+  });
+
+  it('should throw descriptive errors for templates without Resources section', () => {
+    const invalidStructureArb = fc.constantFrom(
+      '{}',
+      '{ "Parameters": {} }',
+      '{ "Outputs": {} }',
+      '{ "Description": "test" }',
+      '{ "AWSTemplateFormatVersion": "2010-09-09" }',
+      '{ "Metadata": {} }',
+    );
+
+    fc.assert(
+      fc.asyncProperty(
+        invalidStructureArb,
+        fc.constantFrom('base', 'target'),
+        async (invalidStructure, templateType) => {
+          const validTemplate = JSON.stringify({ Resources: { Bucket: { Type: 'AWS::S3::Bucket', Properties: {} } } });
+          
+          const options = templateType === 'base'
+            ? { baseTemplate: invalidStructure, targetTemplate: validTemplate }
+            : { baseTemplate: validTemplate, targetTemplate: invalidStructure };
+
+          await expect(analyzeCosts(options)).rejects.toThrow();
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('should throw descriptive errors for empty templates', () => {
+    const emptyTemplateArb = fc.constantFrom(
+      '',
+      '   ',
+      '\n',
+      '\t',
+      '  \n  \t  ',
+    );
+
+    fc.assert(
+      fc.asyncProperty(
+        emptyTemplateArb,
+        fc.constantFrom('base', 'target'),
+        async (emptyTemplate, templateType) => {
+          const validTemplate = JSON.stringify({ Resources: { Bucket: { Type: 'AWS::S3::Bucket', Properties: {} } } });
+          
+          const options = templateType === 'base'
+            ? { baseTemplate: emptyTemplate, targetTemplate: validTemplate }
+            : { baseTemplate: validTemplate, targetTemplate: emptyTemplate };
+
+          await expect(analyzeCosts(options)).rejects.toThrow();
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('should throw descriptive errors for missing required parameters', () => {
+    fc.assert(
+      fc.asyncProperty(
+        fc.constantFrom(
+          { baseTemplate: '', targetTemplate: '' },
+          { baseTemplate: '', targetTemplate: JSON.stringify({ Resources: {} }) },
+          { baseTemplate: JSON.stringify({ Resources: {} }), targetTemplate: '' },
+        ),
+        async (options) => {
+          await expect(analyzeCosts(options)).rejects.toThrow();
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('should throw descriptive errors for templates with invalid Resources type', () => {
+    const invalidResourcesArb = fc.constantFrom(
+      '{ "Resources": "string" }',
+      '{ "Resources": 123 }',
+      '{ "Resources": null }',
+      '{ "Resources": [] }',
+      '{ "Resources": true }',
+    );
+
+    fc.assert(
+      fc.asyncProperty(
+        invalidResourcesArb,
+        fc.constantFrom('base', 'target'),
+        async (invalidTemplate, templateType) => {
+          const validTemplate = JSON.stringify({ Resources: { Bucket: { Type: 'AWS::S3::Bucket', Properties: {} } } });
+          
+          const options = templateType === 'base'
+            ? { baseTemplate: invalidTemplate, targetTemplate: validTemplate }
+            : { baseTemplate: validTemplate, targetTemplate: invalidTemplate };
+
+          await expect(analyzeCosts(options)).rejects.toThrow();
+        }
+      ),
+      { numRuns: 100 }
     );
   });
 });
