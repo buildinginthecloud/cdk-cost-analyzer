@@ -1,10 +1,10 @@
-// test-api.js
-const { analyzeCosts } = require('./dist/api');
+// api-usage.js - Example of programmatic API usage
+const { analyzeCosts } = require('../dist/api');
 const fs = require('fs');
 
 async function test() {
-  const baseTemplate = fs.readFileSync('base.json', 'utf-8');
-  const targetTemplate = fs.readFileSync('target.json', 'utf-8');
+  const baseTemplate = fs.readFileSync('./simple/base.json', 'utf-8');
+  const targetTemplate = fs.readFileSync('./simple/target.json', 'utf-8');
   
   const result = await analyzeCosts({
     baseTemplate,

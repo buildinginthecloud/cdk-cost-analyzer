@@ -24,6 +24,12 @@ A TypeScript package that analyzes AWS CDK infrastructure changes and provides c
 npm install cdk-cost-analyzer
 ```
 
+## Documentation
+
+- **[Development Guide](docs/DEVELOPMENT.md)** - Setup, testing, and troubleshooting
+- **[Implementation Details](docs/IMPLEMENTATION.md)** - Technical implementation documentation
+- **[Examples](examples/)** - Example templates and API usage demonstrations
+
 ## Quick Start
 
 ### CLI Usage
@@ -43,6 +49,8 @@ cdk-cost-analyzer --help
 ```
 
 ### Programmatic Usage
+
+See [examples/api-usage.js](examples/api-usage.js) for a complete working example.
 
 ```typescript
 import { analyzeCosts } from 'cdk-cost-analyzer';
