@@ -16,14 +16,14 @@
   - Extract resource definitions with logical IDs
   - _Requirements: 1.1_
 
-- [x]* 2.1 Write property test for template parser
+- [x] 2.1 Write property test for template parser
   - **Property 1: Template parsing succeeds for valid templates**
   - **Validates: Requirements 1.1**
   - Generate random valid CloudFormation templates
   - Verify parser returns structured template object without errors
   - Test with both JSON and YAML formats
 
-- [x]* 2.2 Write unit tests for template parser
+- [x] 2.2 Write unit tests for template parser
   - Test parsing valid JSON templates
   - Test parsing valid YAML templates
   - Test handling malformed JSON/YAML
@@ -39,20 +39,20 @@
   - Implement deep property comparison for modified resources
   - _Requirements: 1.2_
 
-- [x]* 3.1 Write property test for diff categorization
+- [x] 3.1 Write property test for diff categorization
   - **Property 2: Diff engine correctly categorizes resources**
   - **Validates: Requirements 1.2**
   - Generate random template pairs with known differences
   - Verify all added, removed, and modified resources are correctly identified
 
-- [x]* 3.2 Write property test for resource uniqueness
+- [x] 3.2 Write property test for resource uniqueness
   - **Property 5: Resources appear in exactly one category**
   - **Validates: Requirements 1.5**
   - Generate random template pairs
   - Verify each resource appears in exactly one category (added, removed, or modified)
   - Verify all resources from diff appear in the report
 
-- [x]* 3.3 Write unit tests for diff engine
+- [x] 3.3 Write unit tests for diff engine
   - Test identifying added resources
   - Test identifying removed resources
   - Test identifying modified resources
@@ -68,25 +68,25 @@
   - Handle pricing API failures gracefully
   - _Requirements: 5.1, 5.3, 5.4, 5.5_
 
-- [x]* 4.1 Write property test for pricing API integration
+- [x] 4.1 Write property test for pricing API integration
   - **Property 17: Pricing queries include region filter**
   - **Validates: Requirements 5.2**
   - Generate random resource types and regions
   - Verify pricing API queries include correct region parameter
 
-- [x]* 4.2 Write property test for retry logic
+- [x] 4.2 Write property test for retry logic
   - **Property 18: Failed pricing calls trigger retries**
   - **Validates: Requirements 5.3**
   - Simulate transient API failures
   - Verify system retries up to 3 times with exponential backoff
 
-- [x]* 4.3 Write property test for cache fallback
+- [x] 4.3 Write property test for cache fallback
   - **Property 19: Cache is used when API fails**
   - **Validates: Requirements 5.4**
   - Simulate API failure with cached data available
   - Verify cached data is used instead of marking cost as unknown
 
-- [x]* 4.4 Write property test for unknown cost handling
+- [x] 4.4 Write property test for unknown cost handling
   - **Property 20: Unavailable pricing results in unknown cost**
   - **Validates: Requirements 5.5**
   - Simulate scenarios where pricing data is unavailable
@@ -101,13 +101,13 @@
   - Handle different regions
   - _Requirements: 2.1_
 
-- [x]* 5.1 Write property test for EC2 cost variation
+- [x] 5.1 Write property test for EC2 cost variation
   - **Property 6: EC2 costs vary by instance type and region**
   - **Validates: Requirements 2.1**
   - Generate EC2 instances with different instance types and regions
   - Verify calculated costs differ appropriately
 
-- [x]* 5.2 Write unit tests for EC2 calculator
+- [x] 5.2 Write unit tests for EC2 calculator
   - Test cost calculation for specific instance types (t3.micro, m5.large)
   - Test cost calculation for different regions
   - Test handling missing instance type property
@@ -121,13 +121,13 @@
   - Document assumptions in MonthlyCost object
   - _Requirements: 2.2_
 
-- [x]* 6.1 Write property test for S3 cost estimates
+- [x] 6.1 Write property test for S3 cost estimates
   - **Property 7: S3 buckets receive cost estimates**
   - **Validates: Requirements 2.2**
   - Generate random S3 bucket resources
   - Verify cost estimates are greater than zero
 
-- [x]* 6.2 Write unit tests for S3 calculator
+- [x] 6.2 Write unit tests for S3 calculator
   - Test cost calculation with default assumptions
   - Test cost calculation for different regions
   - _Requirements: 2.2_
@@ -140,13 +140,13 @@
   - Calculate monthly cost (requests + compute)
   - _Requirements: 2.3_
 
-- [x]* 7.1 Write property test for Lambda cost scaling
+- [x] 7.1 Write property test for Lambda cost scaling
   - **Property 8: Lambda costs scale with memory configuration**
   - **Validates: Requirements 2.3**
   - Generate Lambda functions with different memory allocations
   - Verify higher memory results in equal or higher cost
 
-- [x]* 7.2 Write unit tests for Lambda calculator
+- [x] 7.2 Write unit tests for Lambda calculator
   - Test cost calculation for different memory configurations
   - Test cost calculation with default assumptions
   - Test handling missing memory property
@@ -160,13 +160,13 @@
   - Calculate monthly cost (instance + storage)
   - _Requirements: 2.4_
 
-- [x]* 8.1 Write property test for RDS cost calculation
+- [x] 8.1 Write property test for RDS cost calculation
   - **Property 9: RDS costs are calculated for all engine types**
   - **Validates: Requirements 2.4**
   - Generate RDS instances with different engine types
   - Verify cost estimates are greater than zero for all engines
 
-- [x]* 8.2 Write unit tests for RDS calculator
+- [x] 8.2 Write unit tests for RDS calculator
   - Test cost calculation for different instance classes
   - Test cost calculation for different engine types (MySQL, PostgreSQL)
   - Test handling missing properties
@@ -180,19 +180,19 @@
   - Aggregate total cost delta
   - _Requirements: 1.3, 1.4_
 
-- [x]* 9.1 Write property test for cost calculation validity
+- [x] 9.1 Write property test for cost calculation validity
   - **Property 3: Cost calculation produces valid results**
   - **Validates: Requirements 1.3**
   - Generate random supported resources
   - Verify cost calculations return non-negative values with valid currency and confidence
 
-- [x]* 9.2 Write property test for cost delta summation
+- [x] 9.2 Write property test for cost delta summation
   - **Property 4: Total cost delta equals sum of individual costs**
   - **Validates: Requirements 1.4**
   - Generate random cost analysis results
   - Verify total delta equals sum of added minus removed plus modified deltas
 
-- [x]* 9.3 Write property test for unsupported resource handling
+- [x] 9.3 Write property test for unsupported resource handling
   - **Property 10: Unsupported resources don't cause failures**
   - **Validates: Requirements 2.5**
   - Generate templates with unsupported resource types
@@ -212,31 +212,31 @@
   - Include resource logical ID, type, and cost for each entry
   - _Requirements: 1.5, 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [x]* 11.1 Write property test for report resource fields
+- [x] 11.1 Write property test for report resource fields
   - **Property 21: Reports contain all required resource fields**
   - **Validates: Requirements 6.2**
   - Generate random cost analysis results
   - Verify each resource in report includes logical ID, type, and cost
 
-- [x]* 11.2 Write property test for currency formatting
+- [x] 11.2 Write property test for currency formatting
   - **Property 22: Currency values are consistently formatted**
   - **Validates: Requirements 6.3**
   - Generate random cost values
   - Verify all formatted values have exactly 2 decimal places and currency symbol
 
-- [x]* 11.3 Write property test for positive delta formatting
+- [x] 11.3 Write property test for positive delta formatting
   - **Property 23: Positive deltas have plus sign prefix**
   - **Validates: Requirements 6.4**
   - Generate cost deltas greater than zero
   - Verify formatted values include + prefix
 
-- [x]* 11.4 Write property test for negative delta formatting
+- [x] 11.4 Write property test for negative delta formatting
   - **Property 24: Negative deltas have minus sign prefix**
   - **Validates: Requirements 6.5**
   - Generate cost deltas less than zero
   - Verify formatted values include - prefix
 
-- [x]* 11.5 Write unit tests for text reporter
+- [x] 11.5 Write unit tests for text reporter
   - Test report generation with added resources
   - Test report generation with removed resources
   - Test report generation with modified resources
@@ -252,7 +252,7 @@
   - Ensure JSON is properly formatted and parseable
   - _Requirements: 4.3_
 
-- [x]* 12.1 Write unit tests for JSON reporter
+- [x] 12.1 Write unit tests for JSON reporter
   - Test JSON structure matches expected schema
   - Test JSON is valid and parseable
   - Test all required fields are present
@@ -267,19 +267,19 @@
   - Export TypeScript type definitions
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [x]* 13.1 Write property test for API return structure
+- [x] 13.1 Write property test for API return structure
   - **Property 15: API returns structured results**
   - **Validates: Requirements 4.3**
   - Generate random valid template pairs
   - Verify return value contains all required fields (totalDelta, currency, resources, summary)
 
-- [x]* 13.2 Write property test for API error handling
+- [x] 13.2 Write property test for API error handling
   - **Property 16: API throws errors for invalid inputs**
   - **Validates: Requirements 4.4**
   - Generate invalid inputs (malformed templates, invalid regions)
   - Verify API throws descriptive errors instead of crashing
 
-- [x]* 13.3 Write unit tests for programmatic API
+- [x] 13.3 Write unit tests for programmatic API
   - Test successful analysis with valid templates
   - Test error handling for invalid templates
   - Test error handling for invalid region
@@ -298,31 +298,31 @@
   - Handle errors and exit with appropriate status codes
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [x]* 14.1 Write property test for CLI argument parsing
+- [x] 14.1 Write property test for CLI argument parsing
   - **Property 11: CLI accepts valid template file paths**
   - **Validates: Requirements 3.2**
   - Generate valid file paths
   - Verify CLI accepts them and proceeds with analysis
 
-- [x]* 14.2 Write property test for CLI region flag
+- [x] 14.2 Write property test for CLI region flag
   - **Property 12: CLI region flag overrides default**
   - **Validates: Requirements 3.3**
   - Generate random valid AWS regions
   - Verify analysis uses provided region instead of default
 
-- [x]* 14.3 Write property test for CLI success output
+- [x] 14.3 Write property test for CLI success output
   - **Property 13: Successful analysis outputs to stdout**
   - **Validates: Requirements 3.4**
   - Generate valid template pairs
   - Verify CLI outputs to stdout and exits with code 0
 
-- [x]* 14.4 Write property test for CLI error handling
+- [x] 14.4 Write property test for CLI error handling
   - **Property 14: Invalid inputs cause non-zero exit**
   - **Validates: Requirements 3.5**
   - Generate invalid inputs (missing files, malformed templates)
   - Verify CLI exits with non-zero code and writes to stderr
 
-- [x]* 14.5 Write unit tests for CLI
+- [x] 14.5 Write unit tests for CLI
   - Test CLI with valid template files
   - Test CLI with missing files
   - Test CLI with invalid region

@@ -78,7 +78,7 @@ describe('GitLabIntegration', () => {
     });
 
     it('should throw GitLabAPIError when API returns error', async () => {
-      mockFetch.mockResolvedValueOnce({
+      mockFetch.mockResolvedValue({
         ok: false,
         status: 401,
         statusText: 'Unauthorized',
@@ -100,7 +100,8 @@ describe('GitLabIntegration', () => {
     });
 
     it('should throw GitLabAPIError when network fails', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Network error'));
+      mockFetch.mockReset();
+      mockFetch.mockRejectedValue(new Error('Network error'));
 
       const integration = new GitLabIntegration({
         token: 'test-token',

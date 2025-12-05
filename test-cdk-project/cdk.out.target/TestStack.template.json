@@ -52,7 +52,7 @@
      "ZipFile": "exports.handler = async () => ({ statusCode: 200 });"
     },
     "Handler": "index.handler",
-    "MemorySize": 512,
+    "MemorySize": 1024,
     "Role": {
      "Fn::GetAtt": [
       "MyFunctionServiceRole3C357FF2",
@@ -109,7 +109,7 @@
      "ZipFile": "exports.handler = async () => ({ statusCode: 200 });"
     },
     "Handler": "index.handler",
-    "MemorySize": 256,
+    "MemorySize": 2560,
     "Role": {
      "Fn::GetAtt": [
       "MyNewFunctionServiceRole45AE070C",
