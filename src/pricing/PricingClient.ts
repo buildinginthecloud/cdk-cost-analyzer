@@ -1,30 +1,55 @@
 import { PricingClient as AWSPricingClient, GetProductsCommand } from '@aws-sdk/client-pricing';
 import { PricingClient as IPricingClient, PriceQueryParams, PricingAPIError } from './types';
+import { CacheManager } from './CacheManager';
 
 export class PricingClient implements IPricingClient {
   private cache: Map<string, number> = new Map();
   private client: AWSPricingClient;
+  private cacheManager?: CacheManager;
 
-  constructor(region: string = 'us-east-1') {
+  constructor(region: string = 'us-east-1', cacheManager?: CacheManager) {
     this.client = new AWSPricingClient({ region });
+    this.cacheManager = cacheManager;
   }
 
   async getPrice(params: PriceQueryParams): Promise<number | null> {
     const cacheKey = this.getCacheKey(params);
     
+    // Check in-memory cache first
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey)!;
+    }
+
+    // Check persistent cache if cache manager is available
+    if (this.cacheManager) {
+      const cachedPrice = this.cacheManager.getCachedPrice(params);
+      if (cachedPrice !== null) {
+        // Store in memory cache for faster subsequent access
+        this.cache.set(cacheKey, cachedPrice);
+        return cachedPrice;
+      }
     }
 
     try {
       const price = await this.fetchPriceWithRetry(params);
       if (price !== null) {
+        // Store in both memory and persistent cache
         this.cache.set(cacheKey, price);
+        if (this.cacheManager) {
+          this.cacheManager.setCachedPrice(params, price);
+        }
       }
       return price;
     } catch (error) {
+      // On API failure, try to use cached data even if stale
       if (this.cache.has(cacheKey)) {
         return this.cache.get(cacheKey)!;
+      }
+      if (this.cacheManager) {
+        const cachedPrice = this.cacheManager.getCachedPrice(params);
+        if (cachedPrice !== null) {
+          return cachedPrice;
+        }
       }
       return null;
     }

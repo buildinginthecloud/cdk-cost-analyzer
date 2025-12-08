@@ -5,3 +5,5 @@ dist/
 coverage/
 .env
 *.tgz
+.cdk-cost-analyzer-cache/
+.test-cache/

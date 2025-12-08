@@ -92,7 +92,11 @@ The application follows a modular, layered architecture:
 **Key Features**:
 - Text format: Human-readable console output
 - JSON format: Structured data for programmatic use
-- Markdown format: For documentation (Phase 2)
+- Markdown format: GitLab merge request comments with collapsible sections
+- Configuration summary: Shows thresholds, usage assumptions, and exclusions
+- Threshold status: Displays pass/fail status with actionable recommendations
+- Multi-stack support: Per-stack cost breakdowns for complex applications
+- Top cost contributors: Highlights resources with highest cost impact
 - Resources sorted by cost impact
 - Currency formatting with 2 decimal places
 - Delta formatting with +/- signs

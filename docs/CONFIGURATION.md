@@ -59,6 +59,10 @@ usageAssumptions:
   vpcEndpoint:
     dataProcessedGB: 100  # Data processed through interface endpoints
   
+  cloudFront:
+    dataTransferGB: 100  # Data transfer out to internet per month
+    requests: 1000000    # HTTP/HTTPS requests per month
+  
   apiGateway:
     requestsPerMonth: 10000000
 
@@ -160,6 +164,14 @@ usageAssumptions:
 usageAssumptions:
   vpcEndpoint:
     dataProcessedGB: 100    # Data processed through interface endpoints
+```
+
+#### CloudFront
+```yaml
+usageAssumptions:
+  cloudFront:
+    dataTransferGB: 100    # Data transfer out to internet per month
+    requests: 1000000      # HTTP/HTTPS requests per month
 ```
 
 #### API Gateway

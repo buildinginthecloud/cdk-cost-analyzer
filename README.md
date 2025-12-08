@@ -194,9 +194,12 @@ cost-analysis:
 - **AWS::ElasticLoadBalancingV2::LoadBalancer** - Application and Network Load Balancers with LCU costs
 - **AWS::EC2::VPCEndpoint** - VPC Endpoints (interface and gateway types)
 
+### Content Delivery & Caching (Phase 3 - Current)
+
+- **AWS::CloudFront::Distribution** - CloudFront distributions with data transfer and request costs
+
 ### Coming Soon
 
-- CloudFront distributions
 - ElastiCache clusters
 - EKS clusters
 - And more...
@@ -219,7 +222,14 @@ For resources with usage-based pricing, the following default assumptions are us
 - **API Gateway (HTTP)**: 1M requests per month
 - **API Gateway (WebSocket)**: 1M messages, 100K connection minutes per month
 
-These assumptions are documented in cost reports and can be customized by extending the calculator classes.
+### Phase 3 Resources
+- **NAT Gateway**: 500 GB data processed per month
+- **Application Load Balancer**: 50 new connections/sec, 5,000 active connections/min, 1,000 GB processed
+- **Network Load Balancer**: 100 new connections/sec, 10,000 active connections/min, 1,000 GB processed
+- **VPC Endpoint (Interface)**: 100 GB data processed per month
+- **CloudFront Distribution**: 100 GB data transfer out, 1M HTTP/HTTPS requests per month
+
+These assumptions are documented in cost reports and can be customized via configuration file or by extending the calculator classes.
 
 ## Report Formats
 

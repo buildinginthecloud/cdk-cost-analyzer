@@ -79,7 +79,8 @@ describe('ThresholdEnforcer', () => {
         },
       };
 
-      const result = enforcer.evaluateThreshold(40, [], [], config, 'production');
+      // Delta of 60 exceeds production error threshold of 50
+      const result = enforcer.evaluateThreshold(60, [], [], config, 'production');
       
       expect(result.passed).toBe(false);
       expect(result.level).toBe('error');
@@ -100,7 +101,8 @@ describe('ThresholdEnforcer', () => {
         },
       };
 
-      const result = enforcer.evaluateThreshold(150, [], [], config, 'development');
+      // Delta of 250 exceeds default error threshold of 200
+      const result = enforcer.evaluateThreshold(250, [], [], config, 'development');
       
       expect(result.passed).toBe(false);
       expect(result.level).toBe('error');

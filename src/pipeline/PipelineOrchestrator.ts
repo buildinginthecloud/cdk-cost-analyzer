@@ -143,7 +143,8 @@ export class PipelineOrchestrator {
     const pricingService = new PricingService(
       region,
       config.usageAssumptions,
-      config.exclusions?.resourceTypes
+      config.exclusions?.resourceTypes,
+      config.cache
     );
     const reporter = new Reporter();
 

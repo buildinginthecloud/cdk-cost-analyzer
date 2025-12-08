@@ -5,8 +5,9 @@ import {
   CostDelta,
   ResourceCostCalculator,
 } from './types';
-import { UsageAssumptionsConfig } from '../config/types';
+import { UsageAssumptionsConfig, CacheConfig } from '../config/types';
 import { PricingClient } from './PricingClient';
+import { CacheManager } from './CacheManager';
 import { EC2Calculator } from './calculators/EC2Calculator';
 import { S3Calculator } from './calculators/S3Calculator';
 import { LambdaCalculator } from './calculators/LambdaCalculator';
@@ -18,6 +19,8 @@ import { NatGatewayCalculator } from './calculators/NatGatewayCalculator';
 import { ALBCalculator } from './calculators/ALBCalculator';
 import { NLBCalculator } from './calculators/NLBCalculator';
 import { VPCEndpointCalculator } from './calculators/VPCEndpointCalculator';
+import { CloudFrontCalculator } from './calculators/CloudFrontCalculator';
+import { ElastiCacheCalculator } from './calculators/ElastiCacheCalculator';
 
 export class PricingService implements IPricingService {
   private calculators: ResourceCostCalculator[];
@@ -27,9 +30,17 @@ export class PricingService implements IPricingService {
   constructor(
     region: string = 'us-east-1',
     usageAssumptions?: UsageAssumptionsConfig,
-    excludedResourceTypes?: string[]
+    excludedResourceTypes?: string[],
+    cacheConfig?: CacheConfig
   ) {
-    this.pricingClient = new PricingClient(region);
+    // Initialize cache manager if caching is enabled
+    let cacheManager: CacheManager | undefined;
+    if (cacheConfig?.enabled !== false) {
+      const cacheDuration = cacheConfig?.durationHours ?? 24;
+      cacheManager = new CacheManager('.cdk-cost-analyzer-cache', cacheDuration);
+    }
+
+    this.pricingClient = new PricingClient(region, cacheManager);
     this.excludedResourceTypes = new Set(excludedResourceTypes || []);
     this.calculators = [
       new EC2Calculator(),
@@ -51,6 +62,11 @@ export class PricingService implements IPricingService {
         usageAssumptions?.nlb?.processedBytesGB
       ),
       new VPCEndpointCalculator(usageAssumptions?.vpcEndpoint?.dataProcessedGB),
+      new CloudFrontCalculator(
+        usageAssumptions?.cloudfront?.dataTransferGB,
+        usageAssumptions?.cloudfront?.requests
+      ),
+      new ElastiCacheCalculator(),
     ];
   }
 
