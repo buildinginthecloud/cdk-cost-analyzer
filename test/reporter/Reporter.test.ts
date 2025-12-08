@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { Reporter } from '../../src/reporter/Reporter';
 import { CostDelta } from '../../src/pricing/types';
+import { ReportOptions } from '../../src/reporter/types';
+import { ConfigSummary } from '../../src/pipeline/types';
+import { ThresholdEvaluation } from '../../src/threshold/types';
 
 describe('Reporter', () => {
   const reporter = new Reporter();
@@ -710,6 +713,627 @@ describe('Reporter', () => {
       expect(report).toContain('## Added Resources');
       expect(report).toContain('| Logical ID | Type | Monthly Cost |');
       expect(report).toContain('NewInstance');
+    });
+  });
+
+  describe('configuration summary', () => {
+    const configSummary: ConfigSummary = {
+      configPath: '.cdk-cost-analyzer.yml',
+      thresholds: {
+        warning: 50,
+        error: 200,
+        environment: 'production',
+      },
+      usageAssumptions: {
+        s3: {
+          storageGB: 500,
+          getRequests: 100000,
+        },
+        lambda: {
+          invocationsPerMonth: 5000000,
+        },
+      },
+      excludedResourceTypes: ['AWS::IAM::Role', 'AWS::IAM::Policy'],
+      synthesisEnabled: true,
+    };
+
+    const options: ReportOptions = {
+      configSummary,
+    };
+
+    describe('text format', () => {
+      it('should include configuration summary in text report', () => {
+        const report = reporter.generateReport(sampleCostDelta, 'text', options);
+
+        expect(report).toContain('CONFIGURATION:');
+        expect(report).toContain('Configuration File: .cdk-cost-analyzer.yml');
+        expect(report).toContain('Environment: production');
+        expect(report).toContain('Warning Threshold: $50.00/month');
+        expect(report).toContain('Error Threshold: $200.00/month');
+      });
+
+      it('should show excluded resource types', () => {
+        const report = reporter.generateReport(sampleCostDelta, 'text', options);
+
+        expect(report).toContain('Excluded Resource Types: AWS::IAM::Role, AWS::IAM::Policy');
+      });
+
+      it('should show custom usage assumptions', () => {
+        const report = reporter.generateReport(sampleCostDelta, 'text', options);
+
+        expect(report).toContain('Custom Usage Assumptions:');
+        expect(report).toContain('s3:');
+        expect(report).toContain('lambda:');
+      });
+
+      it('should show default configuration when no config file', () => {
+        const defaultOptions: ReportOptions = {
+          configSummary: {
+            synthesisEnabled: false,
+          },
+        };
+
+        const report = reporter.generateReport(sampleCostDelta, 'text', defaultOptions);
+
+        expect(report).toContain('Configuration File: Using defaults');
+      });
+    });
+
+    describe('json format', () => {
+      it('should include configuration summary in json report', () => {
+        const report = reporter.generateReport(sampleCostDelta, 'json', options);
+        const parsed = JSON.parse(report);
+
+        expect(parsed.configSummary).toBeDefined();
+        expect(parsed.configSummary.configPath).toBe('.cdk-cost-analyzer.yml');
+        expect(parsed.configSummary.thresholds.warning).toBe(50);
+        expect(parsed.configSummary.thresholds.error).toBe(200);
+        expect(parsed.configSummary.thresholds.environment).toBe('production');
+      });
+
+      it('should include usage assumptions in json report', () => {
+        const report = reporter.generateReport(sampleCostDelta, 'json', options);
+        const parsed = JSON.parse(report);
+
+        expect(parsed.configSummary.usageAssumptions).toBeDefined();
+        expect(parsed.configSummary.usageAssumptions.s3).toBeDefined();
+        expect(parsed.configSummary.usageAssumptions.lambda).toBeDefined();
+      });
+
+      it('should include excluded resource types in json report', () => {
+        const report = reporter.generateReport(sampleCostDelta, 'json', options);
+        const parsed = JSON.parse(report);
+
+        expect(parsed.configSummary.excludedResourceTypes).toEqual([
+          'AWS::IAM::Role',
+          'AWS::IAM::Policy',
+        ]);
+      });
+    });
+
+    describe('markdown format', () => {
+      it('should include configuration summary as collapsible section', () => {
+        const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
+
+        expect(report).toContain('<details>');
+        expect(report).toContain('<summary><strong>Configuration Summary</strong></summary>');
+        expect(report).toContain('</details>');
+      });
+
+      it('should show configuration file path', () => {
+        const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
+
+        expect(report).toContain('**Configuration File:** `.cdk-cost-analyzer.yml`');
+      });
+
+      it('should show thresholds', () => {
+        const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
+
+        expect(report).toContain('**Thresholds:**');
+        expect(report).toContain('Environment: production');
+        expect(report).toContain('Warning: $50.00/month');
+        expect(report).toContain('Error: $200.00/month');
+      });
+
+      it('should show excluded resource types', () => {
+        const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
+
+        expect(report).toContain('**Excluded Resource Types:**');
+        expect(report).toContain('`AWS::IAM::Role`');
+        expect(report).toContain('`AWS::IAM::Policy`');
+      });
+
+      it('should show custom usage assumptions', () => {
+        const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
+
+        expect(report).toContain('**Custom Usage Assumptions:**');
+        expect(report).toContain('**s3:**');
+        expect(report).toContain('storageGB: 500');
+        expect(report).toContain('getRequests: 100000');
+        expect(report).toContain('**lambda:**');
+        expect(report).toContain('invocationsPerMonth: 5000000');
+      });
+    });
+  });
+
+  describe('threshold status', () => {
+    const thresholdPassed: ThresholdEvaluation = {
+      passed: true,
+      level: 'warning',
+      threshold: 200,
+      delta: 150.50,
+      message: 'Cost delta is within threshold',
+      recommendations: [],
+    };
+
+    const thresholdExceeded: ThresholdEvaluation = {
+      passed: false,
+      level: 'error',
+      threshold: 100,
+      delta: 150.50,
+      message: 'Cost delta exceeds error threshold',
+      recommendations: [
+        'Review the added resources for optimization opportunities',
+        'Consider using reserved instances for EC2',
+        'Request threshold override approval if changes are necessary',
+      ],
+    };
+
+    describe('text format', () => {
+      it('should show passed threshold status', () => {
+        const options: ReportOptions = {
+          thresholdStatus: thresholdPassed,
+        };
+
+        const report = reporter.generateReport(sampleCostDelta, 'text', options);
+
+        expect(report).toContain('THRESHOLD STATUS:');
+        expect(report).toContain('Status: PASSED');
+        expect(report).toContain('Threshold: $200.00/month (warning)');
+        expect(report).toContain('Actual Delta: $150.50/month');
+      });
+
+      it('should show exceeded threshold status with recommendations', () => {
+        const options: ReportOptions = {
+          thresholdStatus: thresholdExceeded,
+        };
+
+        const report = reporter.generateReport(sampleCostDelta, 'text', options);
+
+        expect(report).toContain('Status: EXCEEDED');
+        expect(report).toContain('Threshold: $100.00/month (error)');
+        expect(report).toContain('Recommendations:');
+        expect(report).toContain('Review the added resources for optimization opportunities');
+        expect(report).toContain('Consider using reserved instances for EC2');
+      });
+
+      it('should show no thresholds configured', () => {
+        const noThreshold: ThresholdEvaluation = {
+          passed: true,
+          level: 'none',
+          delta: 150.50,
+          message: 'No thresholds configured',
+          recommendations: [],
+        };
+
+        const options: ReportOptions = {
+          thresholdStatus: noThreshold,
+        };
+
+        const report = reporter.generateReport(sampleCostDelta, 'text', options);
+
+        expect(report).toContain('No thresholds configured');
+      });
+    });
+
+    describe('json format', () => {
+      it('should include threshold status in json report', () => {
+        const options: ReportOptions = {
+          thresholdStatus: thresholdPassed,
+        };
+
+        const report = reporter.generateReport(sampleCostDelta, 'json', options);
+        const parsed = JSON.parse(report);
+
+        expect(parsed.thresholdStatus).toBeDefined();
+        expect(parsed.thresholdStatus.passed).toBe(true);
+        expect(parsed.thresholdStatus.level).toBe('warning');
+        expect(parsed.thresholdStatus.threshold).toBe(200);
+        expect(parsed.thresholdStatus.delta).toBe(150.50);
+      });
+
+      it('should include recommendations when threshold exceeded', () => {
+        const options: ReportOptions = {
+          thresholdStatus: thresholdExceeded,
+        };
+
+        const report = reporter.generateReport(sampleCostDelta, 'json', options);
+        const parsed = JSON.parse(report);
+
+        expect(parsed.thresholdStatus.passed).toBe(false);
+        expect(parsed.thresholdStatus.recommendations).toHaveLength(3);
+      });
+    });
+
+    describe('markdown format', () => {
+      it('should show passed threshold status prominently', () => {
+        const options: ReportOptions = {
+          thresholdStatus: thresholdPassed,
+        };
+
+        const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
+
+        expect(report).toContain('## Threshold Status: PASSED');
+        expect(report).toContain('**Threshold:** $200.00/month (warning)');
+        expect(report).toContain('**Actual Delta:** +$150.50/month');
+      });
+
+      it('should show exceeded threshold with action required section', () => {
+        const options: ReportOptions = {
+          thresholdStatus: thresholdExceeded,
+        };
+
+        const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
+
+        expect(report).toContain('## Threshold Status: EXCEEDED');
+        expect(report).toContain('### Action Required');
+        expect(report).toContain('Cost delta exceeds error threshold');
+      });
+
+      it('should show recommendations when threshold exceeded', () => {
+        const options: ReportOptions = {
+          thresholdStatus: thresholdExceeded,
+        };
+
+        const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
+
+        expect(report).toContain('### Recommendations');
+        expect(report).toContain('- Review the added resources for optimization opportunities');
+        expect(report).toContain('- Consider using reserved instances for EC2');
+        expect(report).toContain('- Request threshold override approval if changes are necessary');
+      });
+
+      it('should show top cost contributors when threshold exceeded', () => {
+        const options: ReportOptions = {
+          thresholdStatus: thresholdExceeded,
+        };
+
+        const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
+
+        expect(report).toContain('### Top Cost Contributors');
+        expect(report).toContain('| Resource | Type | Impact |');
+        expect(report).toContain('NewInstance');
+        expect(report).toContain('AWS::EC2::Instance');
+      });
+
+      it('should not show threshold section when level is none', () => {
+        const noThreshold: ThresholdEvaluation = {
+          passed: true,
+          level: 'none',
+          delta: 150.50,
+          message: 'No thresholds configured',
+          recommendations: [],
+        };
+
+        const options: ReportOptions = {
+          thresholdStatus: noThreshold,
+        };
+
+        const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
+
+        expect(report).not.toContain('Threshold Status');
+      });
+    });
+  });
+
+  describe('multi-stack reporting', () => {
+    const stack1Delta: CostDelta = {
+      totalDelta: 100.00,
+      currency: 'USD',
+      addedCosts: [
+        {
+          logicalId: 'Stack1Instance',
+          type: 'AWS::EC2::Instance',
+          monthlyCost: {
+            amount: 100.00,
+            currency: 'USD',
+            confidence: 'high',
+            assumptions: [],
+          },
+        },
+      ],
+      removedCosts: [],
+      modifiedCosts: [],
+    };
+
+    const stack2Delta: CostDelta = {
+      totalDelta: 50.00,
+      currency: 'USD',
+      addedCosts: [
+        {
+          logicalId: 'Stack2Bucket',
+          type: 'AWS::S3::Bucket',
+          monthlyCost: {
+            amount: 50.00,
+            currency: 'USD',
+            confidence: 'medium',
+            assumptions: [],
+          },
+        },
+      ],
+      removedCosts: [],
+      modifiedCosts: [],
+    };
+
+    const totalDelta: CostDelta = {
+      totalDelta: 150.00,
+      currency: 'USD',
+      addedCosts: [
+        {
+          logicalId: 'Stack1Instance',
+          type: 'AWS::EC2::Instance',
+          monthlyCost: {
+            amount: 100.00,
+            currency: 'USD',
+            confidence: 'high',
+            assumptions: [],
+          },
+        },
+        {
+          logicalId: 'Stack2Bucket',
+          type: 'AWS::S3::Bucket',
+          monthlyCost: {
+            amount: 50.00,
+            currency: 'USD',
+            confidence: 'medium',
+            assumptions: [],
+          },
+        },
+      ],
+      removedCosts: [],
+      modifiedCosts: [],
+    };
+
+    describe('markdown format', () => {
+      it('should show per-stack breakdown table', () => {
+        const options: ReportOptions = {
+          multiStack: true,
+          stacks: [
+            { stackName: 'InfraStack', costDelta: stack1Delta },
+            { stackName: 'AppStack', costDelta: stack2Delta },
+          ],
+        };
+
+        const report = reporter.generateReport(totalDelta, 'markdown', options);
+
+        expect(report).toContain('## Per-Stack Cost Breakdown');
+        expect(report).toContain('| Stack | Cost Delta |');
+        expect(report).toContain('| InfraStack | +$100.00 |');
+        expect(report).toContain('| AppStack | +$50.00 |');
+      });
+
+      it('should show detailed stack breakdowns in collapsible section', () => {
+        const options: ReportOptions = {
+          multiStack: true,
+          stacks: [
+            { stackName: 'InfraStack', costDelta: stack1Delta },
+            { stackName: 'AppStack', costDelta: stack2Delta },
+          ],
+        };
+
+        const report = reporter.generateReport(totalDelta, 'markdown', options);
+
+        expect(report).toContain('<details>');
+        expect(report).toContain('<summary><strong>View Detailed Stack Breakdowns</strong></summary>');
+        expect(report).toContain('### InfraStack');
+        expect(report).toContain('### AppStack');
+        expect(report).toContain('</details>');
+      });
+
+      it('should show resources for each stack', () => {
+        const options: ReportOptions = {
+          multiStack: true,
+          stacks: [
+            { stackName: 'InfraStack', costDelta: stack1Delta },
+            { stackName: 'AppStack', costDelta: stack2Delta },
+          ],
+        };
+
+        const report = reporter.generateReport(totalDelta, 'markdown', options);
+
+        expect(report).toContain('Stack1Instance');
+        expect(report).toContain('AWS::EC2::Instance');
+        expect(report).toContain('Stack2Bucket');
+        expect(report).toContain('AWS::S3::Bucket');
+      });
+
+      it('should not show per-stack breakdown for single stack', () => {
+        const options: ReportOptions = {
+          multiStack: true,
+          stacks: [
+            { stackName: 'SingleStack', costDelta: stack1Delta },
+          ],
+        };
+
+        const report = reporter.generateReport(stack1Delta, 'markdown', options);
+
+        expect(report).not.toContain('## Per-Stack Cost Breakdown');
+      });
+
+      it('should not show per-stack breakdown when multiStack is false', () => {
+        const options: ReportOptions = {
+          multiStack: false,
+          stacks: [
+            { stackName: 'InfraStack', costDelta: stack1Delta },
+            { stackName: 'AppStack', costDelta: stack2Delta },
+          ],
+        };
+
+        const report = reporter.generateReport(totalDelta, 'markdown', options);
+
+        expect(report).not.toContain('## Per-Stack Cost Breakdown');
+      });
+
+      it('should handle stacks with removed resources', () => {
+        const stackWithRemoved: CostDelta = {
+          totalDelta: -50.00,
+          currency: 'USD',
+          addedCosts: [],
+          removedCosts: [
+            {
+              logicalId: 'OldFunction',
+              type: 'AWS::Lambda::Function',
+              monthlyCost: {
+                amount: 50.00,
+                currency: 'USD',
+                confidence: 'medium',
+                assumptions: [],
+              },
+            },
+          ],
+          modifiedCosts: [],
+        };
+
+        const totalWithRemoved: CostDelta = {
+          totalDelta: -50.00,
+          currency: 'USD',
+          addedCosts: [],
+          removedCosts: [
+            {
+              logicalId: 'OldFunction',
+              type: 'AWS::Lambda::Function',
+              monthlyCost: {
+                amount: 50.00,
+                currency: 'USD',
+                confidence: 'medium',
+                assumptions: [],
+              },
+            },
+          ],
+          modifiedCosts: [],
+        };
+
+        const options: ReportOptions = {
+          multiStack: true,
+          stacks: [
+            { stackName: 'CleanupStack', costDelta: stackWithRemoved },
+            { stackName: 'AppStack', costDelta: stack2Delta },
+          ],
+        };
+
+        const report = reporter.generateReport(totalWithRemoved, 'markdown', options);
+
+        expect(report).toContain('**Removed Resources:**');
+        expect(report).toContain('OldFunction');
+      });
+
+      it('should handle stacks with modified resources', () => {
+        const stackWithModified: CostDelta = {
+          totalDelta: 50.00,
+          currency: 'USD',
+          addedCosts: [],
+          removedCosts: [],
+          modifiedCosts: [
+            {
+              logicalId: 'UpdatedInstance',
+              type: 'AWS::EC2::Instance',
+              monthlyCost: {
+                amount: 200.00,
+                currency: 'USD',
+                confidence: 'high',
+                assumptions: [],
+              },
+              oldMonthlyCost: {
+                amount: 150.00,
+                currency: 'USD',
+                confidence: 'high',
+                assumptions: [],
+              },
+              newMonthlyCost: {
+                amount: 200.00,
+                currency: 'USD',
+                confidence: 'high',
+                assumptions: [],
+              },
+              costDelta: 50.00,
+            },
+          ],
+        };
+
+        const totalWithModified: CostDelta = {
+          totalDelta: 100.00,
+          currency: 'USD',
+          addedCosts: [],
+          removedCosts: [],
+          modifiedCosts: [
+            {
+              logicalId: 'UpdatedInstance',
+              type: 'AWS::EC2::Instance',
+              monthlyCost: {
+                amount: 200.00,
+                currency: 'USD',
+                confidence: 'high',
+                assumptions: [],
+              },
+              oldMonthlyCost: {
+                amount: 150.00,
+                currency: 'USD',
+                confidence: 'high',
+                assumptions: [],
+              },
+              newMonthlyCost: {
+                amount: 200.00,
+                currency: 'USD',
+                confidence: 'high',
+                assumptions: [],
+              },
+              costDelta: 50.00,
+            },
+          ],
+        };
+
+        const options: ReportOptions = {
+          multiStack: true,
+          stacks: [
+            { stackName: 'UpdateStack', costDelta: stackWithModified },
+            { stackName: 'AppStack', costDelta: stack2Delta },
+          ],
+        };
+
+        const report = reporter.generateReport(totalWithModified, 'markdown', options);
+
+        expect(report).toContain('**Modified Resources:**');
+        expect(report).toContain('UpdatedInstance');
+        expect(report).toContain('$150.00');
+        expect(report).toContain('$200.00');
+      });
+
+      it('should handle stacks with no changes', () => {
+        const emptyStack: CostDelta = {
+          totalDelta: 0,
+          currency: 'USD',
+          addedCosts: [],
+          removedCosts: [],
+          modifiedCosts: [],
+        };
+
+        const options: ReportOptions = {
+          multiStack: true,
+          stacks: [
+            { stackName: 'EmptyStack', costDelta: emptyStack },
+            { stackName: 'AppStack', costDelta: stack2Delta },
+          ],
+        };
+
+        const combinedDelta: CostDelta = {
+          ...stack2Delta,
+        };
+
+        const report = reporter.generateReport(combinedDelta, 'markdown', options);
+
+        expect(report).toContain('### EmptyStack');
+        expect(report).toContain('No resource changes detected');
+      });
     });
   });
 });

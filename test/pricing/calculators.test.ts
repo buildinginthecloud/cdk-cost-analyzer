@@ -6,6 +6,7 @@ import { RDSCalculator } from '../../src/pricing/calculators/RDSCalculator';
 import { DynamoDBCalculator } from '../../src/pricing/calculators/DynamoDBCalculator';
 import { ECSCalculator } from '../../src/pricing/calculators/ECSCalculator';
 import { APIGatewayCalculator } from '../../src/pricing/calculators/APIGatewayCalculator';
+import { CloudFrontCalculator } from '../../src/pricing/calculators/CloudFrontCalculator';
 
 describe('Resource Cost Calculators', () => {
   describe('EC2Calculator', () => {
@@ -72,6 +73,15 @@ describe('Resource Cost Calculators', () => {
 
     it('should support AWS::ApiGatewayV2::Api', () => {
       expect(calculator.supports('AWS::ApiGatewayV2::Api')).toBe(true);
+    });
+  });
+
+  describe('CloudFrontCalculator', () => {
+    const calculator = new CloudFrontCalculator();
+
+    it('should support AWS::CloudFront::Distribution', () => {
+      expect(calculator.supports('AWS::CloudFront::Distribution')).toBe(true);
+      expect(calculator.supports('AWS::S3::Bucket')).toBe(false);
     });
   });
 });

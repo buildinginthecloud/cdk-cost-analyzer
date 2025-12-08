@@ -1,0 +1,125 @@
+# Example GitLab CI/CD Pipeline with CDK Cost Analysis
+# Copy this to your project's .gitlab-ci.yml and customize as needed
+
+stages:
+  - build
+  - test
+  - cost-analysis
+  - deploy
+
+variables:
+  AWS_REGION: eu-central-1
+  CDK_APP_PATH: ./infrastructure
+
+# Cache configuration for faster builds
+.node-cache: &node-cache
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+      - ${CDK_APP_PATH}/node_modules/
+      - .cdk-cost-analyzer-cache/
+
+# Install dependencies
+install:
+  stage: build
+  image: node:18
+  <<: *node-cache
+  script:
+    - npm ci
+    - cd ${CDK_APP_PATH} && npm ci
+  artifacts:
+    paths:
+      - node_modules/
+      - ${CDK_APP_PATH}/node_modules/
+    expire_in: 1 hour
+
+# Run unit tests
+test:
+  stage: test
+  image: node:18
+  dependencies:
+    - install
+  script:
+    - npm test
+    - cd ${CDK_APP_PATH} && npm test
+
+# Synthesize CDK application
+synthesize:
+  stage: test
+  image: node:18
+  dependencies:
+    - install
+  script:
+    - cd ${CDK_APP_PATH}
+    - npx cdk synth --all
+  artifacts:
+    paths:
+      - ${CDK_APP_PATH}/cdk.out
+    expire_in: 1 hour
+  only:
+    changes:
+      - infrastructure/**/*
+
+# Cost analysis for merge requests
+cost-analysis:
+  stage: cost-analysis
+  image: node:18
+  dependencies:
+    - install
+  <<: *node-cache
+  before_script:
+    # Install CDK Cost Analyzer globally
+    - npm install -g cdk-cost-analyzer
+  script:
+    # Run cost analysis with automatic synthesis
+    - |
+      cdk-cost-analyzer pipeline \
+        --synth \
+        --cdk-app-path ${CDK_APP_PATH} \
+        --region ${AWS_REGION} \
+        --config .cdk-cost-analyzer.yml \
+        --environment ${CI_ENVIRONMENT_NAME:-development} \
+        --format markdown \
+        --post-to-gitlab
+  # Allow pipeline to pass even if error threshold is exceeded
+  # Remove this to strictly enforce thresholds
+  allow_failure:
+    exit_codes: [2]
+  only:
+    - merge_requests
+  only:
+    changes:
+      - infrastructure/**/*
+      - .cdk-cost-analyzer.yml
+
+# Deploy to staging
+deploy:staging:
+  stage: deploy
+  image: node:18
+  dependencies:
+    - install
+    - synthesize
+  script:
+    - cd ${CDK_APP_PATH}
+    - npx cdk deploy --all --require-approval never
+  environment:
+    name: staging
+  only:
+    - develop
+
+# Deploy to production (manual approval required)
+deploy:production:
+  stage: deploy
+  image: node:18
+  dependencies:
+    - install
+    - synthesize
+  script:
+    - cd ${CDK_APP_PATH}
+    - npx cdk deploy --all --require-approval never
+  environment:
+    name: production
+  only:
+    - main
+  when: manual
