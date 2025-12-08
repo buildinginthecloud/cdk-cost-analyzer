@@ -6,6 +6,9 @@ A TypeScript package that analyzes AWS CDK infrastructure changes and provides c
 
 - **Template Comparison**: Parse and diff CloudFormation templates (JSON/YAML) to identify added, removed, and modified resources
 - **Cost Estimation**: Calculate monthly costs for AWS resources using real-time AWS Pricing API data
+- **Automatic CDK Synthesis**: Optionally synthesize CDK applications in CI/CD pipelines
+- **Cost Threshold Enforcement**: Fail pipelines when cost increases exceed configured thresholds
+- **Configuration Management**: Project-specific configuration for thresholds, usage assumptions, and exclusions
 - **Dual Interface**: Use as a CLI tool for quick analysis or import as a library for programmatic integration
 - **Clear Reporting**: Generate formatted cost reports in text, JSON, or Markdown formats
 - **GitLab Integration**: Post cost analysis reports as comments on GitLab merge requests
@@ -15,6 +18,7 @@ A TypeScript package that analyzes AWS CDK infrastructure changes and provides c
 
 - Analyze infrastructure changes in GitLab merge requests
 - Estimate costs before deploying CDK applications
+- Enforce cost approval gates in CI/CD pipelines
 - Compare different infrastructure configurations
 - Promote cost-conscious development practices
 
@@ -26,6 +30,8 @@ npm install cdk-cost-analyzer
 
 ## Documentation
 
+- **[Configuration Guide](docs/CONFIGURATION.md)** - Configure thresholds, usage assumptions, and exclusions
+- **[GitLab CI/CD Integration](docs/GITLAB_CI.md)** - Complete GitLab pipeline setup guide
 - **[Development Guide](docs/DEVELOPMENT.md)** - Setup, testing, and troubleshooting
 - **[Implementation Details](docs/IMPLEMENTATION.md)** - Technical implementation documentation
 - **[Examples](examples/)** - Example templates and API usage demonstrations
@@ -38,15 +44,78 @@ npm install cdk-cost-analyzer
 # Compare two CloudFormation templates
 cdk-cost-analyzer base-template.json target-template.json --region eu-central-1
 
-# Generate Markdown output
-cdk-cost-analyzer base.yaml target.yaml --region us-east-1 --format markdown
+# Use pipeline command with automatic synthesis
+cdk-cost-analyzer pipeline \
+  --synth \
+  --cdk-app-path ./infrastructure \
+  --region eu-central-1 \
+  --config .cdk-cost-analyzer.yml
 
-# Generate JSON output for programmatic processing
-cdk-cost-analyzer base.yaml target.yaml --format json
+# Generate Markdown output
+cdk-cost-analyzer compare base.yaml target.yaml --region us-east-1 --format markdown
 
 # Show help
 cdk-cost-analyzer --help
 ```
+
+### Configuration File
+
+Create `.cdk-cost-analyzer.yml` in your project:
+
+```yaml
+# Cost thresholds
+thresholds:
+  default:
+    warning: 50   # USD per month
+    error: 200
+  environments:
+    production:
+      warning: 25
+      error: 100
+
+# Custom usage assumptions
+usageAssumptions:
+  s3:
+    storageGB: 500
+  natGateway:
+    dataProcessedGB: 500
+  alb:
+    newConnectionsPerSecond: 50
+    processedBytesGB: 1000
+
+# Resource exclusions
+exclusions:
+  resourceTypes:
+    - AWS::IAM::Role
+    - AWS::Logs::LogGroup
+```
+
+See the [Configuration Guide](docs/CONFIGURATION.md) for complete documentation.
+
+### GitLab CI/CD Integration
+
+Add to your `.gitlab-ci.yml`:
+
+```yaml
+cost-analysis:
+  stage: cost-analysis
+  image: node:18
+  before_script:
+    - npm install -g cdk-cost-analyzer
+  script:
+    - |
+      cdk-cost-analyzer pipeline \
+        --synth \
+        --cdk-app-path ./infrastructure \
+        --region $AWS_REGION \
+        --config .cdk-cost-analyzer.yml \
+        --format markdown \
+        --post-to-gitlab
+  only:
+    - merge_requests
+```
+
+See the [GitLab CI/CD Guide](docs/GITLAB_CI.md) for complete documentation.
 
 ### Programmatic Usage
 
@@ -108,25 +177,28 @@ cost-analysis:
 
 ## Supported Resource Types
 
-### Phase 1
+### Core Resources (Phase 1 & 2)
 
 - **AWS::EC2::Instance** - EC2 instances with on-demand pricing
-- **AWS::S3::Bucket** - S3 buckets with default storage assumptions
-- **AWS::Lambda::Function** - Lambda functions with default invocation assumptions
+- **AWS::S3::Bucket** - S3 buckets with storage and request costs
+- **AWS::Lambda::Function** - Lambda functions with invocation and duration costs
 - **AWS::RDS::DBInstance** - RDS database instances
-
-### Phase 2 (Current)
-
 - **AWS::DynamoDB::Table** - DynamoDB tables with provisioned or on-demand billing
 - **AWS::ECS::Service** - ECS services with Fargate or EC2 launch types
 - **AWS::ApiGateway::RestApi** - API Gateway REST APIs
 - **AWS::ApiGatewayV2::Api** - API Gateway HTTP and WebSocket APIs
 
-### Future Phases
+### Networking Resources (Phase 3 - Current)
+
+- **AWS::EC2::NatGateway** - NAT Gateways with hourly and data processing costs
+- **AWS::ElasticLoadBalancingV2::LoadBalancer** - Application and Network Load Balancers with LCU costs
+- **AWS::EC2::VPCEndpoint** - VPC Endpoints (interface and gateway types)
+
+### Coming Soon
 
 - CloudFront distributions
-- NAT Gateways
 - ElastiCache clusters
+- EKS clusters
 - And more...
 
 ## Cost Calculation Assumptions
@@ -271,7 +343,7 @@ The tool handles errors gracefully:
 - AWS Pricing API integration
 - Text and JSON report formats
 
-### Phase 2 (Current) ✓
+### Phase 2 ✓
 
 - Markdown report formatter for GitLab MR comments
 - GitLab integration module for posting reports
@@ -279,14 +351,24 @@ The tool handles errors gracefully:
 - Property-based testing with fast-check
 - Comprehensive unit tests for all new features
 
-### Phase 3 (Planned)
+### Phase 3 (Production Readiness) ✓
 
-- Cost threshold enforcement and approval gates
-- Automatic CDK synthesis
-- Multi-region support with regional breakdowns
-- Historical cost tracking
-- Configurable usage assumptions
-- Additional resource types (CloudFront, NAT Gateway, ElastiCache)
+- **Automatic CDK Synthesis**: Synthesize CDK applications in CI/CD pipelines
+- **Cost Threshold Enforcement**: Fail pipelines when costs exceed configured limits
+- **Configuration Management**: Project-specific configuration files
+- **Additional Resource Calculators**: NAT Gateway, ALB, NLB, VPC Endpoints
+- **Enhanced CLI**: Pipeline command with synthesis and threshold support
+- **Comprehensive Documentation**: Configuration guide, GitLab CI/CD examples
+
+### Phase 4 (Planned)
+
+- Multi-region cost analysis with regional breakdowns
+- Historical cost tracking and trend analysis
+- Cost optimization recommendations
+- Support for Savings Plans and Reserved Instances
+- Additional resource types (CloudFront, ElastiCache, EKS)
+- GitHub Actions integration
+- Slack/Teams notifications
 
 ## Testing
 

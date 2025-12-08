@@ -1,0 +1,85 @@
+# Example CDK Cost Analyzer Configuration
+# Place this file at the root of your project as .cdk-cost-analyzer.yml
+
+# Cost thresholds for pipeline enforcement
+thresholds:
+  # Default thresholds applied to all environments
+  default:
+    warning: 50   # USD per month - triggers warning but pipeline passes
+    error: 200    # USD per month - fails pipeline
+  
+  # Environment-specific thresholds
+  environments:
+    production:
+      warning: 25   # Stricter thresholds for production changes
+      error: 100
+    staging:
+      warning: 50
+      error: 200
+    development:
+      warning: 100  # More lenient for development
+      error: 500
+
+# Custom usage assumptions for cost estimation
+# These override the default assumptions used by resource calculators
+usageAssumptions:
+  # S3 bucket assumptions
+  s3:
+    storageGB: 500          # GB of standard storage per month
+    getRequests: 100000     # GET requests per month
+    putRequests: 10000      # PUT requests per month
+  
+  # Lambda function assumptions
+  lambda:
+    invocationsPerMonth: 5000000  # Number of invocations per month
+    averageDurationMs: 500        # Average execution duration in milliseconds
+  
+  # NAT Gateway assumptions
+  natGateway:
+    dataProcessedGB: 500    # GB of data processed per month
+  
+  # Application Load Balancer assumptions
+  alb:
+    newConnectionsPerSecond: 50       # New TCP connections per second
+    activeConnectionsPerMinute: 5000  # Active TCP connections per minute
+    processedBytesGB: 1000            # GB processed per month
+  
+  # Network Load Balancer assumptions
+  nlb:
+    newConnectionsPerSecond: 100      # New TCP/UDP connections per second
+    activeConnectionsPerMinute: 10000 # Active TCP/UDP connections per minute
+    processedBytesGB: 1000            # GB processed per month
+  
+  # VPC Endpoint assumptions (for interface endpoints)
+  vpcEndpoint:
+    dataProcessedGB: 100    # GB of data processed per month
+  
+  # API Gateway assumptions
+  apiGateway:
+    requestsPerMonth: 10000000  # API requests per month
+
+# CDK synthesis configuration (for automatic synthesis)
+synthesis:
+  appPath: ./infrastructure           # Path to CDK application directory
+  outputPath: ./cdk.out              # CDK output directory (default: cdk.out)
+  customCommand: npx cdk synth --all # Optional: custom synthesis command
+  context:                           # CDK context values passed to synthesis
+    environment: production
+    region: eu-central-1
+
+# Resource types to exclude from cost analysis
+# Useful for zero-cost or negligible-cost resources
+exclusions:
+  resourceTypes:
+    - AWS::IAM::Role
+    - AWS::IAM::Policy
+    - AWS::IAM::User
+    - AWS::IAM::Group
+    - AWS::Logs::LogGroup
+    - AWS::CloudWatch::Alarm
+    - AWS::Events::Rule
+
+# Pricing data cache configuration
+cache:
+  enabled: true        # Enable caching of AWS Pricing API data
+  durationHours: 24    # Cache duration in hours

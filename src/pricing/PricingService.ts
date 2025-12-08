@@ -5,6 +5,7 @@ import {
   CostDelta,
   ResourceCostCalculator,
 } from './types';
+import { UsageAssumptionsConfig } from '../config/types';
 import { PricingClient } from './PricingClient';
 import { EC2Calculator } from './calculators/EC2Calculator';
 import { S3Calculator } from './calculators/S3Calculator';
@@ -13,13 +14,23 @@ import { RDSCalculator } from './calculators/RDSCalculator';
 import { DynamoDBCalculator } from './calculators/DynamoDBCalculator';
 import { ECSCalculator } from './calculators/ECSCalculator';
 import { APIGatewayCalculator } from './calculators/APIGatewayCalculator';
+import { NatGatewayCalculator } from './calculators/NatGatewayCalculator';
+import { ALBCalculator } from './calculators/ALBCalculator';
+import { NLBCalculator } from './calculators/NLBCalculator';
+import { VPCEndpointCalculator } from './calculators/VPCEndpointCalculator';
 
 export class PricingService implements IPricingService {
   private calculators: ResourceCostCalculator[];
   private pricingClient: PricingClient;
+  private excludedResourceTypes: Set<string>;
 
-  constructor(region: string = 'us-east-1') {
+  constructor(
+    region: string = 'us-east-1',
+    usageAssumptions?: UsageAssumptionsConfig,
+    excludedResourceTypes?: string[]
+  ) {
     this.pricingClient = new PricingClient(region);
+    this.excludedResourceTypes = new Set(excludedResourceTypes || []);
     this.calculators = [
       new EC2Calculator(),
       new S3Calculator(),
@@ -28,10 +39,32 @@ export class PricingService implements IPricingService {
       new DynamoDBCalculator(),
       new ECSCalculator(),
       new APIGatewayCalculator(),
+      new NatGatewayCalculator(usageAssumptions?.natGateway?.dataProcessedGB),
+      new ALBCalculator(
+        usageAssumptions?.alb?.newConnectionsPerSecond,
+        usageAssumptions?.alb?.activeConnectionsPerMinute,
+        usageAssumptions?.alb?.processedBytesGB
+      ),
+      new NLBCalculator(
+        usageAssumptions?.nlb?.newConnectionsPerSecond,
+        usageAssumptions?.nlb?.activeConnectionsPerMinute,
+        usageAssumptions?.nlb?.processedBytesGB
+      ),
+      new VPCEndpointCalculator(usageAssumptions?.vpcEndpoint?.dataProcessedGB),
     ];
   }
 
   async getResourceCost(resource: ResourceWithId, region: string): Promise<MonthlyCost> {
+    // Check if resource type is excluded
+    if (this.excludedResourceTypes.has(resource.type)) {
+      return {
+        amount: 0,
+        currency: 'USD',
+        confidence: 'high',
+        assumptions: [`Resource type ${resource.type} is excluded from cost analysis`],
+      };
+    }
+
     const calculator = this.calculators.find(calc => calc.supports(resource.type));
 
     if (!calculator) {
