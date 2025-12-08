@@ -242,9 +242,9 @@ npm test
 npm run lint
 
 # CLI usage
-node dist/cli/index.js base.json target.json --region eu-central-1
+node dist/cli/index.js examples/simple/base.json examples/simple/target.json --region eu-central-1
 
-# Programmatic usage
+# Programmatic usage (see examples/api-usage.js)
 import { analyzeCosts } from './dist/api';
 ```
 
