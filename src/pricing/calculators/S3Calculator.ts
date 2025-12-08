@@ -11,7 +11,7 @@ export class S3Calculator implements ResourceCostCalculator {
   async calculateCost(
     _resource: ResourceWithId,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     try {
       const pricePerGB = await pricingClient.getPrice({

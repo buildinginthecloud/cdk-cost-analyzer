@@ -59,11 +59,11 @@ export class SynthesisOrchestrator {
   private async executeSynthesis(
     command: string,
     cdkAppPath: string,
-    context?: Record<string, string>
+    context?: Record<string, string>,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       const [cmd, ...args] = command.split(' ');
-      
+
       // Add context arguments
       const allArgs = [...args];
       if (context) {
@@ -93,8 +93,8 @@ export class SynthesisOrchestrator {
         reject(
           new SynthesisError(
             `Failed to execute synthesis command: ${error.message}`,
-            stderr
-          )
+            stderr,
+          ),
         );
       });
 
@@ -103,8 +103,8 @@ export class SynthesisOrchestrator {
           reject(
             new SynthesisError(
               `CDK synthesis failed with exit code ${code}`,
-              stderr || stdout
-            )
+              stderr || stdout,
+            ),
           );
         } else {
           resolve();
@@ -117,11 +117,11 @@ export class SynthesisOrchestrator {
    * Find all CloudFormation templates in output directory
    */
   private async findTemplates(
-    outputPath: string
+    outputPath: string,
   ): Promise<{ templatePaths: string[]; stackNames: string[] }> {
     try {
       const files = await fs.readdir(outputPath);
-      
+
       const templatePaths: string[] = [];
       const stackNames: string[] = [];
 
@@ -151,7 +151,7 @@ export class SynthesisOrchestrator {
       return { templatePaths, stackNames };
     } catch (error) {
       throw new Error(
-        `Failed to find templates: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to find templates: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }

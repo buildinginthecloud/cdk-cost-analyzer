@@ -1,6 +1,6 @@
 import { PricingClient as AWSPricingClient, GetProductsCommand } from '@aws-sdk/client-pricing';
-import { PricingClient as IPricingClient, PriceQueryParams, PricingAPIError } from './types';
 import { CacheManager } from './CacheManager';
+import { PricingClient as IPricingClient, PriceQueryParams, PricingAPIError } from './types';
 
 export class PricingClient implements IPricingClient {
   private cache: Map<string, number> = new Map();
@@ -14,7 +14,7 @@ export class PricingClient implements IPricingClient {
 
   async getPrice(params: PriceQueryParams): Promise<number | null> {
     const cacheKey = this.getCacheKey(params);
-    
+
     // Check in-memory cache first
     if (this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey)!;
@@ -72,7 +72,7 @@ export class PricingClient implements IPricingClient {
 
     throw new PricingAPIError(
       `Failed to fetch pricing after ${maxRetries} attempts: ${lastError?.message}`,
-      false
+      false,
     );
   }
 

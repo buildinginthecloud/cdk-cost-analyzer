@@ -1,9 +1,9 @@
-import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { Reporter } from '../../src/reporter/Reporter';
-import { CostDelta, ResourceCost } from '../../src/pricing/types';
-import { ReportOptions } from '../../src/reporter/types';
+import { describe, it, expect } from 'vitest';
 import { ConfigSummary } from '../../src/pipeline/types';
+import { CostDelta, ResourceCost } from '../../src/pricing/types';
+import { Reporter } from '../../src/reporter/Reporter';
+import { ReportOptions } from '../../src/reporter/types';
 import { ThresholdEvaluation } from '../../src/threshold/types';
 
 describe('Reporter - Property Tests', () => {
@@ -60,7 +60,7 @@ describe('Reporter - Property Tests', () => {
           expect(report).toContain(resource.type);
         });
       }),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -80,7 +80,7 @@ describe('Reporter - Property Tests', () => {
           });
         }
       }),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -100,14 +100,14 @@ describe('Reporter - Property Tests', () => {
 
           const report = reporter.generateReport(costDelta, 'text');
           const deltaMatch = report.match(/Total Cost Delta: ([+\-]?\$[\d.]+)/);
-          
+
           expect(deltaMatch).toBeTruthy();
           if (deltaMatch) {
             expect(deltaMatch[1]).toMatch(/^\+\$/);
           }
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -127,14 +127,14 @@ describe('Reporter - Property Tests', () => {
 
           const report = reporter.generateReport(costDelta, 'text');
           const deltaMatch = report.match(/Total Cost Delta: ([+\-]?\$[\d.]+)/);
-          
+
           expect(deltaMatch).toBeTruthy();
           if (deltaMatch) {
             expect(deltaMatch[1]).toMatch(/^-\$/);
           }
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -149,18 +149,18 @@ describe('Reporter - Property Tests', () => {
           error: fc.option(fc.double({ min: 0, max: 1000, noNaN: true }), { nil: undefined }),
           environment: fc.option(fc.constantFrom('development', 'staging', 'production'), { nil: undefined }),
         }),
-        { nil: undefined }
+        { nil: undefined },
       ),
       usageAssumptions: fc.option(
         fc.dictionary(
           fc.constantFrom('s3', 'lambda', 'ec2'),
-          fc.dictionary(fc.string(), fc.oneof(fc.integer(), fc.double(), fc.string()))
+          fc.dictionary(fc.string(), fc.oneof(fc.integer(), fc.double(), fc.string())),
         ),
-        { nil: undefined }
+        { nil: undefined },
       ),
       excludedResourceTypes: fc.option(
         fc.array(fc.constantFrom('AWS::IAM::Role', 'AWS::IAM::Policy', 'AWS::Logs::LogGroup'), { maxLength: 3 }),
-        { nil: undefined }
+        { nil: undefined },
       ),
       synthesisEnabled: fc.boolean(),
     });
@@ -206,7 +206,7 @@ describe('Reporter - Property Tests', () => {
           expect(report).toContain('Custom Usage Assumptions');
         }
       }),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -230,16 +230,16 @@ describe('Reporter - Property Tests', () => {
         if (thresholdStatus.level !== 'none') {
           // Threshold status should be prominently displayed
           expect(report).toContain('Threshold Status');
-          
+
           if (thresholdStatus.passed) {
             expect(report).toContain('PASSED');
           } else {
             expect(report).toContain('EXCEEDED');
-            
+
             // When threshold is exceeded, should include actionable guidance
             expect(report).toContain('Action Required');
             expect(report).toContain(thresholdStatus.message);
-            
+
             // Should show recommendations if provided
             if (thresholdStatus.recommendations && thresholdStatus.recommendations.length > 0) {
               expect(report).toContain('Recommendations');
@@ -249,23 +249,23 @@ describe('Reporter - Property Tests', () => {
                 }
               });
             }
-            
+
             // Should show top cost contributors
             if (costDelta.addedCosts.length > 0 || costDelta.modifiedCosts.length > 0 || costDelta.removedCosts.length > 0) {
               expect(report).toContain('Top Cost Contributors');
             }
           }
-          
+
           // Should show threshold value if configured
           if (thresholdStatus.threshold !== undefined) {
             expect(report).toContain('Threshold:');
           }
-          
+
           // Should show actual delta
           expect(report).toContain('Actual Delta');
         }
       }),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 });

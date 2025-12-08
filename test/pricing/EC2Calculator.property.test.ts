@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
 import * as fc from 'fast-check';
+import { describe, it, expect, vi } from 'vitest';
 import { EC2Calculator } from '../../src/pricing/calculators/EC2Calculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -27,12 +27,12 @@ describe('EC2Calculator - Property Tests', () => {
         // This simulates real AWS pricing where different types and regions have different costs
         const instanceTypeMultiplier = instanceTypes.indexOf(instanceType as string) + 1;
         const regionMultiplier = regions.indexOf(region as string) + 1;
-        
+
         // Base price varies by instance type (larger instances cost more)
         const basePrice = instanceTypeMultiplier * 0.01;
         // Region affects price (some regions are more expensive)
         const regionalAdjustment = regionMultiplier * 0.001;
-        
+
         return basePrice + regionalAdjustment;
       }),
     });
@@ -81,16 +81,16 @@ describe('EC2Calculator - Property Tests', () => {
             // pricing coincidences, so we just verify the calculation completed
             expect(cost1).toBeDefined();
             expect(cost2).toBeDefined();
-            
+
             // At minimum, verify that the pricing client was called with correct parameters
             expect(mockPricingClient.getPrice).toHaveBeenCalled();
           } else {
             // Same instance type and region should produce the same cost
             expect(cost1.amount).toBe(cost2.amount);
           }
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -154,9 +154,9 @@ describe('EC2Calculator - Property Tests', () => {
           expect(largerCost.amount).toBeGreaterThan(smallerCost.amount);
           expect(smallerCost.confidence).toBe('high');
           expect(largerCost.confidence).toBe('high');
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -182,9 +182,9 @@ describe('EC2Calculator - Property Tests', () => {
           expect(cost.amount).toBe(0);
           expect(cost.confidence).toBe('unknown');
           expect(cost.assumptions).toContain('Instance type not specified');
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -214,9 +214,9 @@ describe('EC2Calculator - Property Tests', () => {
           expect(cost.confidence).toBe('unknown');
           expect(cost.assumptions.length).toBeGreaterThan(0);
           expect(cost.assumptions[0]).toContain('Pricing data not available');
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 });

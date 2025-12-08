@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import { Command } from 'commander';
 import * as fs from 'fs';
+import { Command } from 'commander';
 import { analyzeCosts } from '../api';
-import { PipelineOrchestrator } from '../pipeline/PipelineOrchestrator';
 import { GitLabIntegration } from '../integrations/GitLabIntegration';
+import { PipelineOrchestrator } from '../pipeline/PipelineOrchestrator';
 
 const program = new Command();
 
@@ -170,11 +170,14 @@ program
           console.error('Required: CI_JOB_TOKEN, CI_PROJECT_ID, CI_MERGE_REQUEST_IID, CI_SERVER_URL');
         } else {
           try {
-            const gitlab = new GitLabIntegration(gitlabToken, gitlabUrl);
-            await gitlab.postCommentToMR(
+            const gitlab = new GitLabIntegration({
+              token: gitlabToken,
+              apiUrl: gitlabUrl,
+            });
+            await gitlab.postMergeRequestComment(
               projectId,
-              parseInt(mergeRequestIid),
-              result.costAnalysis.summary
+              mergeRequestIid,
+              result.costAnalysis.summary,
             );
             console.log('Results posted to GitLab merge request');
           } catch (error) {

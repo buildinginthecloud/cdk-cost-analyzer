@@ -1,9 +1,9 @@
+import * as fs from 'fs/promises';
+import * as os from 'os';
+import * as path from 'path';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ConfigManager } from '../../src/config/ConfigManager';
 import { CostAnalyzerConfig } from '../../src/config/types';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import * as os from 'os';
 
 describe('ConfigManager', () => {
   let configManager: ConfigManager;
@@ -90,7 +90,7 @@ describe('ConfigManager', () => {
   describe('loadConfig', () => {
     it('should return default config when no file exists', async () => {
       const config = await configManager.loadConfig();
-      
+
       expect(config).toBeDefined();
       expect(config.cache).toBeDefined();
       expect(config.cache?.enabled).toBe(true);
@@ -110,7 +110,7 @@ describe('ConfigManager', () => {
       await fs.writeFile(configPath, JSON.stringify(userConfig));
 
       const config = await configManager.loadConfig(configPath);
-      
+
       expect(config.thresholds).toBeDefined();
       expect(config.thresholds?.default?.warning).toBe(50);
       expect(config.cache?.enabled).toBe(true); // From defaults

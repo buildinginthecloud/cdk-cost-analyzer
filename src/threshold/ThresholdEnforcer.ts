@@ -1,6 +1,6 @@
+import { ThresholdEvaluation } from './types';
 import { ThresholdConfig, ThresholdLevels } from '../config/types';
 import { ResourceCost, ModifiedResourceCost } from '../pricing/types';
-import { ThresholdEvaluation } from './types';
 
 export class ThresholdEnforcer {
   /**
@@ -11,7 +11,7 @@ export class ThresholdEnforcer {
     addedResources: ResourceCost[],
     modifiedResources: ModifiedResourceCost[],
     config?: ThresholdConfig,
-    environment?: string
+    environment?: string,
   ): ThresholdEvaluation {
     if (!config) {
       return {
@@ -40,7 +40,7 @@ export class ThresholdEnforcer {
       const topContributors = this.getTopContributors(
         addedResources,
         modifiedResources,
-        5
+        5,
       );
 
       return {
@@ -58,7 +58,7 @@ export class ThresholdEnforcer {
       const topContributors = this.getTopContributors(
         addedResources,
         modifiedResources,
-        5
+        5,
       );
 
       return {
@@ -85,7 +85,7 @@ export class ThresholdEnforcer {
    */
   private selectThresholds(
     config: ThresholdConfig,
-    environment?: string
+    environment?: string,
   ): ThresholdLevels | undefined {
     if (environment && config.environments?.[environment]) {
       return config.environments[environment];
@@ -99,7 +99,7 @@ export class ThresholdEnforcer {
   private getTopContributors(
     addedResources: ResourceCost[],
     modifiedResources: ModifiedResourceCost[],
-    limit: number
+    limit: number,
   ): ResourceCost[] {
     const allContributors: ResourceCost[] = [
       ...addedResources,
@@ -145,26 +145,26 @@ export class ThresholdEnforcer {
    */
   private getRecommendations(
     level: 'warning' | 'error',
-    topContributors: ResourceCost[]
+    topContributors: ResourceCost[],
   ): string[] {
     const recommendations: string[] = [];
 
     if (level === 'error') {
       recommendations.push(
-        'This change cannot be merged without approval due to cost impact.'
+        'This change cannot be merged without approval due to cost impact.',
       );
       recommendations.push(
-        'Review the cost breakdown and consider optimizations before proceeding.'
+        'Review the cost breakdown and consider optimizations before proceeding.',
       );
       recommendations.push(
-        'Contact your FinOps team for threshold override approval if this cost increase is necessary.'
+        'Contact your FinOps team for threshold override approval if this cost increase is necessary.',
       );
     } else {
       recommendations.push(
-        'Review this cost increase with your team before merging.'
+        'Review this cost increase with your team before merging.',
       );
       recommendations.push(
-        'Consider whether all resources in this change are necessary.'
+        'Consider whether all resources in this change are necessary.',
       );
     }
 
@@ -172,7 +172,7 @@ export class ThresholdEnforcer {
       recommendations.push(
         `Top cost contributors: ${topContributors
           .map((r) => `${r.type} (${r.logicalId}): $${r.monthlyCost.amount.toFixed(2)}/month`)
-          .join(', ')}`
+          .join(', ')}`,
       );
 
       // Specific recommendations based on resource types
@@ -180,19 +180,19 @@ export class ThresholdEnforcer {
 
       if (resourceTypes.has('AWS::RDS::DBInstance')) {
         recommendations.push(
-          'Consider using smaller RDS instance types or Aurora Serverless for lower costs.'
+          'Consider using smaller RDS instance types or Aurora Serverless for lower costs.',
         );
       }
 
       if (resourceTypes.has('AWS::EC2::Instance')) {
         recommendations.push(
-          'Consider using smaller EC2 instance types, Spot instances, or Savings Plans.'
+          'Consider using smaller EC2 instance types, Spot instances, or Savings Plans.',
         );
       }
 
       if (resourceTypes.has('AWS::EC2::NatGateway')) {
         recommendations.push(
-          'NAT Gateways have high data processing costs. Consider using VPC endpoints or consolidating NAT Gateways.'
+          'NAT Gateways have high data processing costs. Consider using VPC endpoints or consolidating NAT Gateways.',
         );
       }
 
@@ -200,7 +200,7 @@ export class ThresholdEnforcer {
         resourceTypes.has('AWS::ElasticLoadBalancingV2::LoadBalancer')
       ) {
         recommendations.push(
-          'Load Balancers have hourly costs. Consider sharing load balancers across services if possible.'
+          'Load Balancers have hourly costs. Consider sharing load balancers across services if possible.',
         );
       }
     }

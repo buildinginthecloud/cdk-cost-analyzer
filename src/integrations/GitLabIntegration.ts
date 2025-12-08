@@ -10,7 +10,7 @@ export class GitLabIntegration implements IGitLabIntegration {
   async postMergeRequestComment(
     projectId: string,
     mergeRequestIid: string,
-    comment: string
+    comment: string,
   ): Promise<void> {
     const url = `${this.config.apiUrl}/projects/${encodeURIComponent(projectId)}/merge_requests/${mergeRequestIid}/notes`;
 
@@ -30,7 +30,7 @@ export class GitLabIntegration implements IGitLabIntegration {
         const errorText = await response.text();
         throw new GitLabAPIError(
           `Failed to post comment: ${response.statusText} - ${errorText}`,
-          response.status
+          response.status,
         );
       }
     } catch (error) {
@@ -38,7 +38,7 @@ export class GitLabIntegration implements IGitLabIntegration {
         throw error;
       }
       throw new GitLabAPIError(
-        `Failed to connect to GitLab API: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to connect to GitLab API: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -49,7 +49,7 @@ export class GitLabIntegration implements IGitLabIntegration {
 
     if (!token) {
       throw new Error(
-        'GitLab token not found. Set CI_JOB_TOKEN or GITLAB_TOKEN environment variable.'
+        'GitLab token not found. Set CI_JOB_TOKEN or GITLAB_TOKEN environment variable.',
       );
     }
 

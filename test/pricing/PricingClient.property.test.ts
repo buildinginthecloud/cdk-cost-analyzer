@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import * as fc from 'fast-check';
-import { PricingClient } from '../../src/pricing/PricingClient';
 import { GetProductsCommand } from '@aws-sdk/client-pricing';
+import * as fc from 'fast-check';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { PricingClient } from '../../src/pricing/PricingClient';
 
 vi.mock('@aws-sdk/client-pricing');
 
@@ -15,9 +15,9 @@ describe('PricingClient - Property Tests', () => {
         JSON.stringify({
           terms: {
             OnDemand: {
-              'TERM_KEY': {
+              TERM_KEY: {
                 priceDimensions: {
-                  'DIM_KEY': {
+                  DIM_KEY: {
                     pricePerUnit: {
                       USD: '0.10',
                     },
@@ -62,7 +62,7 @@ describe('PricingClient - Property Tests', () => {
         field: fc.string().filter(s => s.length > 0),
         value: fc.string().filter(s => s.length > 0),
       }),
-      { minLength: 1, maxLength: 5 }
+      { minLength: 1, maxLength: 5 },
     );
 
     fc.assert(
@@ -85,7 +85,7 @@ describe('PricingClient - Property Tests', () => {
         // Verify that send was called (which means the query was executed)
         expect(mockSend).toHaveBeenCalled();
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -98,7 +98,7 @@ describe('PricingClient - Property Tests', () => {
         field: fc.string().filter(s => s.length > 0),
         value: fc.string().filter(s => s.length > 0),
       }),
-      { minLength: 1, maxLength: 3 }
+      { minLength: 1, maxLength: 3 },
     );
     const failureCountArb = fc.integer({ min: 1, max: 3 });
 
@@ -117,19 +117,19 @@ describe('PricingClient - Property Tests', () => {
           mockSend.mockImplementation(() => {
             callTimes.push(Date.now());
             callCount++;
-            
+
             if (callCount <= failureCount) {
               throw new Error('Transient API failure');
             }
-            
+
             return Promise.resolve({
               PriceList: [
                 JSON.stringify({
                   terms: {
                     OnDemand: {
-                      'TERM_KEY': {
+                      TERM_KEY: {
                         priceDimensions: {
-                          'DIM_KEY': {
+                          DIM_KEY: {
                             pricePerUnit: {
                               USD: '0.10',
                             },
@@ -162,15 +162,15 @@ describe('PricingClient - Property Tests', () => {
             for (let i = 1; i < callTimes.length; i++) {
               const delay = callTimes[i] - callTimes[i - 1];
               const expectedMinDelay = Math.pow(2, i - 1) * 1000;
-              
+
               // Allow some tolerance for timing (expected delay - 100ms)
               // This accounts for execution time and timing variations
               expect(delay).toBeGreaterThanOrEqual(expectedMinDelay - 100);
             }
           }
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -183,7 +183,7 @@ describe('PricingClient - Property Tests', () => {
         field: fc.string().filter(s => s.length > 0),
         value: fc.string().filter(s => s.length > 0),
       }),
-      { minLength: 1, maxLength: 3 }
+      { minLength: 1, maxLength: 3 },
     );
     const cachedPriceArb = fc.float({ min: Math.fround(0.01), max: Math.fround(100.0), noNaN: true });
 
@@ -202,9 +202,9 @@ describe('PricingClient - Property Tests', () => {
               JSON.stringify({
                 terms: {
                   OnDemand: {
-                    'TERM_KEY': {
+                    TERM_KEY: {
                       priceDimensions: {
-                        'DIM_KEY': {
+                        DIM_KEY: {
                           pricePerUnit: {
                             USD: cachedPrice.toFixed(2),
                           },
@@ -232,13 +232,13 @@ describe('PricingClient - Property Tests', () => {
 
           // Second call should return cached value instead of null
           const secondResult = await client.getPrice(params);
-          
+
           // Verify cached data is used (not null or unknown)
           expect(secondResult).not.toBeNull();
           expect(secondResult).toBeCloseTo(cachedPrice, 2);
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -251,7 +251,7 @@ describe('PricingClient - Property Tests', () => {
         field: fc.string().filter(s => s.length > 0),
         value: fc.string().filter(s => s.length > 0),
       }),
-      { minLength: 1, maxLength: 3 }
+      { minLength: 1, maxLength: 3 },
     );
 
     // Test different scenarios where pricing data is unavailable
@@ -259,8 +259,8 @@ describe('PricingClient - Property Tests', () => {
       { name: 'empty PriceList', response: { PriceList: [] } },
       { name: 'no PriceList', response: {} },
       { name: 'no OnDemand terms', response: { PriceList: [JSON.stringify({ terms: {} })] } },
-      { name: 'no priceDimensions', response: { PriceList: [JSON.stringify({ terms: { OnDemand: { 'TERM_KEY': {} } } })] } },
-      { name: 'no pricePerUnit', response: { PriceList: [JSON.stringify({ terms: { OnDemand: { 'TERM_KEY': { priceDimensions: { 'DIM_KEY': {} } } } } })] } },
+      { name: 'no priceDimensions', response: { PriceList: [JSON.stringify({ terms: { OnDemand: { TERM_KEY: {} } } })] } },
+      { name: 'no pricePerUnit', response: { PriceList: [JSON.stringify({ terms: { OnDemand: { TERM_KEY: { priceDimensions: { DIM_KEY: {} } } } } })] } },
     ];
 
     const scenarioArb = fc.constantFrom(...unavailableScenarios);
@@ -285,15 +285,15 @@ describe('PricingClient - Property Tests', () => {
 
           // Call should return null when pricing data is unavailable
           const result = await client.getPrice(params);
-          
+
           // Verify that null is returned (indicating unavailable pricing)
           expect(result).toBeNull();
-          
+
           // Verify that the call didn't throw an error (processing continues)
           expect(mockSend).toHaveBeenCalled();
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

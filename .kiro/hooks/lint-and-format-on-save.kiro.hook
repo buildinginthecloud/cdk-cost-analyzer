@@ -16,6 +16,6 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "A code file has been saved. Please:\n1. Run the appropriate linter (ESLint for JS/TS, flake8/pylint for Python)\n2. Run the appropriate formatter (Prettier for JS/TS, Black for Python)\n3. Fix any auto-fixable issues\n4. Report any remaining issues that need manual attention\n\nUse the project's existing configuration files (.eslintrc, .prettierrc, pyproject.toml, etc.) and follow the established coding standards."
+    "prompt": "A code file has been saved. Please:\n1. Run the TypeScript compiler check: npx projen lint (which runs tsc --noEmit)\n2. Use getDiagnostics tool to check for type errors in the modified file\n3. Report any remaining issues that need manual attention\n\nNote: This project uses Projen for build management. ESLint is configured but has version compatibility issues. Use TypeScript compiler for validation."
   }
 }

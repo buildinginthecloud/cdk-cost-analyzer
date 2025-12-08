@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
 import * as fc from 'fast-check';
+import { describe, it, expect, vi } from 'vitest';
 import { analyzeCosts } from '../../src/api';
 
 vi.mock('@aws-sdk/client-pricing', () => ({
@@ -13,7 +13,7 @@ describe('analyzeCosts API - Property Tests', () => {
   const resourceTypeArb = fc.constantFrom(
     'AWS::S3::Bucket',
     'AWS::EC2::Instance',
-    'AWS::Lambda::Function'
+    'AWS::Lambda::Function',
   );
 
   const resourceArb = fc.record({
@@ -24,9 +24,9 @@ describe('analyzeCosts API - Property Tests', () => {
   const templateArb = fc.dictionary(
     fc.string().filter(s => s.length > 0),
     resourceArb,
-    { minKeys: 1, maxKeys: 3 }
+    { minKeys: 1, maxKeys: 3 },
   ).map(resources => ({
-    Resources: resources
+    Resources: resources,
   }));
 
   // Feature: cdk-cost-analyzer, Property 15: API returns structured results
@@ -53,7 +53,7 @@ describe('analyzeCosts API - Property Tests', () => {
         expect(Array.isArray(result.modifiedResources)).toBe(true);
         expect(typeof result.summary).toBe('string');
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -74,15 +74,15 @@ describe('analyzeCosts API - Property Tests', () => {
         fc.constantFrom('base', 'target'),
         async (invalidJson, templateType) => {
           const validTemplate = JSON.stringify({ Resources: { Bucket: { Type: 'AWS::S3::Bucket', Properties: {} } } });
-          
-          const options = templateType === 'base' 
+
+          const options = templateType === 'base'
             ? { baseTemplate: invalidJson, targetTemplate: validTemplate }
             : { baseTemplate: validTemplate, targetTemplate: invalidJson };
 
           await expect(analyzeCosts(options)).rejects.toThrow();
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -102,15 +102,15 @@ describe('analyzeCosts API - Property Tests', () => {
         fc.constantFrom('base', 'target'),
         async (invalidStructure, templateType) => {
           const validTemplate = JSON.stringify({ Resources: { Bucket: { Type: 'AWS::S3::Bucket', Properties: {} } } });
-          
+
           const options = templateType === 'base'
             ? { baseTemplate: invalidStructure, targetTemplate: validTemplate }
             : { baseTemplate: validTemplate, targetTemplate: invalidStructure };
 
           await expect(analyzeCosts(options)).rejects.toThrow();
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -129,15 +129,15 @@ describe('analyzeCosts API - Property Tests', () => {
         fc.constantFrom('base', 'target'),
         async (emptyTemplate, templateType) => {
           const validTemplate = JSON.stringify({ Resources: { Bucket: { Type: 'AWS::S3::Bucket', Properties: {} } } });
-          
+
           const options = templateType === 'base'
             ? { baseTemplate: emptyTemplate, targetTemplate: validTemplate }
             : { baseTemplate: validTemplate, targetTemplate: emptyTemplate };
 
           await expect(analyzeCosts(options)).rejects.toThrow();
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -151,9 +151,9 @@ describe('analyzeCosts API - Property Tests', () => {
         ),
         async (options) => {
           await expect(analyzeCosts(options)).rejects.toThrow();
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -172,15 +172,15 @@ describe('analyzeCosts API - Property Tests', () => {
         fc.constantFrom('base', 'target'),
         async (invalidTemplate, templateType) => {
           const validTemplate = JSON.stringify({ Resources: { Bucket: { Type: 'AWS::S3::Bucket', Properties: {} } } });
-          
+
           const options = templateType === 'base'
             ? { baseTemplate: invalidTemplate, targetTemplate: validTemplate }
             : { baseTemplate: validTemplate, targetTemplate: invalidTemplate };
 
           await expect(analyzeCosts(options)).rejects.toThrow();
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

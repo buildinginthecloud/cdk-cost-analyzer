@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fc from 'fast-check';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { PricingClient } from '../../src/pricing/PricingClient';
 
 describe('Credential Detection - Property Tests', () => {
@@ -31,7 +31,7 @@ describe('Credential Detection - Property Tests', () => {
       // Only region, no credentials
       { AWS_REGION: 'us-east-1' },
       // Profile name but no actual profile configured
-      { AWS_PROFILE: 'nonexistent-profile' }
+      { AWS_PROFILE: 'nonexistent-profile' },
     );
 
     fc.assert(
@@ -70,13 +70,13 @@ describe('Credential Detection - Property Tests', () => {
           // Requirement 12.1: Credentials should be detected before API calls
           // If we get an error, it should be credential-related
           expect(error).toBeDefined();
-          
+
           // The error should indicate a credential problem
           const errorMessage = error instanceof Error ? error.message : String(error);
-          
+
           // AWS SDK will throw credential errors with specific messages
           // We're verifying that the error is related to credentials
-          const isCredentialError = 
+          const isCredentialError =
             errorMessage.toLowerCase().includes('credential') ||
             errorMessage.toLowerCase().includes('access') ||
             errorMessage.toLowerCase().includes('auth') ||
@@ -92,7 +92,7 @@ describe('Credential Detection - Property Tests', () => {
           }
         }
       }),
-      { numRuns: 20 }
+      { numRuns: 20 },
     );
   }, 30000);
 
@@ -102,7 +102,7 @@ describe('Credential Detection - Property Tests', () => {
     const missingCredentialsArb = fc.constantFrom(
       {},
       { AWS_ACCESS_KEY_ID: '', AWS_SECRET_ACCESS_KEY: '' },
-      { AWS_PROFILE: 'nonexistent-profile-' + Date.now() }
+      { AWS_PROFILE: 'nonexistent-profile-' + Date.now() },
     );
 
     fc.assert(
@@ -135,7 +135,7 @@ describe('Credential Detection - Property Tests', () => {
         // All attempts should have the same outcome (all succeed or all fail)
         const statuses = results.map(r => r.status);
         const allSame = statuses.every(s => s === statuses[0]);
-        
+
         // If credentials are truly missing, all should fail
         // If credentials are configured elsewhere, all should succeed
         expect(allSame).toBe(true);
@@ -146,13 +146,13 @@ describe('Credential Detection - Property Tests', () => {
           if (failure.status === 'rejected') {
             const error = failure.reason;
             expect(error).toBeDefined();
-            
+
             const errorMessage = error instanceof Error ? error.message : String(error);
             expect(errorMessage.length).toBeGreaterThan(0);
           }
         }
       }),
-      { numRuns: 20 }
+      { numRuns: 20 },
     );
   }, 30000);
 
@@ -196,12 +196,12 @@ describe('Credential Detection - Property Tests', () => {
         expect(typeof hasBasicCredentials).toBe('boolean');
 
         // If we have both access key and secret, or a profile, credentials are present
-        const expectedToHaveCredentials = 
+        const expectedToHaveCredentials =
           (hasAccessKey && hasSecretKey) || hasProfile;
 
         expect(!!hasBasicCredentials).toBe(expectedToHaveCredentials);
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -224,7 +224,7 @@ describe('Credential Detection - Property Tests', () => {
       fc.constant({
         AWS_SECRET_ACCESS_KEY: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
         AWS_SESSION_TOKEN: 'FwoGZXIvYXdzEBYaDH',
-      })
+      }),
     );
 
     fc.assert(
@@ -253,12 +253,12 @@ describe('Credential Detection - Property Tests', () => {
         } catch (error) {
           // Requirement 12.1 & 12.2: Should detect and report credential issues
           expect(error).toBeDefined();
-          
+
           const errorMessage = error instanceof Error ? error.message : String(error);
           expect(errorMessage.length).toBeGreaterThan(0);
-          
+
           // Partial credentials should result in credential-related errors
-          const isCredentialError = 
+          const isCredentialError =
             errorMessage.toLowerCase().includes('credential') ||
             errorMessage.toLowerCase().includes('access') ||
             errorMessage.toLowerCase().includes('auth') ||
@@ -271,7 +271,7 @@ describe('Credential Detection - Property Tests', () => {
           }
         }
       }),
-      { numRuns: 20 }
+      { numRuns: 20 },
     );
   }, 30000);
 
@@ -284,7 +284,7 @@ describe('Credential Detection - Property Tests', () => {
       'eu-central-1',
       'eu-west-1',
       'ap-southeast-1',
-      'ap-northeast-1'
+      'ap-northeast-1',
     );
 
     fc.assert(
@@ -309,18 +309,18 @@ describe('Credential Detection - Property Tests', () => {
         } catch (error) {
           // Requirement 12.1: Credentials detected before API call
           expect(error).toBeDefined();
-          
+
           const errorMessage = error instanceof Error ? error.message : String(error);
-          
+
           // Requirement 12.2: Clear error message
           expect(errorMessage.length).toBeGreaterThan(0);
           expect(typeof errorMessage).toBe('string');
-          
+
           // Error should be consistent regardless of region
           expect(errorMessage).toBeTruthy();
         }
       }),
-      { numRuns: 20 }
+      { numRuns: 20 },
     );
   }, 30000);
 });

@@ -11,7 +11,7 @@ export class RDSCalculator implements ResourceCostCalculator {
   async calculateCost(
     resource: ResourceWithId,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     const instanceClass = resource.properties.DBInstanceClass as string;
     const engine = resource.properties.Engine as string;

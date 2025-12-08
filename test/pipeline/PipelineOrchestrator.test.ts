@@ -21,7 +21,7 @@ describe('PipelineOrchestrator', () => {
       await expect(
         orchestrator.runPipelineAnalysis({
           synthesize: false,
-        })
+        }),
       ).rejects.toThrow('Either provide template paths or enable synthesis');
     });
 
@@ -40,9 +40,11 @@ describe('PipelineOrchestrator', () => {
 
     it('should accept synthesis options', async () => {
       // This will attempt synthesis - may fail but validates interface
+      // Use unique output directory to avoid conflicts with parallel tests
       const promise = orchestrator.runPipelineAnalysis({
         synthesize: true,
         cdkAppPath: './test-cdk-project',
+        outputPath: 'cdk.out.pipeline-test',
         region: 'eu-central-1',
       });
 

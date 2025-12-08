@@ -9,7 +9,7 @@ export class ElastiCacheCalculator implements ResourceCostCalculator {
   async calculateCost(
     resource: ResourceWithId,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     const cacheNodeType = resource.properties.CacheNodeType as string;
     const engine = resource.properties.Engine as string;
@@ -88,8 +88,8 @@ export class ElastiCacheCalculator implements ResourceCostCalculator {
 
   private normalizeEngine(engine: string): string {
     const engineMap: Record<string, string> = {
-      'redis': 'Redis',
-      'memcached': 'Memcached',
+      redis: 'Redis',
+      memcached: 'Memcached',
     };
 
     return engineMap[engine.toLowerCase()] || engine;

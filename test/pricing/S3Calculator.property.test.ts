@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
 import * as fc from 'fast-check';
+import { describe, it, expect, vi } from 'vitest';
 import { S3Calculator } from '../../src/pricing/calculators/S3Calculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -58,13 +58,13 @@ describe('S3Calculator - Property Tests', () => {
           expect(cost.amount).toBeGreaterThan(0);
           expect(cost.currency).toBe('USD');
           expect(cost.confidence).toBe('medium');
-          
+
           // Should include assumptions about storage
           expect(cost.assumptions.length).toBeGreaterThan(0);
           expect(cost.assumptions.some(a => a.includes('storage'))).toBe(true);
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -97,9 +97,9 @@ describe('S3Calculator - Property Tests', () => {
           // Same region should produce the same cost (using default assumptions)
           expect(cost1.amount).toBe(cost2.amount);
           expect(cost1.confidence).toBe(cost2.confidence);
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -127,9 +127,9 @@ describe('S3Calculator - Property Tests', () => {
           expect(cost.confidence).toBe('unknown');
           expect(cost.assumptions.length).toBeGreaterThan(0);
           expect(cost.assumptions[0]).toContain('Pricing data not available');
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -157,9 +157,9 @@ describe('S3Calculator - Property Tests', () => {
           expect(cost.confidence).toBe('unknown');
           expect(cost.assumptions.length).toBeGreaterThan(0);
           expect(cost.assumptions[0]).toContain('Failed to fetch pricing');
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 });

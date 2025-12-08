@@ -1,8 +1,8 @@
-import { TemplateParser } from '../parser/TemplateParser';
+import { AnalyzeOptions, CostAnalysisResult } from './types';
 import { DiffEngine } from '../diff/DiffEngine';
+import { TemplateParser } from '../parser/TemplateParser';
 import { PricingService } from '../pricing/PricingService';
 import { Reporter } from '../reporter/Reporter';
-import { AnalyzeOptions, CostAnalysisResult } from './types';
 
 export * from './types';
 export { TemplateParseError } from '../parser/TemplateParser';

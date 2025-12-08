@@ -33,7 +33,7 @@ export class ConfigManager {
         throw new ConfigurationError(
           'Invalid configuration',
           resolvedPath,
-          validation.errors
+          validation.errors,
         );
       }
 
@@ -45,7 +45,7 @@ export class ConfigManager {
       throw new ConfigurationError(
         `Failed to load configuration: ${error instanceof Error ? error.message : String(error)}`,
         configPath || 'unknown',
-        []
+        [],
       );
     }
   }
@@ -116,7 +116,7 @@ export class ConfigManager {
       }
     } catch (error) {
       throw new Error(
-        `Failed to parse configuration file: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to parse configuration file: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }
@@ -139,7 +139,7 @@ export class ConfigManager {
   private validateThresholds(
     thresholds: NonNullable<CostAnalyzerConfig['thresholds']>,
     errors: string[],
-    warnings: string[]
+    warnings: string[],
   ): void {
     const validateLevels = (levels: ThresholdLevels, prefix: string) => {
       if (levels.warning !== undefined && levels.warning < 0) {
@@ -154,7 +154,7 @@ export class ConfigManager {
         levels.warning > levels.error
       ) {
         warnings.push(
-          `${prefix}.warning (${levels.warning}) is greater than ${prefix}.error (${levels.error})`
+          `${prefix}.warning (${levels.warning}) is greater than ${prefix}.error (${levels.error})`,
         );
       }
     };
@@ -175,7 +175,7 @@ export class ConfigManager {
    */
   private validateUsageAssumptions(
     assumptions: NonNullable<CostAnalyzerConfig['usageAssumptions']>,
-    errors: string[]
+    errors: string[],
   ): void {
     const validatePositive = (value: number | undefined, path: string) => {
       if (value !== undefined && value < 0) {
@@ -192,73 +192,73 @@ export class ConfigManager {
     if (assumptions.lambda) {
       validatePositive(
         assumptions.lambda.invocationsPerMonth,
-        'usageAssumptions.lambda.invocationsPerMonth'
+        'usageAssumptions.lambda.invocationsPerMonth',
       );
       validatePositive(
         assumptions.lambda.averageDurationMs,
-        'usageAssumptions.lambda.averageDurationMs'
+        'usageAssumptions.lambda.averageDurationMs',
       );
     }
 
     if (assumptions.natGateway) {
       validatePositive(
         assumptions.natGateway.dataProcessedGB,
-        'usageAssumptions.natGateway.dataProcessedGB'
+        'usageAssumptions.natGateway.dataProcessedGB',
       );
     }
 
     if (assumptions.alb) {
       validatePositive(
         assumptions.alb.newConnectionsPerSecond,
-        'usageAssumptions.alb.newConnectionsPerSecond'
+        'usageAssumptions.alb.newConnectionsPerSecond',
       );
       validatePositive(
         assumptions.alb.activeConnectionsPerMinute,
-        'usageAssumptions.alb.activeConnectionsPerMinute'
+        'usageAssumptions.alb.activeConnectionsPerMinute',
       );
       validatePositive(
         assumptions.alb.processedBytesGB,
-        'usageAssumptions.alb.processedBytesGB'
+        'usageAssumptions.alb.processedBytesGB',
       );
     }
 
     if (assumptions.nlb) {
       validatePositive(
         assumptions.nlb.newConnectionsPerSecond,
-        'usageAssumptions.nlb.newConnectionsPerSecond'
+        'usageAssumptions.nlb.newConnectionsPerSecond',
       );
       validatePositive(
         assumptions.nlb.activeConnectionsPerMinute,
-        'usageAssumptions.nlb.activeConnectionsPerMinute'
+        'usageAssumptions.nlb.activeConnectionsPerMinute',
       );
       validatePositive(
         assumptions.nlb.processedBytesGB,
-        'usageAssumptions.nlb.processedBytesGB'
+        'usageAssumptions.nlb.processedBytesGB',
       );
     }
 
     if (assumptions.cloudfront) {
       validatePositive(
         assumptions.cloudfront.dataTransferGB,
-        'usageAssumptions.cloudfront.dataTransferGB'
+        'usageAssumptions.cloudfront.dataTransferGB',
       );
       validatePositive(
         assumptions.cloudfront.requests,
-        'usageAssumptions.cloudfront.requests'
+        'usageAssumptions.cloudfront.requests',
       );
     }
 
     if (assumptions.apiGateway) {
       validatePositive(
         assumptions.apiGateway.requestsPerMonth,
-        'usageAssumptions.apiGateway.requestsPerMonth'
+        'usageAssumptions.apiGateway.requestsPerMonth',
       );
     }
 
     if (assumptions.vpcEndpoint) {
       validatePositive(
         assumptions.vpcEndpoint.dataProcessedGB,
-        'usageAssumptions.vpcEndpoint.dataProcessedGB'
+        'usageAssumptions.vpcEndpoint.dataProcessedGB',
       );
     }
   }

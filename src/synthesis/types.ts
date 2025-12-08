@@ -16,7 +16,7 @@ export interface SynthesisResult {
 export class SynthesisError extends Error {
   constructor(
     message: string,
-    public cdkOutput: string
+    public cdkOutput: string,
   ) {
     super(message);
     this.name = 'SynthesisError';

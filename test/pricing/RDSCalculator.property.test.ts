@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
 import * as fc from 'fast-check';
+import { describe, it, expect, vi } from 'vitest';
 import { RDSCalculator } from '../../src/pricing/calculators/RDSCalculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -41,7 +41,7 @@ describe('RDSCalculator - Property Tests', () => {
         // Return instance pricing
         if (instanceTypeFilter) {
           const instanceType = instanceTypeFilter.value as string;
-          
+
           // Simulate realistic pricing based on instance class
           const pricingMap: Record<string, number> = {
             'db.t3.micro': 0.017,
@@ -95,9 +95,9 @@ describe('RDSCalculator - Property Tests', () => {
           expect(cost.assumptions.some(a => a.includes('730 hours'))).toBe(true);
           expect(cost.assumptions.some(a => a.includes('100 GB'))).toBe(true);
           expect(cost.assumptions.some(a => a.includes('Single-AZ'))).toBe(true);
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -116,7 +116,7 @@ describe('RDSCalculator - Property Tests', () => {
 
         if (instanceTypeFilter) {
           const instanceType = instanceTypeFilter.value as string;
-          
+
           const pricingMap: Record<string, number> = {
             'db.t3.micro': 0.017,
             'db.t3.small': 0.034,
@@ -171,9 +171,9 @@ describe('RDSCalculator - Property Tests', () => {
           expect(largerCost.amount).toBeGreaterThan(smallerCost.amount);
           expect(smallerCost.confidence).toBe('high');
           expect(largerCost.confidence).toBe('high');
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -200,7 +200,7 @@ describe('RDSCalculator - Property Tests', () => {
           const costWithoutEngine = await calculator.calculateCost(
             resourceWithoutEngine,
             region,
-            mockPricingClient
+            mockPricingClient,
           );
 
           expect(costWithoutEngine.amount).toBe(0);
@@ -219,15 +219,15 @@ describe('RDSCalculator - Property Tests', () => {
           const costWithoutClass = await calculator.calculateCost(
             resourceWithoutClass,
             region,
-            mockPricingClient
+            mockPricingClient,
           );
 
           expect(costWithoutClass.amount).toBe(0);
           expect(costWithoutClass.confidence).toBe('unknown');
           expect(costWithoutClass.assumptions[0]).toContain('not specified');
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -259,9 +259,9 @@ describe('RDSCalculator - Property Tests', () => {
           expect(cost.confidence).toBe('unknown');
           expect(cost.assumptions.length).toBeGreaterThan(0);
           expect(cost.assumptions[0]).toContain('Pricing data not available');
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -294,9 +294,9 @@ describe('RDSCalculator - Property Tests', () => {
           expect(cost.confidence).toBe('unknown');
           expect(cost.assumptions.length).toBeGreaterThan(0);
           expect(cost.assumptions[0]).toContain('Failed to fetch pricing');
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -362,9 +362,9 @@ describe('RDSCalculator - Property Tests', () => {
           // Should successfully calculate cost with normalized engine name
           expect(cost.amount).toBeGreaterThan(0);
           expect(cost.confidence).toBe('high');
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

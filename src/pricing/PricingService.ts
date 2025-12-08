@@ -1,4 +1,18 @@
-import { ResourceWithId, ResourceDiff } from '../diff/types';
+import { CacheManager } from './CacheManager';
+import { ALBCalculator } from './calculators/ALBCalculator';
+import { APIGatewayCalculator } from './calculators/APIGatewayCalculator';
+import { CloudFrontCalculator } from './calculators/CloudFrontCalculator';
+import { DynamoDBCalculator } from './calculators/DynamoDBCalculator';
+import { EC2Calculator } from './calculators/EC2Calculator';
+import { ECSCalculator } from './calculators/ECSCalculator';
+import { LambdaCalculator } from './calculators/LambdaCalculator';
+import { S3Calculator } from './calculators/S3Calculator';
+import { RDSCalculator } from './calculators/RDSCalculator';
+import { NatGatewayCalculator } from './calculators/NatGatewayCalculator';
+import { NLBCalculator } from './calculators/NLBCalculator';
+import { VPCEndpointCalculator } from './calculators/VPCEndpointCalculator';
+import { ElastiCacheCalculator } from './calculators/ElastiCacheCalculator';
+import { PricingClient } from './PricingClient';
 import {
   PricingService as IPricingService,
   MonthlyCost,
@@ -6,21 +20,7 @@ import {
   ResourceCostCalculator,
 } from './types';
 import { UsageAssumptionsConfig, CacheConfig } from '../config/types';
-import { PricingClient } from './PricingClient';
-import { CacheManager } from './CacheManager';
-import { EC2Calculator } from './calculators/EC2Calculator';
-import { S3Calculator } from './calculators/S3Calculator';
-import { LambdaCalculator } from './calculators/LambdaCalculator';
-import { RDSCalculator } from './calculators/RDSCalculator';
-import { DynamoDBCalculator } from './calculators/DynamoDBCalculator';
-import { ECSCalculator } from './calculators/ECSCalculator';
-import { APIGatewayCalculator } from './calculators/APIGatewayCalculator';
-import { NatGatewayCalculator } from './calculators/NatGatewayCalculator';
-import { ALBCalculator } from './calculators/ALBCalculator';
-import { NLBCalculator } from './calculators/NLBCalculator';
-import { VPCEndpointCalculator } from './calculators/VPCEndpointCalculator';
-import { CloudFrontCalculator } from './calculators/CloudFrontCalculator';
-import { ElastiCacheCalculator } from './calculators/ElastiCacheCalculator';
+import { ResourceWithId, ResourceDiff } from '../diff/types';
 
 export class PricingService implements IPricingService {
   private calculators: ResourceCostCalculator[];
@@ -31,7 +31,7 @@ export class PricingService implements IPricingService {
     region: string = 'us-east-1',
     usageAssumptions?: UsageAssumptionsConfig,
     excludedResourceTypes?: string[],
-    cacheConfig?: CacheConfig
+    cacheConfig?: CacheConfig,
   ) {
     // Initialize cache manager if caching is enabled
     let cacheManager: CacheManager | undefined;
@@ -54,17 +54,17 @@ export class PricingService implements IPricingService {
       new ALBCalculator(
         usageAssumptions?.alb?.newConnectionsPerSecond,
         usageAssumptions?.alb?.activeConnectionsPerMinute,
-        usageAssumptions?.alb?.processedBytesGB
+        usageAssumptions?.alb?.processedBytesGB,
       ),
       new NLBCalculator(
         usageAssumptions?.nlb?.newConnectionsPerSecond,
         usageAssumptions?.nlb?.activeConnectionsPerMinute,
-        usageAssumptions?.nlb?.processedBytesGB
+        usageAssumptions?.nlb?.processedBytesGB,
       ),
       new VPCEndpointCalculator(usageAssumptions?.vpcEndpoint?.dataProcessedGB),
       new CloudFrontCalculator(
         usageAssumptions?.cloudfront?.dataTransferGB,
-        usageAssumptions?.cloudfront?.requests
+        usageAssumptions?.cloudfront?.requests,
       ),
       new ElastiCacheCalculator(),
     ];
@@ -113,7 +113,7 @@ export class PricingService implements IPricingService {
           type: resource.type,
           monthlyCost,
         };
-      })
+      }),
     );
 
     const removedCosts = await Promise.all(
@@ -124,7 +124,7 @@ export class PricingService implements IPricingService {
           type: resource.type,
           monthlyCost,
         };
-      })
+      }),
     );
 
     const modifiedCosts = await Promise.all(
@@ -152,7 +152,7 @@ export class PricingService implements IPricingService {
           newMonthlyCost,
           costDelta,
         };
-      })
+      }),
     );
 
     const totalAddedCost = addedCosts.reduce((sum, r) => sum + r.monthlyCost.amount, 0);

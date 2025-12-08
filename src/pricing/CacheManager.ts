@@ -1,6 +1,6 @@
-import * as fs from "fs";
-import * as path from "path";
-import { PriceQueryParams } from "./types";
+import * as fs from 'fs';
+import * as path from 'path';
+import { PriceQueryParams } from './types';
 
 export interface CachedPriceEntry {
   price: number;
@@ -27,12 +27,12 @@ export class CacheManager {
    * @param cacheDurationHours Duration in hours before cache entries expire (default: 24)
    */
   constructor(
-    cacheDir: string = ".cdk-cost-analyzer-cache",
+    cacheDir: string = '.cdk-cost-analyzer-cache',
     cacheDurationHours: number = 24,
   ) {
     this.cacheDir = cacheDir;
     this.cacheDurationMs = cacheDurationHours * 60 * 60 * 1000;
-    this.metadataPath = path.join(this.cacheDir, "metadata.json");
+    this.metadataPath = path.join(this.cacheDir, 'metadata.json');
     this.metadata = { entries: {} };
     this.ensureCacheDirectory();
     this.loadMetadata();
@@ -149,7 +149,7 @@ export class CacheManager {
     const filterStr = params.filters
       .map((f) => `${f.field}:${f.value}`)
       .sort()
-      .join("|");
+      .join('|');
     return `${params.serviceCode}:${params.region}:${filterStr}`;
   }
 
@@ -168,7 +168,7 @@ export class CacheManager {
   private loadMetadata(): void {
     try {
       if (fs.existsSync(this.metadataPath)) {
-        const data = fs.readFileSync(this.metadataPath, "utf-8");
+        const data = fs.readFileSync(this.metadataPath, 'utf-8');
         this.metadata = JSON.parse(data);
       }
     } catch (error) {
@@ -185,7 +185,7 @@ export class CacheManager {
       fs.writeFileSync(
         this.metadataPath,
         JSON.stringify(this.metadata, null, 2),
-        "utf-8",
+        'utf-8',
       );
     } catch (error) {
       // Silently fail if we can't write cache - not critical

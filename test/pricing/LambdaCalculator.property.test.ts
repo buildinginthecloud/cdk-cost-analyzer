@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
 import * as fc from 'fast-check';
+import { describe, it, expect, vi } from 'vitest';
 import { LambdaCalculator } from '../../src/pricing/calculators/LambdaCalculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -80,9 +80,9 @@ describe('LambdaCalculator - Property Tests', () => {
             // Same memory should produce the same cost
             expect(cost1.amount).toBe(cost2.amount);
           }
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -145,9 +145,9 @@ describe('LambdaCalculator - Property Tests', () => {
           // Both should have assumptions about memory
           expect(smallerCost.assumptions.some(a => a.includes(`${smallerMem}MB`))).toBe(true);
           expect(largerCost.assumptions.some(a => a.includes(`${largerMem}MB`))).toBe(true);
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -184,9 +184,9 @@ describe('LambdaCalculator - Property Tests', () => {
           expect(cost.amount).toBeGreaterThan(0);
           expect(cost.confidence).toBe('medium');
           expect(cost.assumptions.some(a => a.includes('128MB'))).toBe(true);
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -216,9 +216,9 @@ describe('LambdaCalculator - Property Tests', () => {
           expect(cost.confidence).toBe('unknown');
           expect(cost.assumptions.length).toBeGreaterThan(0);
           expect(cost.assumptions[0]).toContain('Pricing data not available');
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -249,9 +249,9 @@ describe('LambdaCalculator - Property Tests', () => {
           expect(cost.confidence).toBe('unknown');
           expect(cost.assumptions.length).toBeGreaterThan(0);
           expect(cost.assumptions[0]).toContain('Failed to fetch pricing');
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 });

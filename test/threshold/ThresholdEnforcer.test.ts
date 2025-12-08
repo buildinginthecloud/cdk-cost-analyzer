@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ThresholdEnforcer } from '../../src/threshold/ThresholdEnforcer';
 import { ThresholdConfig } from '../../src/config/types';
 import { ResourceCost } from '../../src/pricing/types';
+import { ThresholdEnforcer } from '../../src/threshold/ThresholdEnforcer';
 
 describe('ThresholdEnforcer', () => {
   let enforcer: ThresholdEnforcer;
@@ -13,7 +13,7 @@ describe('ThresholdEnforcer', () => {
   describe('evaluateThreshold', () => {
     it('should pass when no thresholds configured', () => {
       const result = enforcer.evaluateThreshold(100, [], []);
-      
+
       expect(result.passed).toBe(true);
       expect(result.level).toBe('none');
       expect(result.delta).toBe(100);
@@ -28,7 +28,7 @@ describe('ThresholdEnforcer', () => {
       };
 
       const result = enforcer.evaluateThreshold(50, [], [], config);
-      
+
       expect(result.passed).toBe(true);
       expect(result.level).toBe('none');
     });
@@ -42,7 +42,7 @@ describe('ThresholdEnforcer', () => {
       };
 
       const result = enforcer.evaluateThreshold(100, [], [], config);
-      
+
       expect(result.passed).toBe(true);
       expect(result.level).toBe('warning');
       expect(result.threshold).toBe(50);
@@ -58,7 +58,7 @@ describe('ThresholdEnforcer', () => {
       };
 
       const result = enforcer.evaluateThreshold(150, [], [], config);
-      
+
       expect(result.passed).toBe(false);
       expect(result.level).toBe('error');
       expect(result.threshold).toBe(100);
@@ -81,7 +81,7 @@ describe('ThresholdEnforcer', () => {
 
       // Delta of 60 exceeds production error threshold of 50
       const result = enforcer.evaluateThreshold(60, [], [], config, 'production');
-      
+
       expect(result.passed).toBe(false);
       expect(result.level).toBe('error');
       expect(result.threshold).toBe(50);
@@ -103,7 +103,7 @@ describe('ThresholdEnforcer', () => {
 
       // Delta of 250 exceeds default error threshold of 200
       const result = enforcer.evaluateThreshold(250, [], [], config, 'development');
-      
+
       expect(result.passed).toBe(false);
       expect(result.level).toBe('error');
       expect(result.threshold).toBe(200); // Uses default
@@ -130,7 +130,7 @@ describe('ThresholdEnforcer', () => {
       ];
 
       const result = enforcer.evaluateThreshold(150, addedResources, [], config);
-      
+
       expect(result.recommendations.length).toBeGreaterThan(0);
       expect(result.recommendations.some(r => r.includes('RDS'))).toBe(true);
     });
@@ -166,7 +166,7 @@ describe('ThresholdEnforcer', () => {
       ];
 
       const result = enforcer.evaluateThreshold(80, addedResources, [], config);
-      
+
       expect(result.recommendations.some(r => r.includes('Resource2'))).toBe(true);
     });
   });
@@ -183,7 +183,7 @@ describe('ThresholdEnforcer', () => {
       const result1 = enforcer.evaluateThreshold(75, [], [], config);
       const result2 = enforcer.evaluateThreshold(75, [], [], config);
       const result3 = enforcer.evaluateThreshold(75, [], [], config);
-      
+
       expect(result1.passed).toBe(result2.passed);
       expect(result2.passed).toBe(result3.passed);
       expect(result1.level).toBe(result2.level);

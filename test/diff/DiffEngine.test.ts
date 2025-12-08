@@ -11,26 +11,26 @@ describe('DiffEngine', () => {
         Resources: {
           ExistingBucket: {
             Type: 'AWS::S3::Bucket',
-            Properties: {}
-          }
-        }
+            Properties: {},
+          },
+        },
       };
 
       const target: CloudFormationTemplate = {
         Resources: {
           ExistingBucket: {
             Type: 'AWS::S3::Bucket',
-            Properties: {}
+            Properties: {},
           },
           NewBucket: {
             Type: 'AWS::S3::Bucket',
-            Properties: { BucketName: 'new-bucket' }
-          }
-        }
+            Properties: { BucketName: 'new-bucket' },
+          },
+        },
       };
 
       const diff = engine.diff(base, target);
-      
+
       expect(diff.added).toHaveLength(1);
       expect(diff.added[0].logicalId).toBe('NewBucket');
       expect(diff.added[0].type).toBe('AWS::S3::Bucket');
@@ -45,26 +45,26 @@ describe('DiffEngine', () => {
         Resources: {
           OldBucket: {
             Type: 'AWS::S3::Bucket',
-            Properties: {}
+            Properties: {},
           },
           KeptBucket: {
             Type: 'AWS::S3::Bucket',
-            Properties: {}
-          }
-        }
+            Properties: {},
+          },
+        },
       };
 
       const target: CloudFormationTemplate = {
         Resources: {
           KeptBucket: {
             Type: 'AWS::S3::Bucket',
-            Properties: {}
-          }
-        }
+            Properties: {},
+          },
+        },
       };
 
       const diff = engine.diff(base, target);
-      
+
       expect(diff.removed).toHaveLength(1);
       expect(diff.removed[0].logicalId).toBe('OldBucket');
       expect(diff.removed[0].type).toBe('AWS::S3::Bucket');
@@ -79,22 +79,22 @@ describe('DiffEngine', () => {
         Resources: {
           MyInstance: {
             Type: 'AWS::EC2::Instance',
-            Properties: { InstanceType: 't3.micro' }
-          }
-        }
+            Properties: { InstanceType: 't3.micro' },
+          },
+        },
       };
 
       const target: CloudFormationTemplate = {
         Resources: {
           MyInstance: {
             Type: 'AWS::EC2::Instance',
-            Properties: { InstanceType: 't3.large' }
-          }
-        }
+            Properties: { InstanceType: 't3.large' },
+          },
+        },
       };
 
       const diff = engine.diff(base, target);
-      
+
       expect(diff.modified).toHaveLength(1);
       expect(diff.modified[0].logicalId).toBe('MyInstance');
       expect(diff.modified[0].type).toBe('AWS::EC2::Instance');
@@ -109,22 +109,22 @@ describe('DiffEngine', () => {
         Resources: {
           MyBucket: {
             Type: 'AWS::S3::Bucket',
-            Properties: { BucketName: 'my-bucket' }
-          }
-        }
+            Properties: { BucketName: 'my-bucket' },
+          },
+        },
       };
 
       const target: CloudFormationTemplate = {
         Resources: {
           MyBucket: {
             Type: 'AWS::S3::Bucket',
-            Properties: { BucketName: 'my-bucket' }
-          }
-        }
+            Properties: { BucketName: 'my-bucket' },
+          },
+        },
       };
 
       const diff = engine.diff(base, target);
-      
+
       expect(diff.modified).toHaveLength(0);
       expect(diff.added).toHaveLength(0);
       expect(diff.removed).toHaveLength(0);
@@ -137,17 +137,17 @@ describe('DiffEngine', () => {
         Resources: {
           Bucket1: {
             Type: 'AWS::S3::Bucket',
-            Properties: {}
+            Properties: {},
           },
           Instance1: {
             Type: 'AWS::EC2::Instance',
-            Properties: { InstanceType: 't3.micro' }
-          }
-        }
+            Properties: { InstanceType: 't3.micro' },
+          },
+        },
       };
 
       const diff = engine.diff(template, template);
-      
+
       expect(diff.added).toHaveLength(0);
       expect(diff.removed).toHaveLength(0);
       expect(diff.modified).toHaveLength(0);
@@ -160,30 +160,30 @@ describe('DiffEngine', () => {
         Resources: {
           OldResource1: {
             Type: 'AWS::S3::Bucket',
-            Properties: {}
+            Properties: {},
           },
           OldResource2: {
             Type: 'AWS::EC2::Instance',
-            Properties: {}
-          }
-        }
+            Properties: {},
+          },
+        },
       };
 
       const target: CloudFormationTemplate = {
         Resources: {
           NewResource1: {
             Type: 'AWS::Lambda::Function',
-            Properties: {}
+            Properties: {},
           },
           NewResource2: {
             Type: 'AWS::RDS::DBInstance',
-            Properties: {}
-          }
-        }
+            Properties: {},
+          },
+        },
       };
 
       const diff = engine.diff(base, target);
-      
+
       expect(diff.removed).toHaveLength(2);
       expect(diff.added).toHaveLength(2);
       expect(diff.modified).toHaveLength(0);
@@ -200,12 +200,12 @@ describe('DiffEngine', () => {
               Runtime: 'nodejs18.x',
               Environment: {
                 Variables: {
-                  KEY1: 'value1'
-                }
-              }
-            }
-          }
-        }
+                  KEY1: 'value1',
+                },
+              },
+            },
+          },
+        },
       };
 
       const target: CloudFormationTemplate = {
@@ -216,16 +216,16 @@ describe('DiffEngine', () => {
               Runtime: 'nodejs18.x',
               Environment: {
                 Variables: {
-                  KEY1: 'value2'
-                }
-              }
-            }
-          }
-        }
+                  KEY1: 'value2',
+                },
+              },
+            },
+          },
+        },
       };
 
       const diff = engine.diff(base, target);
-      
+
       expect(diff.modified).toHaveLength(1);
       expect(diff.modified[0].logicalId).toBe('MyFunction');
     });

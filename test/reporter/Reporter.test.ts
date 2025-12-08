@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { Reporter } from '../../src/reporter/Reporter';
-import { CostDelta } from '../../src/pricing/types';
-import { ReportOptions } from '../../src/reporter/types';
 import { ConfigSummary } from '../../src/pipeline/types';
+import { CostDelta } from '../../src/pricing/types';
+import { Reporter } from '../../src/reporter/Reporter';
+import { ReportOptions } from '../../src/reporter/types';
 import { ThresholdEvaluation } from '../../src/threshold/types';
 
 describe('Reporter', () => {
@@ -118,7 +118,7 @@ describe('Reporter', () => {
       };
 
       const report = reporter.generateReport(addedOnlyDelta, 'text');
-      
+
       expect(report).toContain('ADDED RESOURCES:');
       expect(report).not.toContain('REMOVED RESOURCES:');
       expect(report).not.toContain('MODIFIED RESOURCES:');
@@ -159,7 +159,7 @@ describe('Reporter', () => {
       };
 
       const report = reporter.generateReport(removedOnlyDelta, 'text');
-      
+
       expect(report).not.toContain('ADDED RESOURCES:');
       expect(report).toContain('REMOVED RESOURCES:');
       expect(report).not.toContain('MODIFIED RESOURCES:');
@@ -202,7 +202,7 @@ describe('Reporter', () => {
       };
 
       const report = reporter.generateReport(modifiedOnlyDelta, 'text');
-      
+
       expect(report).not.toContain('ADDED RESOURCES:');
       expect(report).not.toContain('REMOVED RESOURCES:');
       expect(report).toContain('MODIFIED RESOURCES:');
@@ -213,10 +213,10 @@ describe('Reporter', () => {
 
     it('should sort added resources by cost impact (descending)', () => {
       const report = reporter.generateReport(sampleCostDelta, 'text');
-      
+
       const newInstanceIndex = report.indexOf('NewInstance');
       const newBucketIndex = report.indexOf('NewBucket');
-      
+
       expect(newInstanceIndex).toBeLessThan(newBucketIndex);
     });
 
@@ -251,10 +251,10 @@ describe('Reporter', () => {
       };
 
       const report = reporter.generateReport(multipleRemovedDelta, 'text');
-      
+
       const largeInstanceIndex = report.indexOf('LargeInstance');
       const smallFunctionIndex = report.indexOf('SmallFunction');
-      
+
       expect(largeInstanceIndex).toBeLessThan(smallFunctionIndex);
     });
 
@@ -315,10 +315,10 @@ describe('Reporter', () => {
       };
 
       const report = reporter.generateReport(multipleModifiedDelta, 'text');
-      
+
       const largeChangeIndex = report.indexOf('LargeChange');
       const smallChangeIndex = report.indexOf('SmallChange');
-      
+
       expect(largeChangeIndex).toBeLessThan(smallChangeIndex);
     });
 
@@ -413,7 +413,7 @@ describe('Reporter', () => {
   describe('json report', () => {
     it('should generate valid JSON', () => {
       const report = reporter.generateReport(sampleCostDelta, 'json');
-      
+
       const parsed = JSON.parse(report);
       expect(parsed).toBeDefined();
       expect(parsed.totalDelta).toBe(150.50);
@@ -447,7 +447,7 @@ describe('Reporter', () => {
       const parsed = JSON.parse(report);
 
       expect(parsed.addedCosts).toHaveLength(2);
-      
+
       const firstResource = parsed.addedCosts[0];
       expect(firstResource).toHaveProperty('logicalId');
       expect(firstResource).toHaveProperty('type');
@@ -463,7 +463,7 @@ describe('Reporter', () => {
       const parsed = JSON.parse(report);
 
       expect(parsed.removedCosts).toHaveLength(1);
-      
+
       const firstResource = parsed.removedCosts[0];
       expect(firstResource).toHaveProperty('logicalId');
       expect(firstResource).toHaveProperty('type');
@@ -479,7 +479,7 @@ describe('Reporter', () => {
       const parsed = JSON.parse(report);
 
       expect(parsed.modifiedCosts).toHaveLength(1);
-      
+
       const firstResource = parsed.modifiedCosts[0];
       expect(firstResource).toHaveProperty('logicalId');
       expect(firstResource).toHaveProperty('type');
@@ -487,7 +487,7 @@ describe('Reporter', () => {
       expect(firstResource).toHaveProperty('oldMonthlyCost');
       expect(firstResource).toHaveProperty('newMonthlyCost');
       expect(firstResource).toHaveProperty('costDelta');
-      
+
       expect(firstResource.oldMonthlyCost).toHaveProperty('amount');
       expect(firstResource.oldMonthlyCost).toHaveProperty('currency');
       expect(firstResource.oldMonthlyCost).toHaveProperty('confidence');
@@ -537,16 +537,16 @@ describe('Reporter', () => {
 
     it('should be parseable by JSON.parse without errors', () => {
       const report = reporter.generateReport(sampleCostDelta, 'json');
-      
+
       expect(() => JSON.parse(report)).not.toThrow();
     });
 
     it('should produce well-formatted JSON with proper indentation', () => {
       const report = reporter.generateReport(sampleCostDelta, 'json');
-      
+
       expect(report).toContain('\n');
       expect(report).toContain('  ');
-      
+
       const parsed = JSON.parse(report);
       const reformatted = JSON.stringify(parsed, null, 2);
       expect(report).toBe(reformatted);

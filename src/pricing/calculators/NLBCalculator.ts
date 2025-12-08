@@ -10,7 +10,7 @@ export class NLBCalculator implements ResourceCostCalculator {
   constructor(
     private customNewConnectionsPerSecond?: number,
     private customActiveConnectionsPerMinute?: number,
-    private customProcessedBytesGB?: number
+    private customProcessedBytesGB?: number,
   ) {}
 
   supports(resourceType: string): boolean {
@@ -20,7 +20,7 @@ export class NLBCalculator implements ResourceCostCalculator {
   async calculateCost(
     resource: ResourceWithId,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     // Check if this is a Network Load Balancer
     const loadBalancerType = resource.properties?.Type;
@@ -83,7 +83,7 @@ export class NLBCalculator implements ResourceCostCalculator {
       const nlcuPerHour = Math.max(
         nlcuFromNewConnections,
         nlcuFromActiveConnections,
-        nlcuFromProcessedBytes
+        nlcuFromProcessedBytes,
       );
 
       const hourlyCost = hourlyRate * this.HOURS_PER_MONTH;

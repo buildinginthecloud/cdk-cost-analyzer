@@ -1,30 +1,30 @@
-import { describe, it, expect, vi } from "vitest";
-import * as fc from "fast-check";
-import { ALBCalculator } from "../../src/pricing/calculators/ALBCalculator";
-import { PricingClient } from "../../src/pricing/types";
+import * as fc from 'fast-check';
+import { describe, it, expect, vi } from 'vitest';
+import { ALBCalculator } from '../../src/pricing/calculators/ALBCalculator';
+import { PricingClient } from '../../src/pricing/types';
 
-describe("ALBCalculator - Property Tests", () => {
+describe('ALBCalculator - Property Tests', () => {
   /**
    * Feature: production-readiness, Property 9: ALB costs scale with LCU assumptions
    * Validates: Requirements 8.1, 8.2, 8.3
    */
-  it("should produce equal or higher costs for higher LCU assumptions", () => {
+  it('should produce equal or higher costs for higher LCU assumptions', () => {
     // Define ranges for LCU parameters
     const newConnectionsRange = [10, 25, 50, 100, 200];
     const activeConnectionsRange = [1000, 3000, 5000, 10000, 15000];
     const processedBytesRange = [50, 100, 500, 1000, 2000];
     const regions = [
-      "us-east-1",
-      "us-west-2",
-      "eu-central-1",
-      "eu-west-1",
-      "ap-southeast-1",
+      'us-east-1',
+      'us-west-2',
+      'eu-central-1',
+      'eu-west-1',
+      'ap-southeast-1',
     ];
 
     // Create a mock pricing client that returns realistic ALB pricing
     const createMockPricingClient = (): PricingClient => ({
       getPrice: vi.fn().mockImplementation(async (params) => {
-        const usageType = params.filters?.find((f) => f.field === "usagetype")
+        const usageType = params.filters?.find((f) => f.field === 'usagetype')
           ?.value as string;
 
         if (!usageType) {
@@ -34,9 +34,9 @@ describe("ALBCalculator - Property Tests", () => {
         // Realistic ALB pricing (as of 2024)
         // Hourly rate: ~$0.0225 per hour
         // LCU rate: ~$0.008 per LCU-hour
-        if (usageType.includes("LoadBalancerUsage")) {
+        if (usageType.includes('LoadBalancerUsage')) {
           return 0.0225;
-        } else if (usageType.includes("LCUUsage")) {
+        } else if (usageType.includes('LCUUsage')) {
           return 0.008;
         }
 
@@ -70,10 +70,10 @@ describe("ALBCalculator - Property Tests", () => {
           const calculator2 = new ALBCalculator(newConn2, activeConn2, bytes2);
 
           const resource = {
-            logicalId: "TestALB",
-            type: "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            logicalId: 'TestALB',
+            type: 'AWS::ElasticLoadBalancingV2::LoadBalancer',
             properties: {
-              Type: "application",
+              Type: 'application',
             },
           };
 
@@ -91,10 +91,10 @@ describe("ALBCalculator - Property Tests", () => {
           // Both costs should be valid
           expect(cost1.amount).toBeGreaterThanOrEqual(0);
           expect(cost2.amount).toBeGreaterThanOrEqual(0);
-          expect(cost1.currency).toBe("USD");
-          expect(cost2.currency).toBe("USD");
-          expect(cost1.confidence).toBe("medium");
-          expect(cost2.confidence).toBe("medium");
+          expect(cost1.currency).toBe('USD');
+          expect(cost2.currency).toBe('USD');
+          expect(cost1.confidence).toBe('medium');
+          expect(cost2.confidence).toBe('medium');
 
           // Calculate LCU consumption for both configurations
           // 1 LCU provides: 25 new connections/sec, 3000 active connections/min, 1 GB processed/hour
@@ -131,7 +131,7 @@ describe("ALBCalculator - Property Tests", () => {
     );
   });
 
-  it("should produce strictly higher costs for strictly higher LCU assumptions", () => {
+  it('should produce strictly higher costs for strictly higher LCU assumptions', () => {
     // Define pairs where one configuration clearly has higher LCU consumption
     const lowerLCUConfigs = [
       { newConn: 10, activeConn: 1000, bytes: 50 },
@@ -147,12 +147,12 @@ describe("ALBCalculator - Property Tests", () => {
 
     const createMockPricingClient = (): PricingClient => ({
       getPrice: vi.fn().mockImplementation(async (params) => {
-        const usageType = params.filters?.find((f) => f.field === "usagetype")
+        const usageType = params.filters?.find((f) => f.field === 'usagetype')
           ?.value as string;
 
-        if (usageType?.includes("LoadBalancerUsage")) {
+        if (usageType?.includes('LoadBalancerUsage')) {
           return 0.0225;
-        } else if (usageType?.includes("LCUUsage")) {
+        } else if (usageType?.includes('LCUUsage')) {
           return 0.008;
         }
 
@@ -166,7 +166,7 @@ describe("ALBCalculator - Property Tests", () => {
       fc.asyncProperty(
         fc.constantFrom(...lowerLCUConfigs),
         fc.constantFrom(...higherLCUConfigs),
-        fc.constantFrom("us-east-1", "eu-central-1", "ap-southeast-1"),
+        fc.constantFrom('us-east-1', 'eu-central-1', 'ap-southeast-1'),
         async (lowerConfig, higherConfig, region) => {
           const lowerCalculator = new ALBCalculator(
             lowerConfig.newConn,
@@ -181,10 +181,10 @@ describe("ALBCalculator - Property Tests", () => {
           );
 
           const resource = {
-            logicalId: "TestALB",
-            type: "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            logicalId: 'TestALB',
+            type: 'AWS::ElasticLoadBalancingV2::LoadBalancer',
             properties: {
-              Type: "application",
+              Type: 'application',
             },
           };
 
@@ -201,14 +201,14 @@ describe("ALBCalculator - Property Tests", () => {
 
           // Higher LCU configuration should cost strictly more
           expect(higherCost.amount).toBeGreaterThan(lowerCost.amount);
-          expect(lowerCost.confidence).toBe("medium");
-          expect(higherCost.confidence).toBe("medium");
+          expect(lowerCost.confidence).toBe('medium');
+          expect(higherCost.confidence).toBe('medium');
 
           // Both should have assumptions about LCU consumption
-          expect(lowerCost.assumptions.some((a) => a.includes("LCU"))).toBe(
+          expect(lowerCost.assumptions.some((a) => a.includes('LCU'))).toBe(
             true,
           );
-          expect(higherCost.assumptions.some((a) => a.includes("LCU"))).toBe(
+          expect(higherCost.assumptions.some((a) => a.includes('LCU'))).toBe(
             true,
           );
         },
@@ -217,17 +217,17 @@ describe("ALBCalculator - Property Tests", () => {
     );
   });
 
-  it("should use default LCU assumptions when not provided", () => {
+  it('should use default LCU assumptions when not provided', () => {
     const calculator = new ALBCalculator();
 
     const mockPricingClient: PricingClient = {
       getPrice: vi.fn().mockImplementation(async (params) => {
-        const usageType = params.filters?.find((f) => f.field === "usagetype")
+        const usageType = params.filters?.find((f) => f.field === 'usagetype')
           ?.value as string;
 
-        if (usageType?.includes("LoadBalancerUsage")) {
+        if (usageType?.includes('LoadBalancerUsage')) {
           return 0.0225;
-        } else if (usageType?.includes("LCUUsage")) {
+        } else if (usageType?.includes('LCUUsage')) {
           return 0.008;
         }
 
@@ -237,13 +237,13 @@ describe("ALBCalculator - Property Tests", () => {
 
     fc.assert(
       fc.asyncProperty(
-        fc.constantFrom("us-east-1", "eu-central-1", "ap-southeast-1"),
+        fc.constantFrom('us-east-1', 'eu-central-1', 'ap-southeast-1'),
         async (region) => {
           const resource = {
-            logicalId: "ALBWithDefaults",
-            type: "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            logicalId: 'ALBWithDefaults',
+            type: 'AWS::ElasticLoadBalancingV2::LoadBalancer',
             properties: {
-              Type: "application",
+              Type: 'application',
             },
           };
 
@@ -255,14 +255,14 @@ describe("ALBCalculator - Property Tests", () => {
 
           // Should use defaults and still calculate cost
           expect(cost.amount).toBeGreaterThan(0);
-          expect(cost.confidence).toBe("medium");
+          expect(cost.confidence).toBe('medium');
           // Check that default values are mentioned in assumptions
           expect(
             cost.assumptions.some(
               (a) =>
-                a.includes("25/sec") ||
-                a.includes("3000/min") ||
-                a.includes("100 GB"),
+                a.includes('25/sec') ||
+                a.includes('3000/min') ||
+                a.includes('100 GB'),
             ),
           ).toBe(true);
         },
@@ -271,7 +271,7 @@ describe("ALBCalculator - Property Tests", () => {
     );
   });
 
-  it("should return zero cost for non-application load balancers", () => {
+  it('should return zero cost for non-application load balancers', () => {
     const calculator = new ALBCalculator();
 
     const mockPricingClient: PricingClient = {
@@ -280,12 +280,12 @@ describe("ALBCalculator - Property Tests", () => {
 
     fc.assert(
       fc.asyncProperty(
-        fc.constantFrom("network", "gateway"),
-        fc.constantFrom("us-east-1", "eu-central-1"),
+        fc.constantFrom('network', 'gateway'),
+        fc.constantFrom('us-east-1', 'eu-central-1'),
         async (loadBalancerType, region) => {
           const resource = {
-            logicalId: "NonALB",
-            type: "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            logicalId: 'NonALB',
+            type: 'AWS::ElasticLoadBalancingV2::LoadBalancer',
             properties: {
               Type: loadBalancerType,
             },
@@ -298,9 +298,9 @@ describe("ALBCalculator - Property Tests", () => {
           );
 
           expect(cost.amount).toBe(0);
-          expect(cost.confidence).toBe("unknown");
+          expect(cost.confidence).toBe('unknown');
           expect(cost.assumptions).toContain(
-            "This calculator only supports Application Load Balancers",
+            'This calculator only supports Application Load Balancers',
           );
         },
       ),
@@ -308,7 +308,7 @@ describe("ALBCalculator - Property Tests", () => {
     );
   });
 
-  it("should handle pricing API failures gracefully", () => {
+  it('should handle pricing API failures gracefully', () => {
     const calculator = new ALBCalculator(50, 5000, 500);
 
     const mockPricingClient: PricingClient = {
@@ -317,13 +317,13 @@ describe("ALBCalculator - Property Tests", () => {
 
     fc.assert(
       fc.asyncProperty(
-        fc.constantFrom("us-east-1", "eu-central-1"),
+        fc.constantFrom('us-east-1', 'eu-central-1'),
         async (region) => {
           const resource = {
-            logicalId: "TestALB",
-            type: "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            logicalId: 'TestALB',
+            type: 'AWS::ElasticLoadBalancingV2::LoadBalancer',
             properties: {
-              Type: "application",
+              Type: 'application',
             },
           };
 
@@ -334,31 +334,31 @@ describe("ALBCalculator - Property Tests", () => {
           );
 
           expect(cost.amount).toBe(0);
-          expect(cost.confidence).toBe("unknown");
+          expect(cost.confidence).toBe('unknown');
           expect(cost.assumptions.length).toBeGreaterThan(0);
-          expect(cost.assumptions[0]).toContain("Pricing data not available");
+          expect(cost.assumptions[0]).toContain('Pricing data not available');
         },
       ),
       { numRuns: 50 },
     );
   });
 
-  it("should handle pricing API errors gracefully", () => {
+  it('should handle pricing API errors gracefully', () => {
     const calculator = new ALBCalculator(100, 10000, 1000);
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockRejectedValue(new Error("Network timeout")),
+      getPrice: vi.fn().mockRejectedValue(new Error('Network timeout')),
     };
 
     fc.assert(
       fc.asyncProperty(
-        fc.constantFrom("us-east-1", "eu-central-1"),
+        fc.constantFrom('us-east-1', 'eu-central-1'),
         async (region) => {
           const resource = {
-            logicalId: "TestALB",
-            type: "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            logicalId: 'TestALB',
+            type: 'AWS::ElasticLoadBalancingV2::LoadBalancer',
             properties: {
-              Type: "application",
+              Type: 'application',
             },
           };
 
@@ -370,9 +370,9 @@ describe("ALBCalculator - Property Tests", () => {
 
           // When API throws error, should handle gracefully
           expect(cost.amount).toBe(0);
-          expect(cost.confidence).toBe("unknown");
+          expect(cost.confidence).toBe('unknown');
           expect(cost.assumptions.length).toBeGreaterThan(0);
-          expect(cost.assumptions[0]).toContain("Failed to fetch pricing");
+          expect(cost.assumptions[0]).toContain('Failed to fetch pricing');
         },
       ),
       { numRuns: 50 },

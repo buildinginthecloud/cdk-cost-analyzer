@@ -1,6 +1,6 @@
-import { CostDelta } from "../pricing/types";
-import { ConfigSummary } from "../pipeline/types";
-import { ThresholdEvaluation } from "../threshold/types";
+import { ConfigSummary } from '../pipeline/types';
+import { CostDelta } from '../pricing/types';
+import { ThresholdEvaluation } from '../threshold/types';
 
 /**
  * Reporter interface for generating cost analysis reports in various formats.
@@ -82,4 +82,4 @@ export interface StackCostDelta {
  * - json: Structured JSON for programmatic processing
  * - markdown: Formatted markdown suitable for GitLab merge request comments
  */
-export type ReportFormat = "text" | "json" | "markdown";
+export type ReportFormat = 'text' | 'json' | 'markdown';

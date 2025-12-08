@@ -14,10 +14,10 @@ export class VPCEndpointCalculator implements ResourceCostCalculator {
   async calculateCost(
     resource: ResourceWithId,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     const endpointType = resource.properties?.VpcEndpointType || 'Interface';
-    const serviceName = resource.properties?.ServiceName || '';
+    const serviceName = (resource.properties?.ServiceName as string | undefined) || '';
 
     // Gateway endpoints (S3 and DynamoDB) are free
     if (
@@ -79,7 +79,7 @@ export class VPCEndpointCalculator implements ResourceCostCalculator {
         currency: 'USD',
         confidence: 'medium',
         assumptions: [
-          `Interface VPC Endpoint type`,
+          'Interface VPC Endpoint type',
           `Hourly rate: $${hourlyRate.toFixed(4)}/hour × ${this.HOURS_PER_MONTH} hours = $${hourlyCost.toFixed(2)}/month`,
           `Data processing: $${dataProcessingRate.toFixed(4)}/GB × ${dataProcessedGB} GB = $${dataProcessingCost.toFixed(2)}/month`,
           `Total: $${totalCost.toFixed(2)}/month`,

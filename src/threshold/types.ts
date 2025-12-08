@@ -14,7 +14,7 @@ export class ThresholdExceededError extends Error {
     message: string,
     public threshold: number,
     public actualDelta: number,
-    public topContributors: ResourceCost[]
+    public topContributors: ResourceCost[],
   ) {
     super(message);
     this.name = 'ThresholdExceededError';

@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import * as fc from 'fast-check';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as fc from 'fast-check';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { analyzeCosts } from '../../src/api';
 
 // Mock the analyzeCosts function to track region parameter
@@ -23,22 +23,22 @@ describe('CLI - Property Tests', () => {
       Resources: {
         Bucket1: {
           Type: 'AWS::S3::Bucket',
-          Properties: {}
-        }
-      }
+          Properties: {},
+        },
+      },
     };
 
     const targetTemplate = {
       Resources: {
         Bucket1: {
           Type: 'AWS::S3::Bucket',
-          Properties: {}
+          Properties: {},
         },
         Bucket2: {
           Type: 'AWS::S3::Bucket',
-          Properties: {}
-        }
-      }
+          Properties: {},
+        },
+      },
     };
 
     fs.writeFileSync(baseTemplatePath, JSON.stringify(baseTemplate, null, 2));
@@ -46,7 +46,7 @@ describe('CLI - Property Tests', () => {
 
     // Reset mock before each test
     vi.clearAllMocks();
-    
+
     // Setup default mock implementation
     (analyzeCosts as any).mockResolvedValue({
       totalDelta: 0,
@@ -87,14 +87,14 @@ describe('CLI - Property Tests', () => {
       'ap-northeast-3',
       'eu-south-1',
       'af-south-1',
-      'me-south-1'
+      'me-south-1',
     );
 
     await fc.assert(
       fc.asyncProperty(awsRegionArb, async (region) => {
         // Clear mock calls before each property test iteration
         vi.clearAllMocks();
-        
+
         // Dynamically import the CLI module to execute it
         const { Command } = await import('commander');
         const program = new Command();
@@ -124,7 +124,7 @@ describe('CLI - Property Tests', () => {
           baseTemplatePath,
           targetTemplatePath,
           '--region',
-          region
+          region,
         ]);
 
         // Verify analyzeCosts was called with the provided region
@@ -132,7 +132,7 @@ describe('CLI - Property Tests', () => {
         const callArgs = (analyzeCosts as any).mock.calls[0][0];
         expect(callArgs.region).toBe(region);
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -141,20 +141,20 @@ describe('CLI - Property Tests', () => {
     // Generate arbitrary valid CloudFormation templates
     const resourceTypeArb = fc.constantFrom(
       'AWS::S3::Bucket',
-      'AWS::Lambda::Function'
+      'AWS::Lambda::Function',
     );
 
     const resourceArb = fc.record({
       Type: resourceTypeArb,
-      Properties: fc.constant({})
+      Properties: fc.constant({}),
     });
 
     const templateArb = fc.record({
       Resources: fc.dictionary(
         fc.string({ minLength: 1, maxLength: 10 }).filter(s => /^[a-zA-Z][a-zA-Z0-9]*$/.test(s)),
         resourceArb,
-        { minKeys: 1, maxKeys: 3 }
-      )
+        { minKeys: 1, maxKeys: 3 },
+      ),
     });
 
     await fc.assert(
@@ -162,10 +162,10 @@ describe('CLI - Property Tests', () => {
         // Create temporary template files
         const testRunDir = path.join(testDir, `run-${Date.now()}-${Math.random().toString(36).substring(7)}`);
         fs.mkdirSync(testRunDir, { recursive: true });
-        
+
         const baseFile = path.join(testRunDir, 'base.json');
         const targetFile = path.join(testRunDir, 'target.json');
-        
+
         fs.writeFileSync(baseFile, JSON.stringify(baseTemplate, null, 2));
         fs.writeFileSync(targetFile, JSON.stringify(targetTemplate, null, 2));
 
@@ -252,7 +252,7 @@ describe('CLI - Property Tests', () => {
           }
         }
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -262,7 +262,7 @@ describe('CLI - Property Tests', () => {
     const invalidScenarioArb = fc.constantFrom(
       { type: 'missing-base', basePath: '/nonexistent/base-template.json', targetPath: targetTemplatePath },
       { type: 'missing-target', basePath: baseTemplatePath, targetPath: '/nonexistent/target-template.json' },
-      { type: 'missing-both', basePath: '/nonexistent/base.json', targetPath: '/nonexistent/target.json' }
+      { type: 'missing-both', basePath: '/nonexistent/base.json', targetPath: '/nonexistent/target.json' },
     );
 
     await fc.assert(
@@ -353,7 +353,7 @@ describe('CLI - Property Tests', () => {
         expect(stderrOutput).toBeDefined();
         expect(stderrOutput.length).toBeGreaterThan(0);
         expect(stderrOutput).toContain('Error:');
-        
+
         // Verify appropriate error message based on scenario
         if (scenario.type === 'missing-base') {
           expect(stderrOutput).toContain('Base template file not found');
@@ -361,7 +361,7 @@ describe('CLI - Property Tests', () => {
           expect(stderrOutput).toContain('Target template file not found');
         }
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -372,7 +372,7 @@ describe('CLI - Property Tests', () => {
       '{ invalid json',
       '{ "Resources": "not an object" }',
       '',
-      'null'
+      'null',
     );
 
     await fc.assert(
@@ -380,7 +380,7 @@ describe('CLI - Property Tests', () => {
         // Create temporary malformed template file
         const testRunDir = path.join(testDir, `malformed-${Date.now()}-${Math.random().toString(36).substring(7)}`);
         fs.mkdirSync(testRunDir, { recursive: true });
-        
+
         const malformedFile = path.join(testRunDir, 'malformed.json');
         fs.writeFileSync(malformedFile, malformedContent);
 
@@ -478,7 +478,7 @@ describe('CLI - Property Tests', () => {
           }
         }
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

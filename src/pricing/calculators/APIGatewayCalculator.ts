@@ -3,14 +3,14 @@ import { ResourceCostCalculator, MonthlyCost, PricingClient } from '../types';
 
 export class APIGatewayCalculator implements ResourceCostCalculator {
   supports(resourceType: string): boolean {
-    return resourceType === 'AWS::ApiGateway::RestApi' || 
+    return resourceType === 'AWS::ApiGateway::RestApi' ||
            resourceType === 'AWS::ApiGatewayV2::Api';
   }
 
   async calculateCost(
     resource: ResourceWithId,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     const isV2 = resource.type === 'AWS::ApiGatewayV2::Api';
     const protocolType = isV2 ? (resource.properties.ProtocolType as string) : 'REST';
@@ -26,7 +26,7 @@ export class APIGatewayCalculator implements ResourceCostCalculator {
 
   private async calculateRestApiCost(
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     try {
       const assumedRequests = 1_000_000; // 1M requests per month
@@ -74,7 +74,7 @@ export class APIGatewayCalculator implements ResourceCostCalculator {
 
   private async calculateHttpApiCost(
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     try {
       const assumedRequests = 1_000_000; // 1M requests per month
@@ -122,7 +122,7 @@ export class APIGatewayCalculator implements ResourceCostCalculator {
 
   private async calculateWebSocketCost(
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     try {
       const assumedMessages = 1_000_000; // 1M messages per month

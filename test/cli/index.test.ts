@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Command } from 'commander';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { analyzeCosts } from '../../src/api';
 
 // Mock the API module
@@ -24,22 +24,22 @@ describe('CLI Unit Tests', () => {
       Resources: {
         Bucket1: {
           Type: 'AWS::S3::Bucket',
-          Properties: {}
-        }
-      }
+          Properties: {},
+        },
+      },
     };
 
     const targetTemplate = {
       Resources: {
         Bucket1: {
           Type: 'AWS::S3::Bucket',
-          Properties: {}
+          Properties: {},
         },
         Bucket2: {
           Type: 'AWS::S3::Bucket',
-          Properties: {}
-        }
-      }
+          Properties: {},
+        },
+      },
     };
 
     fs.writeFileSync(baseTemplatePath, JSON.stringify(baseTemplate, null, 2));
@@ -597,11 +597,11 @@ describe('CLI Unit Tests', () => {
     expect(stdoutOutput).toContain('{');
     expect(stdoutOutput).toContain('totalDelta');
     expect(stdoutOutput).toContain('currency');
-    
+
     // Verify it's valid JSON
     const jsonOutput = stdoutOutput.trim();
     expect(() => JSON.parse(jsonOutput)).not.toThrow();
-    
+
     expect(exitCode).toBe(0);
   });
 

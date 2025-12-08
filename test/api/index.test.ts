@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
-import { 
-  analyzeCosts, 
-  TemplateParseError, 
-  PricingAPIError, 
+import {
+  analyzeCosts,
+  TemplateParseError,
+  PricingAPIError,
   UnsupportedResourceError,
   AnalyzeOptions,
-  CostAnalysisResult
+  CostAnalysisResult,
 } from '../../src/api';
 
 vi.mock('@aws-sdk/client-pricing', () => ({
@@ -20,22 +20,22 @@ describe('analyzeCosts API', () => {
     Resources: {
       Bucket1: {
         Type: 'AWS::S3::Bucket',
-        Properties: {}
-      }
-    }
+        Properties: {},
+      },
+    },
   });
 
   const targetTemplate = JSON.stringify({
     Resources: {
       Bucket1: {
         Type: 'AWS::S3::Bucket',
-        Properties: {}
+        Properties: {},
       },
       Bucket2: {
         Type: 'AWS::S3::Bucket',
-        Properties: {}
-      }
-    }
+        Properties: {},
+      },
+    },
   });
 
   it('should return structured results for valid templates', async () => {
@@ -51,7 +51,7 @@ describe('analyzeCosts API', () => {
     expect(result).toHaveProperty('removedResources');
     expect(result).toHaveProperty('modifiedResources');
     expect(result).toHaveProperty('summary');
-    
+
     expect(typeof result.totalDelta).toBe('number');
     expect(typeof result.currency).toBe('string');
     expect(Array.isArray(result.addedResources)).toBe(true);
@@ -74,7 +74,7 @@ describe('analyzeCosts API', () => {
       analyzeCosts({
         baseTemplate: 'invalid json',
         targetTemplate,
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -83,7 +83,7 @@ describe('analyzeCosts API', () => {
       analyzeCosts({
         baseTemplate,
         targetTemplate: 'invalid json',
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -92,7 +92,7 @@ describe('analyzeCosts API', () => {
       analyzeCosts({
         baseTemplate: '',
         targetTemplate: '',
-      })
+      }),
     ).rejects.toThrow();
   });
 

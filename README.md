@@ -32,6 +32,8 @@ npm install cdk-cost-analyzer
 
 - **[Configuration Guide](docs/CONFIGURATION.md)** - Configure thresholds, usage assumptions, and exclusions
 - **[GitLab CI/CD Integration](docs/GITLAB_CI.md)** - Complete GitLab pipeline setup guide
+- **[Resource Calculator Reference](docs/CALCULATORS.md)** - Detailed cost calculation methods and assumptions
+- **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 - **[Development Guide](docs/DEVELOPMENT.md)** - Setup, testing, and troubleshooting
 - **[Implementation Details](docs/IMPLEMENTATION.md)** - Technical implementation documentation
 - **[Examples](examples/)** - Example templates and API usage demonstrations
@@ -401,6 +403,40 @@ npm run lint
 ## Contributing
 
 Contributions are welcome! Please see the [implementation plan](.kiro/specs/cdk-cost-analyzer/tasks.md) for current development tasks.
+
+### Development Setup
+
+This project uses [Projen](https://projen.io/) for project management. All project configuration is managed through `.projenrc.ts`.
+
+```bash
+# Clone the repository
+git clone https://gitlab.com/anwb/cdk-cost-analyzer.git
+cd cdk-cost-analyzer
+
+# Install dependencies
+npm install
+
+# Synthesize project files (after modifying .projenrc.ts)
+npx projen
+
+# Build the project
+npx projen build
+
+# Run tests
+npx projen test
+
+# Run linting
+npx projen lint
+
+# Compile TypeScript
+npx projen compile
+```
+
+**Important**: Never manually edit generated files like `package.json`, `tsconfig.json`, or `.gitignore`. Always modify `.projenrc.ts` and run `npx projen` to regenerate these files.
+
+### Release Process
+
+See [docs/RELEASE.md](docs/RELEASE.md) for detailed release instructions.
 
 ## License
 
