@@ -68,7 +68,7 @@ describe('RDSCalculator - Property Tests', () => {
 
     // Property: For any RDS instance with a valid engine type and instance class,
     // the cost calculator should return a cost estimate greater than zero
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom(...engineTypes),
         fc.constantFrom(...instanceClasses),
@@ -139,7 +139,7 @@ describe('RDSCalculator - Property Tests', () => {
 
     const mockPricingClient = createMockPricingClient();
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom(...smallerInstances),
         fc.constantFrom(...largerInstances),
@@ -184,7 +184,7 @@ describe('RDSCalculator - Property Tests', () => {
       getPrice: vi.fn().mockResolvedValue(0.1),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom('us-east-1', 'eu-central-1', 'ap-southeast-1'),
         async (region) => {
@@ -238,7 +238,7 @@ describe('RDSCalculator - Property Tests', () => {
       getPrice: vi.fn().mockResolvedValue(null),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom('mysql', 'postgres', 'mariadb'),
         fc.constantFrom('db.t3.micro', 'db.m5.large'),
@@ -272,7 +272,7 @@ describe('RDSCalculator - Property Tests', () => {
       getPrice: vi.fn().mockRejectedValue(new Error('API timeout')),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom('mysql', 'postgres'),
         fc.constantFrom('db.t3.micro', 'db.m5.large'),
@@ -342,7 +342,7 @@ describe('RDSCalculator - Property Tests', () => {
       }),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom(...engineVariations.map(e => e.input)),
         fc.constantFrom('db.t3.micro', 'db.m5.large'),

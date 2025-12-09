@@ -34,7 +34,7 @@ describe('Credential Detection - Property Tests', () => {
       { AWS_PROFILE: 'nonexistent-profile' },
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(missingCredentialsArb, async (envVars) => {
         // Clear all AWS-related environment variables
         delete process.env.AWS_ACCESS_KEY_ID;
@@ -105,7 +105,7 @@ describe('Credential Detection - Property Tests', () => {
       { AWS_PROFILE: 'nonexistent-profile-' + Date.now() },
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(missingCredentialsArb, async (envVars) => {
         // Clear credentials
         delete process.env.AWS_ACCESS_KEY_ID;
@@ -166,7 +166,7 @@ describe('Credential Detection - Property Tests', () => {
       hasProfile: fc.boolean(),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.property(credentialCheckArb, ({ hasAccessKey, hasSecretKey, hasProfile }) => {
         // Clear all credentials
         delete process.env.AWS_ACCESS_KEY_ID;
@@ -227,7 +227,7 @@ describe('Credential Detection - Property Tests', () => {
       }),
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(partialCredentialsArb, async (envVars) => {
         // Clear all credentials
         delete process.env.AWS_ACCESS_KEY_ID;
@@ -287,7 +287,7 @@ describe('Credential Detection - Property Tests', () => {
       'ap-northeast-1',
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(regionArb, async (region) => {
         // Clear credentials
         delete process.env.AWS_ACCESS_KEY_ID;

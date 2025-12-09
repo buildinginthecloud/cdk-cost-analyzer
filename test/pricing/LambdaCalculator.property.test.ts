@@ -38,7 +38,7 @@ describe('LambdaCalculator - Property Tests', () => {
 
     // Property: For any two Lambda functions where one has higher memory allocation,
     // the higher memory function should have equal or higher estimated cost
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom(...memoryConfigurations),
         fc.constantFrom(...memoryConfigurations),
@@ -109,7 +109,7 @@ describe('LambdaCalculator - Property Tests', () => {
 
     const mockPricingClient = createMockPricingClient();
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom(...smallerMemory),
         fc.constantFrom(...largerMemory),
@@ -168,7 +168,7 @@ describe('LambdaCalculator - Property Tests', () => {
       }),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom('us-east-1', 'eu-central-1', 'ap-southeast-1'),
         async (region) => {
@@ -197,7 +197,7 @@ describe('LambdaCalculator - Property Tests', () => {
       getPrice: vi.fn().mockResolvedValue(null),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom(128, 256, 512, 1024, 2048),
         fc.constantFrom('us-east-1', 'eu-central-1'),
@@ -229,7 +229,7 @@ describe('LambdaCalculator - Property Tests', () => {
       getPrice: vi.fn().mockRejectedValue(new Error('Network timeout')),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom(128, 512, 1024),
         fc.constantFrom('us-east-1', 'eu-central-1'),

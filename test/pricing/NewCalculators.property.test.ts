@@ -14,7 +14,7 @@ describe('New Calculators - Property-Based Tests', () => {
     const calculator = new DynamoDBCalculator();
 
     it('Property: DynamoDB costs are non-negative for all billing modes', () => {
-      fc.assert(
+      void fc.assert(
         fc.asyncProperty(
           fc.constantFrom('PROVISIONED', 'PAY_PER_REQUEST'),
           fc.integer({ min: 1, max: 100 }),
@@ -47,7 +47,7 @@ describe('New Calculators - Property-Based Tests', () => {
     });
 
     it('Property: Provisioned costs scale with capacity units', () => {
-      fc.assert(
+      void fc.assert(
         fc.asyncProperty(
           fc.integer({ min: 5, max: 50 }),
           fc.integer({ min: 5, max: 50 }),
@@ -100,7 +100,7 @@ describe('New Calculators - Property-Based Tests', () => {
     const calculator = new ECSCalculator();
 
     it('Property: ECS costs are non-negative for all launch types', () => {
-      fc.assert(
+      void fc.assert(
         fc.asyncProperty(
           fc.constantFrom('FARGATE', 'EC2'),
           fc.integer({ min: 1, max: 10 }),
@@ -126,7 +126,7 @@ describe('New Calculators - Property-Based Tests', () => {
     });
 
     it('Property: Fargate costs scale with desired count', () => {
-      fc.assert(
+      void fc.assert(
         fc.asyncProperty(
           fc.integer({ min: 1, max: 5 }),
           fc.integer({ min: 6, max: 10 }),
@@ -173,7 +173,7 @@ describe('New Calculators - Property-Based Tests', () => {
     const calculator = new APIGatewayCalculator();
 
     it('Property: API Gateway costs are non-negative for all API types', () => {
-      fc.assert(
+      void fc.assert(
         fc.asyncProperty(
           fc.constantFrom('REST', 'HTTP', 'WEBSOCKET'),
           async (apiType) => {
@@ -196,7 +196,7 @@ describe('New Calculators - Property-Based Tests', () => {
     });
 
     it('Property: Calculator supports both v1 and v2 API Gateway resources', () => {
-      fc.assert(
+      void fc.assert(
         fc.property(
           fc.constantFrom('AWS::ApiGateway::RestApi', 'AWS::ApiGatewayV2::Api'),
           (resourceType) => {
@@ -215,7 +215,7 @@ describe('New Calculators - Property-Based Tests', () => {
         new APIGatewayCalculator(),
       ];
 
-      fc.assert(
+      void fc.assert(
         fc.asyncProperty(
           fc.integer({ min: 0, max: 2 }),
           async (calcIndex) => {

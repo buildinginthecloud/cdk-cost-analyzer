@@ -1,10 +1,11 @@
 import { typescript } from 'projen';
-import { NpmAccess } from 'projen/lib/javascript';
+import { NodePackageManager, NpmAccess } from 'projen/lib/javascript';
 
 const project = new typescript.TypeScriptProject({
   name: 'cdk-cost-analyzer',
   description: 'Analyze AWS CDK infrastructure changes and provide cost impact summaries',
   defaultReleaseBranch: 'main',
+  packageManager: NodePackageManager.NPM,
 
   // Package metadata
   packageName: 'cdk-cost-analyzer',

@@ -15,7 +15,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
       }),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(customS3AssumptionsArb, async (customAssumptions) => {
         const region = 'eu-central-1';
 
@@ -70,7 +70,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
       }),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(customLambdaAssumptionsArb, async (customAssumptions) => {
         const region = 'eu-central-1';
 
@@ -114,7 +114,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
       }),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(customNatGatewayAssumptionsArb, async (customAssumptions) => {
         const region = 'eu-central-1';
 
@@ -155,7 +155,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
       }),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(customAlbAssumptionsArb, async (customAssumptions) => {
         const region = 'eu-central-1';
 
@@ -206,7 +206,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
       }),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(customCloudFrontAssumptionsArb, async (customAssumptions) => {
         const region = 'eu-central-1';
 
@@ -266,7 +266,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
       ),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(mixedAssumptionsArb, async (customAssumptions) => {
         const region = 'eu-central-1';
 

@@ -31,7 +31,7 @@ describe('analyzeCosts API - Property Tests', () => {
 
   // Feature: cdk-cost-analyzer, Property 15: API returns structured results
   it('should return structured results for any valid template pair', () => {
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(templateArb, templateArb, async (base, target) => {
         const result = await analyzeCosts({
           baseTemplate: JSON.stringify(base),
@@ -68,7 +68,7 @@ describe('analyzeCosts API - Property Tests', () => {
       '{"key": undefined}',
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         invalidJsonArb,
         fc.constantFrom('base', 'target'),
@@ -96,7 +96,7 @@ describe('analyzeCosts API - Property Tests', () => {
       '{ "Metadata": {} }',
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         invalidStructureArb,
         fc.constantFrom('base', 'target'),
@@ -123,7 +123,7 @@ describe('analyzeCosts API - Property Tests', () => {
       '  \n  \t  ',
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         emptyTemplateArb,
         fc.constantFrom('base', 'target'),
@@ -142,7 +142,7 @@ describe('analyzeCosts API - Property Tests', () => {
   });
 
   it('should throw descriptive errors for missing required parameters', () => {
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom(
           { baseTemplate: '', targetTemplate: '' },
@@ -165,7 +165,7 @@ describe('analyzeCosts API - Property Tests', () => {
       '{ "Resources": true }',
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         invalidResourcesArb,
         fc.constantFrom('base', 'target'),

@@ -54,13 +54,13 @@ describe('SynthesisOrchestrator - Property Tests', () => {
   it('should produce consistent results for the same CDK project', async () => {
     // Synthesize the same project multiple times with unique output directories to avoid conflicts
     const results = await Promise.all([
-      orchestrator.synthesize({ 
+      orchestrator.synthesize({
         cdkAppPath: './examples/single-stack',
-        outputPath: 'cdk.out.test1'
+        outputPath: 'cdk.out.test1',
       }),
-      orchestrator.synthesize({ 
+      orchestrator.synthesize({
         cdkAppPath: './examples/single-stack',
-        outputPath: 'cdk.out.test2'
+        outputPath: 'cdk.out.test2',
       }),
     ]);
 
@@ -94,7 +94,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
       { maxKeys: 3 },
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(contextArb, async (context) => {
         const result = await orchestrator.synthesize({
           cdkAppPath: './examples/single-stack',
@@ -135,7 +135,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
         .map((s) => `./${s}-nonexistent`),
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(invalidPathArb, async (cdkAppPath) => {
         const result = await orchestrator.synthesize({ cdkAppPath });
 
@@ -200,7 +200,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
       fc.constant('./node_modules'),
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(invalidScenarioArb, async (cdkAppPath) => {
         const result = await orchestrator.synthesize({ cdkAppPath });
 
@@ -250,7 +250,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
       fc.string({ minLength: 5, maxLength: 30 }).map((s) => `invalid-${s}`),
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(invalidCommandArb, async (customCommand) => {
         const result = await orchestrator.synthesize({
           cdkAppPath: './examples/single-stack',
@@ -276,7 +276,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
         // Should always return valid result structure
         expect(result).toHaveProperty('success');
         expect(result).toHaveProperty('duration');
-        
+
         // Error property should only exist when synthesis fails
         if (!result.success) {
           expect(result).toHaveProperty('error');

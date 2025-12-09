@@ -65,7 +65,7 @@ describe('PricingClient - Property Tests', () => {
       { minLength: 1, maxLength: 5 },
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(regionArb, serviceCodeArb, filterArb, async (region, serviceCode, filters) => {
         const client = new PricingClient(region);
 
@@ -102,7 +102,7 @@ describe('PricingClient - Property Tests', () => {
     );
     const failureCountArb = fc.integer({ min: 1, max: 3 });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         regionArb,
         serviceCodeArb,
@@ -187,7 +187,7 @@ describe('PricingClient - Property Tests', () => {
     );
     const cachedPriceArb = fc.float({ min: Math.fround(0.01), max: Math.fround(100.0), noNaN: true });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         regionArb,
         serviceCodeArb,
@@ -265,7 +265,7 @@ describe('PricingClient - Property Tests', () => {
 
     const scenarioArb = fc.constantFrom(...unavailableScenarios);
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         regionArb,
         serviceCodeArb,

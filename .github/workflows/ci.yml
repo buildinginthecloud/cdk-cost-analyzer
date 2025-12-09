@@ -20,19 +20,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-          cache: 'yarn'
+          cache: 'npm'
       
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
       
       - name: Run linting
         run: npx projen eslint
       
       - name: Run type checking
-        run: yarn lint
+        run: npm run lint
       
       - name: Build project
         run: npx projen build
       
       - name: Run tests
-        run: yarn test
+        run: npx projen test

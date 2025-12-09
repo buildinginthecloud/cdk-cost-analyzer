@@ -39,7 +39,7 @@ describe('S3Calculator - Property Tests', () => {
 
     // Property: For any S3 bucket resource, the cost calculator should return
     // a cost estimate greater than zero
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom(...regions),
         fc.string({ minLength: 3, maxLength: 63 }).filter(s => /^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(s)),
@@ -75,7 +75,7 @@ describe('S3Calculator - Property Tests', () => {
       getPrice: vi.fn().mockResolvedValue(0.023),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom('us-east-1', 'eu-central-1', 'ap-southeast-1'),
         async (region) => {
@@ -110,7 +110,7 @@ describe('S3Calculator - Property Tests', () => {
       getPrice: vi.fn().mockResolvedValue(null),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom('us-east-1', 'eu-central-1', 'ap-southeast-1'),
         async (region) => {
@@ -140,7 +140,7 @@ describe('S3Calculator - Property Tests', () => {
       getPrice: vi.fn().mockRejectedValue(new Error('Network timeout')),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom('us-east-1', 'eu-central-1'),
         async (region) => {

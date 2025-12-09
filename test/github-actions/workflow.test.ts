@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
+import { describe, it, expect } from 'vitest';
 
 describe('GitHub Actions Workflow - Unit Tests', () => {
   const workflowPath = path.join(
@@ -150,6 +150,7 @@ describe('GitHub Actions Workflow - Unit Tests', () => {
         (step: any) =>
           step.run?.includes('npm test') ||
           step.run?.includes('npm run test') ||
+          step.run?.includes('npx projen test') ||
           step.run?.includes('vitest'),
       );
       expect(testStep).toBeDefined();

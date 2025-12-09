@@ -24,7 +24,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
       { minKeys: 2, maxKeys: 10 },
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(templateArb, async (resources) => {
         const region = 'eu-central-1';
 
@@ -92,7 +92,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
       { minKeys: 1, maxKeys: 5 },
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(templateArb, async (resources) => {
         const region = 'eu-central-1';
 
@@ -141,7 +141,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
       ),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(templateArb, async ({ included, excluded }) => {
         const region = 'eu-central-1';
 
@@ -193,7 +193,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
       { minKeys: 2, maxKeys: 5 },
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(templateArb, templateArb, async (baseResources, targetResources) => {
         const region = 'eu-central-1';
 
@@ -236,7 +236,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
       { minKeys: 2, maxKeys: 5 },
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(templateArb, async (resources) => {
         const region = 'eu-central-1';
 
