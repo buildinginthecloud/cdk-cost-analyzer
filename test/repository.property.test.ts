@@ -260,6 +260,7 @@ describe('Repository Structure - Property Tests', () => {
 
       // CI/CD
       '.gitlab-ci.yml', // GitLab CI configuration
+      '.github', // GitHub Actions workflows
     ]);
 
     const rootEntries = fs.readdirSync(projectRoot);
