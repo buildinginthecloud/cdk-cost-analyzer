@@ -32,7 +32,7 @@ jobs:
         run: npx projen eslint
       
       - name: Run type checking
-        run: npm projen lint
+        run: npx projen lint
       
       - name: Test and build project
         run: npx projen build
