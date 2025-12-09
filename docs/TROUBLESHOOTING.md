@@ -158,7 +158,7 @@ aws configure
 
 2. **Verify credentials work:**
 ```bash
-aws sts get-caller-identity
+aws sts get-caller-identity --no-cli-pager
 ```
 
 3. **For GitLab CI, add CI/CD variables:**
@@ -240,7 +240,7 @@ Error: Invalid region: eu-central-1a
 
 2. **Verify region name:**
 ```bash
-aws ec2 describe-regions --query 'Regions[].RegionName'
+aws ec2 describe-regions --query 'Regions[].RegionName' --no-cli-pager
 ```
 
 ## Configuration Validation Errors
@@ -424,7 +424,7 @@ exclusions:
 
 2. **Check resource availability in region:**
 ```bash
-aws pricing describe-services --service-code AmazonEC2 --region us-east-1
+aws pricing describe-services --service-code AmazonEC2 --region us-east-1 --no-cli-pager
 ```
 
 3. **Accept unknown costs:**
@@ -451,6 +451,8 @@ Connection timeout after 30000ms
 ```bash
 curl -I https://api.pricing.us-east-1.amazonaws.com
 ```
+
+**Note:** This tests connectivity to the AWS Pricing API endpoint.
 
 2. **Configure proxy if needed:**
 ```bash
@@ -655,7 +657,7 @@ file template.json
 
 3. **Validate with AWS CLI:**
 ```bash
-aws cloudformation validate-template --template-body file://template.json
+aws cloudformation validate-template --template-body file://template.json --no-cli-pager
 ```
 
 ### Error: Template too large

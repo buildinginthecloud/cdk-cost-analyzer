@@ -33,12 +33,11 @@ npm install cdk-cost-analyzer
 ## Documentation
 
 - **[Configuration Guide](docs/CONFIGURATION.md)** - Configure thresholds, usage assumptions, and exclusions
-- **[GitLab CI/CD Integration](docs/GITLAB_CI.md)** - Complete GitLab pipeline setup guide
-- **[GitHub Actions Integration](docs/GITHUB_ACTIONS.md)** - GitHub Actions CI/CD setup guide
+- **[CI/CD Integration](docs/CI_CD.md)** - GitHub Actions and GitLab CI/CD setup guides
 - **[Resource Calculator Reference](docs/CALCULATORS.md)** - Detailed cost calculation methods and assumptions
 - **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Common issues and solutions
-- **[Development Guide](docs/DEVELOPMENT.md)** - Setup, testing, and troubleshooting
-- **[Implementation Details](docs/IMPLEMENTATION.md)** - Technical implementation documentation
+- **[Development Guide](docs/DEVELOPMENT.md)** - Local development, testing, and architecture
+- **[Release Process](docs/RELEASE.md)** - How to release new versions
 - **[Examples](examples/)** - Example templates and API usage demonstrations
 
 ## Quick Start
@@ -120,7 +119,7 @@ cost-analysis:
     - merge_requests
 ```
 
-See the [GitLab CI/CD Guide](docs/GITLAB_CI.md) for complete documentation.
+See the [CI/CD Integration Guide](docs/CI_CD.md) for complete documentation.
 
 ### GitHub Actions Integration
 
@@ -151,7 +150,7 @@ jobs:
       - run: npm run test:silent
 ```
 
-The GitHub Actions workflow automatically runs on every push and pull request, executing linting, type checking, build verification, and the complete test suite. See the [GitHub Actions Guide](docs/GITHUB_ACTIONS.md) for complete documentation.
+The GitHub Actions workflow automatically runs on every push and pull request, executing linting, type checking, build verification, and the complete test suite. See the [CI/CD Integration Guide](docs/CI_CD.md) for complete documentation.
 
 ### Programmatic Usage
 
