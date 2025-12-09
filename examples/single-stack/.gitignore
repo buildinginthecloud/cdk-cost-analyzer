@@ -6,6 +6,7 @@ node_modules
 # CDK asset staging directory
 .cdk.staging
 cdk.out
+cdk.out*
 
 # Cost analyzer cache
 .cdk-cost-analyzer-cache/
