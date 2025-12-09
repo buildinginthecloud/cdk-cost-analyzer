@@ -48,7 +48,7 @@ describe('ALBCalculator - Property Tests', () => {
 
     // Property: For any two ALB configurations where one has higher LCU assumptions,
     // the higher LCU configuration should have equal or higher estimated cost
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom(...newConnectionsRange),
         fc.constantFrom(...activeConnectionsRange),
@@ -162,7 +162,7 @@ describe('ALBCalculator - Property Tests', () => {
 
     const mockPricingClient = createMockPricingClient();
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom(...lowerLCUConfigs),
         fc.constantFrom(...higherLCUConfigs),
@@ -235,7 +235,7 @@ describe('ALBCalculator - Property Tests', () => {
       }),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom('us-east-1', 'eu-central-1', 'ap-southeast-1'),
         async (region) => {
@@ -278,7 +278,7 @@ describe('ALBCalculator - Property Tests', () => {
       getPrice: vi.fn().mockResolvedValue(0.0225),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom('network', 'gateway'),
         fc.constantFrom('us-east-1', 'eu-central-1'),
@@ -315,7 +315,7 @@ describe('ALBCalculator - Property Tests', () => {
       getPrice: vi.fn().mockResolvedValue(null),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom('us-east-1', 'eu-central-1'),
         async (region) => {
@@ -350,7 +350,7 @@ describe('ALBCalculator - Property Tests', () => {
       getPrice: vi.fn().mockRejectedValue(new Error('Network timeout')),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom('us-east-1', 'eu-central-1'),
         async (region) => {

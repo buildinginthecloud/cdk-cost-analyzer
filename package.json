@@ -3,7 +3,7 @@
   "description": "Analyze AWS CDK infrastructure changes and provide cost impact summaries",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/anwb/cdk-cost-analyzer.git"
+    "url": "https://gitlab.com/buildinginthecloud/cdk-cost-analyzer.git"
   },
   "bin": {
     "cdk-cost-analyzer": "dist/cli/index.js"
@@ -31,8 +31,8 @@
     "projen": "npx projen"
   },
   "author": {
-    "name": "ANWB",
-    "email": "devops@anwb.nl",
+    "name": "Yvo van Zee",
+    "email": "yvo@buildinginthecloud.com",
     "organization": false
   },
   "devDependencies": {

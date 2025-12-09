@@ -177,9 +177,9 @@ export class ConfigManager {
     assumptions: NonNullable<CostAnalyzerConfig['usageAssumptions']>,
     errors: string[],
   ): void {
-    const validatePositive = (value: number | undefined, path: string) => {
+    const validatePositive = (value: number | undefined, configPath: string) => {
       if (value !== undefined && value < 0) {
-        errors.push(`${path} must be non-negative`);
+        errors.push(`${configPath} must be non-negative`);
       }
     };
 

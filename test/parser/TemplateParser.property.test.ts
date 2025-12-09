@@ -36,6 +36,7 @@ describe('TemplateParser - Property Tests', () => {
         if (format === 'json') {
           content = JSON.stringify(template);
         } else {
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           const yaml = require('js-yaml');
           content = yaml.dump(template);
         }

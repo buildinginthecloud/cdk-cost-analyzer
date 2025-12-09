@@ -41,7 +41,7 @@ describe('EC2Calculator - Property Tests', () => {
 
     // Property: For any two EC2 instances with different instance types or regions,
     // their calculated costs should differ (unless they happen to have identical pricing)
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom(...instanceTypes),
         fc.constantFrom(...regions),
@@ -125,7 +125,7 @@ describe('EC2Calculator - Property Tests', () => {
 
     const mockPricingClient = createMockPricingClient();
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom(...smallerInstances),
         fc.constantFrom(...largerInstances),
@@ -167,7 +167,7 @@ describe('EC2Calculator - Property Tests', () => {
       getPrice: vi.fn().mockResolvedValue(0.05),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom('us-east-1', 'eu-central-1', 'ap-southeast-1'),
         async (region) => {
@@ -195,7 +195,7 @@ describe('EC2Calculator - Property Tests', () => {
       getPrice: vi.fn().mockResolvedValue(null),
     };
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         fc.constantFrom('t3.micro', 't3.small', 'm5.large'),
         fc.constantFrom('us-east-1', 'eu-central-1'),

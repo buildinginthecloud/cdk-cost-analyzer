@@ -28,7 +28,7 @@ describe('PricingService - Property Tests', () => {
       properties: fc.dictionary(fc.string(), fc.anything()),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(resourceArb, async (resource) => {
         const cost = await service.getResourceCost(resource, 'eu-central-1');
 
@@ -62,7 +62,7 @@ describe('PricingService - Property Tests', () => {
       properties: fc.dictionary(fc.string(), fc.anything()),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(resourceArb, async (resource) => {
         const cost = await service.getResourceCost(resource, 'eu-central-1');
 
@@ -119,7 +119,7 @@ describe('PricingService - Property Tests', () => {
       ),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(diffArb, async (diff) => {
         // Analysis should complete without throwing errors
         const result = await service.getCostDelta(diff, 'eu-central-1');
@@ -191,7 +191,7 @@ describe('PricingService - Property Tests', () => {
       ),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(diffArb, async (diff) => {
         const result = await service.getCostDelta(diff, 'eu-central-1');
 
@@ -245,7 +245,7 @@ describe('PricingService - Property Tests', () => {
       ),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(diffArb, async (diff) => {
         // Create a service that will have pricing failures
         const failingService = new PricingService('us-east-1');

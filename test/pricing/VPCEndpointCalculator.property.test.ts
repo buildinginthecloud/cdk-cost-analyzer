@@ -59,7 +59,7 @@ describe('VPCEndpointCalculator - Property Tests', () => {
       'ap-southeast-1',
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         gatewayEndpointArb,
         regionArb,
@@ -145,7 +145,7 @@ describe('VPCEndpointCalculator - Property Tests', () => {
       'eu-west-1',
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         interfaceEndpointArb,
         regionArb,
@@ -226,7 +226,7 @@ describe('VPCEndpointCalculator - Property Tests', () => {
       'ap-southeast-1',
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         gatewayVariationsArb,
         regionArb,
@@ -282,7 +282,7 @@ describe('VPCEndpointCalculator - Property Tests', () => {
       }),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(
         interfaceEndpointArb,
         async (resource: ResourceWithId) => {

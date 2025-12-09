@@ -5,13 +5,13 @@ import { CloudFrontCalculator } from './calculators/CloudFrontCalculator';
 import { DynamoDBCalculator } from './calculators/DynamoDBCalculator';
 import { EC2Calculator } from './calculators/EC2Calculator';
 import { ECSCalculator } from './calculators/ECSCalculator';
+import { ElastiCacheCalculator } from './calculators/ElastiCacheCalculator';
 import { LambdaCalculator } from './calculators/LambdaCalculator';
-import { S3Calculator } from './calculators/S3Calculator';
-import { RDSCalculator } from './calculators/RDSCalculator';
 import { NatGatewayCalculator } from './calculators/NatGatewayCalculator';
 import { NLBCalculator } from './calculators/NLBCalculator';
+import { RDSCalculator } from './calculators/RDSCalculator';
+import { S3Calculator } from './calculators/S3Calculator';
 import { VPCEndpointCalculator } from './calculators/VPCEndpointCalculator';
-import { ElastiCacheCalculator } from './calculators/ElastiCacheCalculator';
 import { PricingClient } from './PricingClient';
 import {
   PricingService as IPricingService,

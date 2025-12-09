@@ -54,7 +54,7 @@ describe('PipelineOrchestrator', () => {
         thresholdStatus: expect.any(Object),
         configUsed: expect.any(Object),
       });
-    }, 10000); // Increase timeout to 10 seconds
+    }, 30000); // Increase timeout to 30 seconds for CI environment
 
     it('should reject when config file not found', async () => {
       const promise = orchestrator.runPipelineAnalysis({

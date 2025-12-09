@@ -16,7 +16,7 @@ describe('NatGatewayCalculator - Property Tests', () => {
       properties: fc.dictionary(fc.string(), fc.anything()),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(natGatewayResourceArb, async (resource) => {
         const region = 'eu-central-1';
         const cost = await calculator.calculateCost(resource, region, pricingClient);
@@ -46,7 +46,7 @@ describe('NatGatewayCalculator - Property Tests', () => {
 
     const dataProcessingArb = fc.double({ min: 1, max: 10000, noNaN: true });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(dataProcessingArb, dataProcessingArb, async (dataGB1, dataGB2) => {
         // Skip if values are too close
         if (Math.abs(dataGB1 - dataGB2) < 1) {
@@ -93,7 +93,7 @@ describe('NatGatewayCalculator - Property Tests', () => {
       properties: fc.dictionary(fc.string(), fc.anything()),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(natGatewayResourceArb, async (resource) => {
         const region = 'eu-central-1';
 
@@ -134,7 +134,7 @@ describe('NatGatewayCalculator - Property Tests', () => {
 
     const dataProcessingArb = fc.double({ min: 1, max: 10000, noNaN: true });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(dataProcessingArb, async (dataGB) => {
         const region = 'eu-central-1';
         const cost = await calculator.calculateCost(

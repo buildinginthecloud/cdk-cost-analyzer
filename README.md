@@ -1,5 +1,7 @@
 # CDK Cost Analyzer
 
+[![CI](https://github.com/YOUR_USERNAME/cdk-cost-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/cdk-cost-analyzer/actions/workflows/ci.yml)
+
 A TypeScript package that analyzes AWS CDK infrastructure changes and provides cost impact summaries. Compare CloudFormation templates to understand the financial implications of your infrastructure changes before deployment.
 
 ## Key Features
@@ -32,6 +34,7 @@ npm install cdk-cost-analyzer
 
 - **[Configuration Guide](docs/CONFIGURATION.md)** - Configure thresholds, usage assumptions, and exclusions
 - **[GitLab CI/CD Integration](docs/GITLAB_CI.md)** - Complete GitLab pipeline setup guide
+- **[GitHub Actions Integration](docs/GITHUB_ACTIONS.md)** - GitHub Actions CI/CD setup guide
 - **[Resource Calculator Reference](docs/CALCULATORS.md)** - Detailed cost calculation methods and assumptions
 - **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Common issues and solutions
 - **[Development Guide](docs/DEVELOPMENT.md)** - Setup, testing, and troubleshooting
@@ -118,6 +121,37 @@ cost-analysis:
 ```
 
 See the [GitLab CI/CD Guide](docs/GITLAB_CI.md) for complete documentation.
+
+### GitHub Actions Integration
+
+Add to your `.github/workflows/ci.yml`:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run eslint
+      - run: npm run lint
+      - run: npm run build
+      - run: npm run test:silent
+```
+
+The GitHub Actions workflow automatically runs on every push and pull request, executing linting, type checking, build verification, and the complete test suite. See the [GitHub Actions Guide](docs/GITHUB_ACTIONS.md) for complete documentation.
 
 ### Programmatic Usage
 

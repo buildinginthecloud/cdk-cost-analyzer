@@ -37,7 +37,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
       targetStacks: fc.array(templateArb, { minLength: 2, maxLength: 3 }),
     }).filter(({ baseStacks, targetStacks }) => baseStacks.length === targetStacks.length);
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(multiStackArb, async ({ baseStacks, targetStacks }) => {
         const region = 'eu-central-1';
 
@@ -113,7 +113,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
       stack2Target: fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 3 }),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(stackPairArb, async ({ stack1Base, stack1Target, stack2Base, stack2Target }) => {
         const region = 'eu-central-1';
 
@@ -193,7 +193,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
       nonEmptyStackTarget: fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 3 }),
     });
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(mixedStacksArb, async ({ emptyStack, nonEmptyStackBase, nonEmptyStackTarget }) => {
         const region = 'eu-central-1';
 
@@ -237,7 +237,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
       { minLength: 2, maxLength: 4 },
     );
 
-    fc.assert(
+    void fc.assert(
       fc.asyncProperty(multiStackArb, async (stacks) => {
         const region = 'eu-central-1';
 
