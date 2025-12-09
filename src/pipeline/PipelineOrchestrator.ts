@@ -1,12 +1,12 @@
 import * as fs from 'fs/promises';
+import { PipelineOptions, PipelineResult, PipelineError, ConfigSummary } from './types';
 import { ConfigManager } from '../config/ConfigManager';
-import { SynthesisOrchestrator } from '../synthesis/SynthesisOrchestrator';
-import { ThresholdEnforcer } from '../threshold/ThresholdEnforcer';
-import { TemplateParser } from '../parser/TemplateParser';
 import { DiffEngine } from '../diff/DiffEngine';
+import { TemplateParser } from '../parser/TemplateParser';
 import { PricingService } from '../pricing/PricingService';
 import { Reporter } from '../reporter/Reporter';
-import { PipelineOptions, PipelineResult, PipelineError, ConfigSummary } from './types';
+import { SynthesisOrchestrator } from '../synthesis/SynthesisOrchestrator';
+import { ThresholdEnforcer } from '../threshold/ThresholdEnforcer';
 
 export class PipelineOrchestrator {
   private configManager: ConfigManager;
@@ -34,7 +34,11 @@ export class PipelineOrchestrator {
 
       if (options.synthesize && options.cdkAppPath) {
         // Synthesize both branches
-        const synthResult = await this.synthesizeBothBranches(options.cdkAppPath, config);
+        const synthResult = await this.synthesizeBothBranches(
+          options.cdkAppPath,
+          config,
+          options.outputPath,
+        );
         baseTemplatePath = synthResult.baseTemplatePath;
         targetTemplatePath = synthResult.targetTemplatePath;
         synthesisInfo = synthResult.synthesisInfo;
@@ -43,7 +47,7 @@ export class PipelineOrchestrator {
         if (!options.baseTemplate || !options.targetTemplate) {
           throw new PipelineError(
             'Either provide template paths or enable synthesis with cdkAppPath',
-            'configuration'
+            'configuration',
           );
         }
         baseTemplatePath = options.baseTemplate;
@@ -56,7 +60,7 @@ export class PipelineOrchestrator {
         baseTemplatePath,
         targetTemplatePath,
         region,
-        config
+        config,
       );
 
       // 4. Evaluate thresholds
@@ -65,7 +69,7 @@ export class PipelineOrchestrator {
         costAnalysis.addedResources,
         costAnalysis.modifiedResources,
         config.thresholds,
-        options.environment
+        options.environment,
       );
 
       // 5. Build config summary
@@ -83,7 +87,7 @@ export class PipelineOrchestrator {
       }
       throw new PipelineError(
         `Pipeline failed: ${error instanceof Error ? error.message : String(error)}`,
-        'unknown'
+        'unknown',
       );
     }
   }
@@ -93,17 +97,18 @@ export class PipelineOrchestrator {
    */
   private async synthesizeBothBranches(
     cdkAppPath: string,
-    config: any
+    config: any,
+    outputPath?: string,
   ): Promise<{
-    baseTemplatePath: string;
-    targetTemplatePath: string;
-    synthesisInfo: any;
-  }> {
+      baseTemplatePath: string;
+      targetTemplatePath: string;
+      synthesisInfo: any;
+    }> {
     // For now, just synthesize the current branch
     // In a full implementation, this would checkout branches and synthesize each
     const result = await this.synthesisOrchestrator.synthesize({
       cdkAppPath,
-      outputPath: config.synthesis?.outputPath,
+      outputPath: outputPath || config.synthesis?.outputPath,
       context: config.synthesis?.context,
       customCommand: config.synthesis?.customCommand,
     });
@@ -111,7 +116,7 @@ export class PipelineOrchestrator {
     if (!result.success) {
       throw new PipelineError(
         `CDK synthesis failed: ${result.error}`,
-        'synthesis'
+        'synthesis',
       );
     }
 
@@ -136,7 +141,7 @@ export class PipelineOrchestrator {
     baseTemplatePath: string,
     targetTemplatePath: string,
     region: string,
-    config: any
+    config: any,
   ): Promise<any> {
     const parser = new TemplateParser();
     const diffEngine = new DiffEngine();
@@ -144,7 +149,7 @@ export class PipelineOrchestrator {
       region,
       config.usageAssumptions,
       config.exclusions?.resourceTypes,
-      config.cache
+      config.cache,
     );
     const reporter = new Reporter();
 

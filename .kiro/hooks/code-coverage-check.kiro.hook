@@ -9,6 +9,6 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Run tests with code coverage analysis following testing best practices. Please:\n1. Run the test suite with coverage reporting enabled using minimal verbosity (--silent, --quiet flags)\n2. Generate a coverage report showing which lines/functions are not covered\n3. Identify files with low coverage (< 80%)\n4. Suggest specific areas that need more tests\n5. Check for any dead code that can be removed\n6. Report overall coverage statistics\n7. Suggest improvements to increase coverage\n8. Use commands like: npm test -- --coverage --silent, yarn test --coverage --silent, or pytest --cov --tb=short -q\n9. Focus on testing behavior, not implementation\n10. Ensure tests are descriptive and well-organized"
+    "prompt": "Run tests with code coverage analysis following testing best practices. Please:\n1. Run the test suite with coverage: npx vitest run --coverage --silent\n2. Generate a coverage report showing which lines/functions are not covered\n3. Identify files with low coverage (< 80% as configured in .projenrc.ts)\n4. Suggest specific areas that need more tests\n5. Check for any dead code that can be removed\n6. Report overall coverage statistics\n7. Suggest improvements to increase coverage\n8. Focus on testing behavior, not implementation\n9. Ensure tests are descriptive and well-organized\n\nNote: This project uses Projen with Vitest for testing. Coverage threshold is set to 80% in .projenrc.ts."
   }
 }

@@ -1,0 +1,72 @@
+# CDK Cost Analyzer Configuration for Multi-Stack Application
+# This file configures cost thresholds and usage assumptions for cost analysis
+
+# Cost thresholds for pipeline enforcement
+# Note: Thresholds apply to total cost across all stacks
+thresholds:
+  default:
+    warning: 100   # USD per month - displays warning but passes pipeline
+    error: 500     # USD per month - fails pipeline, requires review
+
+# Custom usage assumptions for cost estimation
+# Adjust these values to match your expected application usage
+usageAssumptions:
+  # NAT Gateway usage (Networking Stack)
+  natGateway:
+    dataProcessedGB: 500  # Monthly data processed through NAT Gateway
+
+  # Application Load Balancer usage (Compute Stack)
+  alb:
+    newConnectionsPerSecond: 50
+    activeConnectionsPerMinute: 5000
+    processedBytesGB: 1000
+
+  # VPC Endpoint usage (Networking Stack)
+  vpcEndpoint:
+    dataProcessedGB: 100  # Monthly data processed through interface endpoints
+
+  # ECS usage (Compute Stack)
+  ecs:
+    taskCount: 2
+    cpuUnits: 512
+    memoryMB: 1024
+    hoursPerMonth: 730
+
+  # RDS usage (Storage Stack)
+  rds:
+    instanceClass: db.t3.medium
+    storageGB: 100
+    backupRetentionDays: 7
+    multiAZ: false
+
+  # ElastiCache usage (Storage Stack)
+  elasticache:
+    nodeType: cache.t3.micro
+    numNodes: 2
+    engineType: redis
+
+  # S3 usage (Storage Stack)
+  s3:
+    storageGB: 500
+    getRequests: 100000
+    putRequests: 10000
+    dataTransferGB: 100
+
+# CDK synthesis configuration (optional)
+synthesis:
+  appPath: .                 # Path to CDK application
+  outputPath: cdk.out        # CDK synthesis output directory
+
+# Resource exclusions (optional)
+# Exclude specific resource types from cost analysis
+exclusions:
+  resourceTypes:
+    - AWS::IAM::Role         # IAM roles have no direct cost
+    - AWS::IAM::Policy       # IAM policies have no direct cost
+    - AWS::EC2::SecurityGroup  # Security groups have no direct cost
+    - AWS::Logs::LogGroup    # CloudWatch Logs analyzed separately
+
+# Cache configuration
+cache:
+  enabled: true              # Enable pricing data caching
+  durationHours: 24          # Cache duration in hours

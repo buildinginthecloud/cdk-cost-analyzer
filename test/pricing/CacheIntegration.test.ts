@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { PricingClient } from '../../src/pricing/PricingClient';
-import { CacheManager } from '../../src/pricing/CacheManager';
-import { GetProductsCommand } from '@aws-sdk/client-pricing';
 import * as fs from 'fs';
+import { GetProductsCommand } from '@aws-sdk/client-pricing';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { CacheManager } from '../../src/pricing/CacheManager';
+import { PricingClient } from '../../src/pricing/PricingClient';
 
 vi.mock('@aws-sdk/client-pricing');
 
@@ -22,9 +22,9 @@ describe('Cache Integration with PricingClient', () => {
         JSON.stringify({
           terms: {
             OnDemand: {
-              'TERM_KEY': {
+              TERM_KEY: {
                 priceDimensions: {
-                  'DIM_KEY': {
+                  DIM_KEY: {
                     pricePerUnit: {
                       USD: '0.10',
                     },

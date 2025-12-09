@@ -1,5 +1,5 @@
-import { CloudFormationTemplate } from '../parser/types';
 import { DiffEngine as IDiffEngine, ResourceDiff, ResourceWithId, ModifiedResource } from './types';
+import { CloudFormationTemplate } from '../parser/types';
 
 export class DiffEngine implements IDiffEngine {
   diff(base: CloudFormationTemplate, target: CloudFormationTemplate): ResourceDiff {
@@ -56,7 +56,7 @@ export class DiffEngine implements IDiffEngine {
 
   private arePropertiesEqual(
     props1: Record<string, unknown> | undefined,
-    props2: Record<string, unknown> | undefined
+    props2: Record<string, unknown> | undefined,
   ): boolean {
     const p1 = props1 || {};
     const p2 = props2 || {};

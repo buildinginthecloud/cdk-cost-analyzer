@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { EC2Calculator } from '../../src/pricing/calculators/EC2Calculator';
-import { S3Calculator } from '../../src/pricing/calculators/S3Calculator';
-import { LambdaCalculator } from '../../src/pricing/calculators/LambdaCalculator';
-import { RDSCalculator } from '../../src/pricing/calculators/RDSCalculator';
-import { DynamoDBCalculator } from '../../src/pricing/calculators/DynamoDBCalculator';
-import { ECSCalculator } from '../../src/pricing/calculators/ECSCalculator';
 import { APIGatewayCalculator } from '../../src/pricing/calculators/APIGatewayCalculator';
 import { CloudFrontCalculator } from '../../src/pricing/calculators/CloudFrontCalculator';
+import { DynamoDBCalculator } from '../../src/pricing/calculators/DynamoDBCalculator';
+import { EC2Calculator } from '../../src/pricing/calculators/EC2Calculator';
+import { ECSCalculator } from '../../src/pricing/calculators/ECSCalculator';
+import { LambdaCalculator } from '../../src/pricing/calculators/LambdaCalculator';
+import { RDSCalculator } from '../../src/pricing/calculators/RDSCalculator';
+import { S3Calculator } from '../../src/pricing/calculators/S3Calculator';
 
 describe('Resource Cost Calculators', () => {
   describe('EC2Calculator', () => {

@@ -77,7 +77,7 @@ export class ConfigurationError extends Error {
   constructor(
     message: string,
     public configPath: string,
-    public validationErrors: string[]
+    public validationErrors: string[],
   ) {
     super(message);
     this.name = 'ConfigurationError';

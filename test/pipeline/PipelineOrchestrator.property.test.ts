@@ -1,10 +1,10 @@
-import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { PipelineOrchestrator } from '../../src/pipeline/PipelineOrchestrator';
-import { PricingService } from '../../src/pricing/PricingService';
+import { describe, it, expect } from 'vitest';
 import { DiffEngine } from '../../src/diff/DiffEngine';
 import { TemplateParser } from '../../src/parser/TemplateParser';
 import { CloudFormationTemplate } from '../../src/parser/types';
+import { PipelineOrchestrator } from '../../src/pipeline/PipelineOrchestrator';
+import { PricingService } from '../../src/pricing/PricingService';
 
 describe('PipelineOrchestrator - Property Tests', () => {
   const pricingService = new PricingService();
@@ -17,7 +17,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
     const resourceTypeArb = fc.constantFrom(
       'AWS::S3::Bucket',
       'AWS::Lambda::Function',
-      'AWS::EC2::Instance'
+      'AWS::EC2::Instance',
     );
 
     const resourceArb = fc.record({
@@ -28,7 +28,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
     const templateArb = fc.dictionary(
       fc.string().filter(s => s.length > 0),
       resourceArb,
-      { minKeys: 1, maxKeys: 5 }
+      { minKeys: 1, maxKeys: 5 },
     ).map(resources => ({ Resources: resources }));
 
     // Generate multiple stacks (2-3 stacks)
@@ -40,14 +40,14 @@ describe('PipelineOrchestrator - Property Tests', () => {
     fc.assert(
       fc.asyncProperty(multiStackArb, async ({ baseStacks, targetStacks }) => {
         const region = 'eu-central-1';
-        
+
         // Calculate cost delta for each stack individually
         const individualDeltas: number[] = [];
-        
+
         for (let i = 0; i < baseStacks.length; i++) {
           const diff = diffEngine.diff(
             baseStacks[i] as CloudFormationTemplate,
-            targetStacks[i] as CloudFormationTemplate
+            targetStacks[i] as CloudFormationTemplate,
           );
           const costDelta = await pricingService.getCostDelta(diff, region);
           individualDeltas.push(costDelta.totalDelta);
@@ -86,7 +86,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
         expect(difference).toBeLessThan(0.01);
 
         // Verify the number of resources matches
-        const totalAddedIndividual = individualDeltas.length > 0 ? 
+        const totalAddedIndividual = individualDeltas.length > 0 ?
           (await Promise.all(baseStacks.map((base, i) => {
             const diff = diffEngine.diff(base as CloudFormationTemplate, targetStacks[i] as CloudFormationTemplate);
             return pricingService.getCostDelta(diff, region);
@@ -94,7 +94,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
 
         expect(mergedCostDelta.addedCosts.length).toBe(totalAddedIndividual);
       }),
-      { numRuns: 30 }
+      { numRuns: 30 },
     );
   });
 
@@ -120,14 +120,14 @@ describe('PipelineOrchestrator - Property Tests', () => {
         // Analyze stack 1
         const diff1 = diffEngine.diff(
           { Resources: stack1Base } as CloudFormationTemplate,
-          { Resources: stack1Target } as CloudFormationTemplate
+          { Resources: stack1Target } as CloudFormationTemplate,
         );
         const cost1 = await pricingService.getCostDelta(diff1, region);
 
         // Analyze stack 2
         const diff2 = diffEngine.diff(
           { Resources: stack2Base } as CloudFormationTemplate,
-          { Resources: stack2Target } as CloudFormationTemplate
+          { Resources: stack2Target } as CloudFormationTemplate,
         );
         const cost2 = await pricingService.getCostDelta(diff2, region);
 
@@ -138,10 +138,10 @@ describe('PipelineOrchestrator - Property Tests', () => {
         const combinedBase: CloudFormationTemplate = {
           Resources: {
             ...Object.fromEntries(
-              Object.entries(stack1Base).map(([k, v]) => [`S1-${k}`, v])
+              Object.entries(stack1Base).map(([k, v]) => [`S1-${k}`, v]),
             ),
             ...Object.fromEntries(
-              Object.entries(stack2Base).map(([k, v]) => [`S2-${k}`, v])
+              Object.entries(stack2Base).map(([k, v]) => [`S2-${k}`, v]),
             ),
           },
         };
@@ -149,10 +149,10 @@ describe('PipelineOrchestrator - Property Tests', () => {
         const combinedTarget: CloudFormationTemplate = {
           Resources: {
             ...Object.fromEntries(
-              Object.entries(stack1Target).map(([k, v]) => [`S1-${k}`, v])
+              Object.entries(stack1Target).map(([k, v]) => [`S1-${k}`, v]),
             ),
             ...Object.fromEntries(
-              Object.entries(stack2Target).map(([k, v]) => [`S2-${k}`, v])
+              Object.entries(stack2Target).map(([k, v]) => [`S2-${k}`, v]),
             ),
           },
         };
@@ -166,16 +166,16 @@ describe('PipelineOrchestrator - Property Tests', () => {
 
         // Resource counts should also match
         expect(combinedCost.addedCosts.length).toBe(
-          cost1.addedCosts.length + cost2.addedCosts.length
+          cost1.addedCosts.length + cost2.addedCosts.length,
         );
         expect(combinedCost.removedCosts.length).toBe(
-          cost1.removedCosts.length + cost2.removedCosts.length
+          cost1.removedCosts.length + cost2.removedCosts.length,
         );
         expect(combinedCost.modifiedCosts.length).toBe(
-          cost1.modifiedCosts.length + cost2.modifiedCosts.length
+          cost1.modifiedCosts.length + cost2.modifiedCosts.length,
         );
       }),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -200,7 +200,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
         // Analyze empty stack (should have zero delta)
         const emptyDiff = diffEngine.diff(
           emptyStack as CloudFormationTemplate,
-          emptyStack as CloudFormationTemplate
+          emptyStack as CloudFormationTemplate,
         );
         const emptyCost = await pricingService.getCostDelta(emptyDiff, region);
         expect(emptyCost.totalDelta).toBe(0);
@@ -208,7 +208,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
         // Analyze non-empty stack
         const nonEmptyDiff = diffEngine.diff(
           { Resources: nonEmptyStackBase } as CloudFormationTemplate,
-          { Resources: nonEmptyStackTarget } as CloudFormationTemplate
+          { Resources: nonEmptyStackTarget } as CloudFormationTemplate,
         );
         const nonEmptyCost = await pricingService.getCostDelta(nonEmptyDiff, region);
 
@@ -217,7 +217,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
         const difference = Math.abs(combined - nonEmptyCost.totalDelta);
         expect(difference).toBeLessThan(0.01);
       }),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -234,7 +234,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
         base: fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 2 }),
         target: fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 2 }),
       }),
-      { minLength: 2, maxLength: 4 }
+      { minLength: 2, maxLength: 4 },
     );
 
     fc.assert(
@@ -246,10 +246,10 @@ describe('PipelineOrchestrator - Property Tests', () => {
           stacks.map(async ({ base, target }) => {
             const diff = diffEngine.diff(
               { Resources: base } as CloudFormationTemplate,
-              { Resources: target } as CloudFormationTemplate
+              { Resources: target } as CloudFormationTemplate,
             );
             return pricingService.getCostDelta(diff, region);
-          })
+          }),
         );
 
         // All results should have the same currency
@@ -262,7 +262,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
         const totalDelta = results.reduce((sum, r) => sum + r.totalDelta, 0);
         expect(typeof totalDelta).toBe('number');
       }),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 });

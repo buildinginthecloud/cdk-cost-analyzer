@@ -9,10 +9,10 @@ export class DynamoDBCalculator implements ResourceCostCalculator {
   async calculateCost(
     resource: ResourceWithId,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     const billingMode = (resource.properties.BillingMode as string) || 'PROVISIONED';
-    
+
     if (billingMode === 'PAY_PER_REQUEST') {
       return this.calculateOnDemandCost(resource, region, pricingClient);
     } else {
@@ -23,7 +23,7 @@ export class DynamoDBCalculator implements ResourceCostCalculator {
   private async calculateOnDemandCost(
     _resource: ResourceWithId,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     try {
       // Default assumptions for on-demand mode
@@ -85,7 +85,7 @@ export class DynamoDBCalculator implements ResourceCostCalculator {
   private async calculateProvisionedCost(
     resource: ResourceWithId,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     try {
       const provisionedThroughput = resource.properties.ProvisionedThroughput as any;

@@ -16,7 +16,7 @@ export class SynthesisOrchestrator {
       const outputPath = options.outputPath || this.DEFAULT_OUTPUT_PATH;
       const command = options.customCommand || 'npx cdk synth';
 
-      await this.executeSynthesis(command, options.cdkAppPath, options.context);
+      await this.executeSynthesis(command, options.cdkAppPath, options.context, outputPath);
 
       const fullOutputPath = path.join(options.cdkAppPath, outputPath);
       const { templatePaths, stackNames } = await this.findTemplates(fullOutputPath);
@@ -59,17 +59,23 @@ export class SynthesisOrchestrator {
   private async executeSynthesis(
     command: string,
     cdkAppPath: string,
-    context?: Record<string, string>
+    context?: Record<string, string>,
+    outputPath?: string,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       const [cmd, ...args] = command.split(' ');
-      
+
       // Add context arguments
       const allArgs = [...args];
       if (context) {
         for (const [key, value] of Object.entries(context)) {
           allArgs.push('-c', `${key}=${value}`);
         }
+      }
+
+      // Add output path if specified
+      if (outputPath) {
+        allArgs.push('--output', outputPath);
       }
 
       const proc = spawn(cmd, allArgs, {
@@ -93,8 +99,8 @@ export class SynthesisOrchestrator {
         reject(
           new SynthesisError(
             `Failed to execute synthesis command: ${error.message}`,
-            stderr
-          )
+            stderr,
+          ),
         );
       });
 
@@ -103,8 +109,8 @@ export class SynthesisOrchestrator {
           reject(
             new SynthesisError(
               `CDK synthesis failed with exit code ${code}`,
-              stderr || stdout
-            )
+              stderr || stdout,
+            ),
           );
         } else {
           resolve();
@@ -117,11 +123,11 @@ export class SynthesisOrchestrator {
    * Find all CloudFormation templates in output directory
    */
   private async findTemplates(
-    outputPath: string
+    outputPath: string,
   ): Promise<{ templatePaths: string[]; stackNames: string[] }> {
     try {
       const files = await fs.readdir(outputPath);
-      
+
       const templatePaths: string[] = [];
       const stackNames: string[] = [];
 
@@ -151,7 +157,7 @@ export class SynthesisOrchestrator {
       return { templatePaths, stackNames };
     } catch (error) {
       throw new Error(
-        `Failed to find templates: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to find templates: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
   }

@@ -1,25 +1,25 @@
-import { describe, it, expect, vi } from "vitest";
-import * as fc from "fast-check";
-import { PricingService } from "../../src/pricing/PricingService";
-import { ResourceWithId } from "../../src/diff/types";
+import * as fc from 'fast-check';
+import { describe, it, expect, vi } from 'vitest';
+import { ResourceWithId } from '../../src/diff/types';
+import { PricingService } from '../../src/pricing/PricingService';
 
-vi.mock("@aws-sdk/client-pricing", () => ({
+vi.mock('@aws-sdk/client-pricing', () => ({
   PricingClient: vi.fn(() => ({
     send: vi.fn(),
   })),
   GetProductsCommand: vi.fn(),
 }));
 
-describe("PricingService - Property Tests", () => {
+describe('PricingService - Property Tests', () => {
   const service = new PricingService();
 
   // Feature: cdk-cost-analyzer, Property 3: Cost calculation produces valid results
-  it("should return non-negative costs with valid currency and confidence", () => {
+  it('should return non-negative costs with valid currency and confidence', () => {
     const supportedTypes = [
-      "AWS::EC2::Instance",
-      "AWS::S3::Bucket",
-      "AWS::Lambda::Function",
-      "AWS::RDS::DBInstance",
+      'AWS::EC2::Instance',
+      'AWS::S3::Bucket',
+      'AWS::Lambda::Function',
+      'AWS::RDS::DBInstance',
     ];
 
     const resourceArb = fc.record({
@@ -30,11 +30,11 @@ describe("PricingService - Property Tests", () => {
 
     fc.assert(
       fc.asyncProperty(resourceArb, async (resource) => {
-        const cost = await service.getResourceCost(resource, "eu-central-1");
+        const cost = await service.getResourceCost(resource, 'eu-central-1');
 
         expect(cost.amount).toBeGreaterThanOrEqual(0);
-        expect(cost.currency).toBe("USD");
-        expect(["high", "medium", "low", "unknown"]).toContain(cost.confidence);
+        expect(cost.currency).toBe('USD');
+        expect(['high', 'medium', 'low', 'unknown']).toContain(cost.confidence);
         expect(Array.isArray(cost.assumptions)).toBe(true);
       }),
       { numRuns: 50 },
@@ -42,18 +42,18 @@ describe("PricingService - Property Tests", () => {
   });
 
   // Feature: cdk-cost-analyzer, Property 10: Unsupported resources don't cause failures
-  it("should handle unsupported resource types gracefully", () => {
+  it('should handle unsupported resource types gracefully', () => {
     const unsupportedTypes = [
-      "AWS::CloudFront::Distribution",
-      "AWS::ApiGateway::RestApi",
-      "AWS::Route53::HostedZone",
-      "AWS::SNS::Topic",
-      "AWS::SQS::Queue",
-      "AWS::ElasticLoadBalancingV2::LoadBalancer",
-      "AWS::CloudWatch::Alarm",
-      "AWS::IAM::Role",
-      "Custom::MyResource",
-      "Custom::SomeOtherResource",
+      'AWS::CloudFront::Distribution',
+      'AWS::ApiGateway::RestApi',
+      'AWS::Route53::HostedZone',
+      'AWS::SNS::Topic',
+      'AWS::SQS::Queue',
+      'AWS::ElasticLoadBalancingV2::LoadBalancer',
+      'AWS::CloudWatch::Alarm',
+      'AWS::IAM::Role',
+      'Custom::MyResource',
+      'Custom::SomeOtherResource',
     ];
 
     const resourceArb = fc.record({
@@ -64,14 +64,14 @@ describe("PricingService - Property Tests", () => {
 
     fc.assert(
       fc.asyncProperty(resourceArb, async (resource) => {
-        const cost = await service.getResourceCost(resource, "eu-central-1");
+        const cost = await service.getResourceCost(resource, 'eu-central-1');
 
         expect(cost).toBeDefined();
-        expect(cost.confidence).toBe("unknown");
+        expect(cost.confidence).toBe('unknown');
         expect(cost.amount).toBe(0);
-        expect(cost.currency).toBe("USD");
+        expect(cost.currency).toBe('USD');
         expect(Array.isArray(cost.assumptions)).toBe(true);
-        expect(cost.assumptions.some((a) => a.includes("not supported"))).toBe(
+        expect(cost.assumptions.some((a) => a.includes('not supported'))).toBe(
           true,
         );
       }),
@@ -80,21 +80,21 @@ describe("PricingService - Property Tests", () => {
   });
 
   // Feature: cdk-cost-analyzer, Property 10: Unsupported resources don't cause failures (complete analysis)
-  it("should complete analysis successfully with templates containing unsupported resources", () => {
+  it('should complete analysis successfully with templates containing unsupported resources', () => {
     const supportedTypes = [
-      "AWS::EC2::Instance",
-      "AWS::S3::Bucket",
-      "AWS::Lambda::Function",
-      "AWS::RDS::DBInstance",
+      'AWS::EC2::Instance',
+      'AWS::S3::Bucket',
+      'AWS::Lambda::Function',
+      'AWS::RDS::DBInstance',
     ];
 
     const unsupportedTypes = [
-      "AWS::CloudFront::Distribution",
-      "AWS::ApiGateway::RestApi",
-      "AWS::Route53::HostedZone",
-      "AWS::SNS::Topic",
-      "AWS::SQS::Queue",
-      "Custom::MyResource",
+      'AWS::CloudFront::Distribution',
+      'AWS::ApiGateway::RestApi',
+      'AWS::Route53::HostedZone',
+      'AWS::SNS::Topic',
+      'AWS::SQS::Queue',
+      'Custom::MyResource',
     ];
 
     const allTypes = [...supportedTypes, ...unsupportedTypes];
@@ -122,12 +122,12 @@ describe("PricingService - Property Tests", () => {
     fc.assert(
       fc.asyncProperty(diffArb, async (diff) => {
         // Analysis should complete without throwing errors
-        const result = await service.getCostDelta(diff, "eu-central-1");
+        const result = await service.getCostDelta(diff, 'eu-central-1');
 
         // Verify result structure is valid
         expect(result).toBeDefined();
-        expect(typeof result.totalDelta).toBe("number");
-        expect(result.currency).toBe("USD");
+        expect(typeof result.totalDelta).toBe('number');
+        expect(result.currency).toBe('USD');
         expect(Array.isArray(result.addedCosts)).toBe(true);
         expect(Array.isArray(result.removedCosts)).toBe(true);
         expect(Array.isArray(result.modifiedCosts)).toBe(true);
@@ -149,18 +149,18 @@ describe("PricingService - Property Tests", () => {
 
         allResourceCosts.forEach((resourceCost) => {
           if (unsupportedTypes.includes(resourceCost.type)) {
-            expect(resourceCost.monthlyCost.confidence).toBe("unknown");
+            expect(resourceCost.monthlyCost.confidence).toBe('unknown');
             expect(resourceCost.monthlyCost.amount).toBe(0);
             expect(
               resourceCost.monthlyCost.assumptions.some((a) =>
-                a.includes("not supported"),
+                a.includes('not supported'),
               ),
             ).toBe(true);
           }
           // All resources should have valid cost structure
-          expect(resourceCost.monthlyCost.currency).toBe("USD");
+          expect(resourceCost.monthlyCost.currency).toBe('USD');
           expect(resourceCost.monthlyCost.amount).toBeGreaterThanOrEqual(0);
-          expect(["high", "medium", "low", "unknown"]).toContain(
+          expect(['high', 'medium', 'low', 'unknown']).toContain(
             resourceCost.monthlyCost.confidence,
           );
         });
@@ -170,10 +170,10 @@ describe("PricingService - Property Tests", () => {
   });
 
   // Feature: cdk-cost-analyzer, Property 4: Total cost delta equals sum of individual costs
-  it("should calculate total delta as sum of component costs", () => {
+  it('should calculate total delta as sum of component costs', () => {
     const resourceArb = fc.record({
       logicalId: fc.string().filter((s) => s.length > 0),
-      type: fc.constantFrom("AWS::S3::Bucket", "AWS::Lambda::Function"),
+      type: fc.constantFrom('AWS::S3::Bucket', 'AWS::Lambda::Function'),
       properties: fc.dictionary(fc.string(), fc.anything()),
     });
 
@@ -183,7 +183,7 @@ describe("PricingService - Property Tests", () => {
       modified: fc.array(
         fc.record({
           logicalId: fc.string().filter((s) => s.length > 0),
-          type: fc.constantFrom("AWS::S3::Bucket"),
+          type: fc.constantFrom('AWS::S3::Bucket'),
           oldProperties: fc.dictionary(fc.string(), fc.anything()),
           newProperties: fc.dictionary(fc.string(), fc.anything()),
         }),
@@ -193,7 +193,7 @@ describe("PricingService - Property Tests", () => {
 
     fc.assert(
       fc.asyncProperty(diffArb, async (diff) => {
-        const result = await service.getCostDelta(diff, "eu-central-1");
+        const result = await service.getCostDelta(diff, 'eu-central-1');
 
         const addedSum = result.addedCosts.reduce(
           (sum, r) => sum + r.monthlyCost.amount,
@@ -217,12 +217,12 @@ describe("PricingService - Property Tests", () => {
   });
 
   // Feature: cdk-cost-analyzer, Property 20: Unavailable pricing results in unknown cost
-  it("should mark resources with unknown confidence when pricing is unavailable and continue processing", () => {
+  it('should mark resources with unknown confidence when pricing is unavailable and continue processing', () => {
     const supportedTypes = [
-      "AWS::EC2::Instance",
-      "AWS::S3::Bucket",
-      "AWS::Lambda::Function",
-      "AWS::RDS::DBInstance",
+      'AWS::EC2::Instance',
+      'AWS::S3::Bucket',
+      'AWS::Lambda::Function',
+      'AWS::RDS::DBInstance',
     ];
 
     const resourceArb = fc.record({
@@ -248,16 +248,16 @@ describe("PricingService - Property Tests", () => {
     fc.assert(
       fc.asyncProperty(diffArb, async (diff) => {
         // Create a service that will have pricing failures
-        const failingService = new PricingService("us-east-1");
+        const failingService = new PricingService('us-east-1');
 
         // The service should complete without throwing errors
-        const result = await failingService.getCostDelta(diff, "us-east-1");
+        const result = await failingService.getCostDelta(diff, 'us-east-1');
 
         // Verify the result is defined and has the expected structure
         expect(result).toBeDefined();
         expect(result.totalDelta).toBeDefined();
-        expect(typeof result.totalDelta).toBe("number");
-        expect(result.currency).toBe("USD");
+        expect(typeof result.totalDelta).toBe('number');
+        expect(result.currency).toBe('USD');
         expect(Array.isArray(result.addedCosts)).toBe(true);
         expect(Array.isArray(result.removedCosts)).toBe(true);
         expect(Array.isArray(result.modifiedCosts)).toBe(true);
@@ -272,8 +272,8 @@ describe("PricingService - Property Tests", () => {
           (resourceCost) => {
             expect(resourceCost.monthlyCost).toBeDefined();
             expect(resourceCost.monthlyCost.amount).toBeGreaterThanOrEqual(0);
-            expect(resourceCost.monthlyCost.currency).toBe("USD");
-            expect(["high", "medium", "low", "unknown"]).toContain(
+            expect(resourceCost.monthlyCost.currency).toBe('USD');
+            expect(['high', 'medium', 'low', 'unknown']).toContain(
               resourceCost.monthlyCost.confidence,
             );
             expect(Array.isArray(resourceCost.monthlyCost.assumptions)).toBe(
@@ -285,10 +285,10 @@ describe("PricingService - Property Tests", () => {
         result.modifiedCosts.forEach((resourceCost) => {
           expect(resourceCost.oldMonthlyCost).toBeDefined();
           expect(resourceCost.newMonthlyCost).toBeDefined();
-          expect(["high", "medium", "low", "unknown"]).toContain(
+          expect(['high', 'medium', 'low', 'unknown']).toContain(
             resourceCost.oldMonthlyCost.confidence,
           );
-          expect(["high", "medium", "low", "unknown"]).toContain(
+          expect(['high', 'medium', 'low', 'unknown']).toContain(
             resourceCost.newMonthlyCost.confidence,
           );
         });

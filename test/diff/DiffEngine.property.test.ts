@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
+import { describe, it, expect } from 'vitest';
 import { DiffEngine } from '../../src/diff/DiffEngine';
 import { CloudFormationTemplate } from '../../src/parser/types';
 
@@ -11,7 +11,7 @@ describe('DiffEngine - Property Tests', () => {
     const resourceTypeArb = fc.constantFrom(
       'AWS::S3::Bucket',
       'AWS::EC2::Instance',
-      'AWS::Lambda::Function'
+      'AWS::Lambda::Function',
     );
 
     const resourceArb = fc.record({
@@ -69,9 +69,9 @@ describe('DiffEngine - Property Tests', () => {
             // Ensure properties actually differ
             expect(JSON.stringify(resource.oldProperties)).not.toBe(JSON.stringify(resource.newProperties));
           });
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -114,15 +114,15 @@ describe('DiffEngine - Property Tests', () => {
           const allDiffIds = new Set([...addedIds, ...removedIds, ...modifiedIds]);
           const allResourceIds = new Set([
             ...Object.keys(baseResources),
-            ...Object.keys(targetResources)
+            ...Object.keys(targetResources),
           ]);
 
           allDiffIds.forEach(id => {
             expect(allResourceIds.has(id)).toBe(true);
           });
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

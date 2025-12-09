@@ -40,7 +40,7 @@ describe('GitLabIntegration', () => {
       });
 
       await expect(
-        integration.postMergeRequestComment('123', '456', 'Test comment')
+        integration.postMergeRequestComment('123', '456', 'Test comment'),
       ).resolves.not.toThrow();
 
       expect(mockFetch).toHaveBeenCalledWith(
@@ -54,7 +54,7 @@ describe('GitLabIntegration', () => {
           body: JSON.stringify({
             body: 'Test comment',
           }),
-        }
+        },
       );
     });
 
@@ -73,7 +73,7 @@ describe('GitLabIntegration', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('group%2Fproject'),
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -91,11 +91,11 @@ describe('GitLabIntegration', () => {
       });
 
       await expect(
-        integration.postMergeRequestComment('123', '456', 'Test comment')
+        integration.postMergeRequestComment('123', '456', 'Test comment'),
       ).rejects.toThrow(GitLabAPIError);
 
       await expect(
-        integration.postMergeRequestComment('123', '456', 'Test comment')
+        integration.postMergeRequestComment('123', '456', 'Test comment'),
       ).rejects.toThrow('Failed to post comment');
     });
 
@@ -109,11 +109,11 @@ describe('GitLabIntegration', () => {
       });
 
       await expect(
-        integration.postMergeRequestComment('123', '456', 'Test comment')
+        integration.postMergeRequestComment('123', '456', 'Test comment'),
       ).rejects.toThrow(GitLabAPIError);
 
       await expect(
-        integration.postMergeRequestComment('123', '456', 'Test comment')
+        integration.postMergeRequestComment('123', '456', 'Test comment'),
       ).rejects.toThrow('Failed to connect to GitLab API');
     });
 
@@ -177,7 +177,7 @@ describe('GitLabIntegration', () => {
 
     it('should throw error when no token is available', () => {
       expect(() => GitLabIntegration.fromEnvironment()).toThrow(
-        'GitLab token not found'
+        'GitLab token not found',
       );
     });
   });

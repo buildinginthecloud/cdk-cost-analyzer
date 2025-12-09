@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { CacheManager } from '../../src/pricing/CacheManager';
 import * as fs from 'fs';
 import * as path from 'path';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { CacheManager } from '../../src/pricing/CacheManager';
 
 describe('CacheManager', () => {
   const testCacheDir = '.test-cache';

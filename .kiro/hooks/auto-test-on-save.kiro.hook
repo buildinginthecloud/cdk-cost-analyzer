@@ -14,6 +14,6 @@
   },
   "then": {
     "type": "askAgent",
-    "prompt": "A code file has been saved. Run the appropriate tests for this file and report any failures. IMPORTANT: Use minimal verbosity to prevent session timeouts - add --silent, --quiet, or similar flags. If this is a test file, run it directly with filtering (--grep, --testNamePattern). If this is a source file, find and run related tests. Use commands like: npm test -- --silent, yarn test --silent, npx jest --silent --testNamePattern='specific', or pytest -q -k 'test_name'."
+    "prompt": "A code file has been saved. Run the appropriate tests for this file and report any failures. IMPORTANT:\n1. Use Projen test command: npx projen test:silent (which runs vitest with --silent flag)\n2. For specific test files, use: npx vitest run --silent <test-file-path>\n3. If this is a test file, run it directly\n4. If this is a source file, find and run related tests\n5. Keep output minimal to prevent session timeouts"
   }
 }

@@ -1,0 +1,251 @@
+# GitLab CI/CD Pipeline for Monorepo with Parallel CDK Cost Analysis
+# This pipeline runs cost analysis in parallel for multiple CDK applications
+
+stages:
+  - build
+  - test
+  - cost-analysis
+  - deploy
+
+variables:
+  AWS_REGION: us-east-1
+  NODE_VERSION: "18"
+
+# Install dependencies for all packages in the workspace
+build:
+  stage: build
+  image: node:${NODE_VERSION}
+  script:
+    - echo "Installing dependencies for all packages..."
+    - npm ci
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+      - packages/*/node_modules/
+  artifacts:
+    paths:
+      - node_modules/
+      - packages/*/node_modules/
+    expire_in: 1 hour
+
+# Run tests for all packages in parallel
+test:frontend:
+  stage: test
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  script:
+    - cd packages/frontend-infra
+    - npm test
+  only:
+    - merge_requests
+    - main
+
+test:backend:
+  stage: test
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  script:
+    - cd packages/backend-infra
+    - npm test
+  only:
+    - merge_requests
+    - main
+
+test:data:
+  stage: test
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  script:
+    - cd packages/data-infra
+    - npm test
+  only:
+    - merge_requests
+    - main
+
+# Analyze cost changes for frontend infrastructure
+cost-analysis:frontend:
+  stage: cost-analysis
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  before_script:
+    - npm install -g cdk-cost-analyzer
+    - |
+      if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+        echo "ERROR: AWS credentials not configured"
+        exit 1
+      fi
+  script:
+    - echo "Analyzing frontend infrastructure cost changes..."
+    - cd packages/frontend-infra
+    - |
+      cdk-cost-analyzer pipeline \
+        --base-branch ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME} \
+        --target-branch ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME} \
+        --cdk-app-path . \
+        --region ${AWS_REGION} \
+        --format markdown \
+        --post-to-gitlab
+  cache:
+    key: pricing-cache-frontend
+    paths:
+      - .cdk-cost-analyzer-cache/
+  artifacts:
+    paths:
+      - packages/frontend-infra/cost-report.md
+    expire_in: 30 days
+  only:
+    - merge_requests
+  allow_failure: false
+
+# Analyze cost changes for backend infrastructure
+cost-analysis:backend:
+  stage: cost-analysis
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  before_script:
+    - npm install -g cdk-cost-analyzer
+    - |
+      if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+        echo "ERROR: AWS credentials not configured"
+        exit 1
+      fi
+  script:
+    - echo "Analyzing backend infrastructure cost changes..."
+    - cd packages/backend-infra
+    - |
+      cdk-cost-analyzer pipeline \
+        --base-branch ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME} \
+        --target-branch ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME} \
+        --cdk-app-path . \
+        --region ${AWS_REGION} \
+        --format markdown \
+        --post-to-gitlab
+  cache:
+    key: pricing-cache-backend
+    paths:
+      - .cdk-cost-analyzer-cache/
+  artifacts:
+    paths:
+      - packages/backend-infra/cost-report.md
+    expire_in: 30 days
+  only:
+    - merge_requests
+  allow_failure: false
+
+# Analyze cost changes for data infrastructure
+cost-analysis:data:
+  stage: cost-analysis
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  before_script:
+    - npm install -g cdk-cost-analyzer
+    - |
+      if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+        echo "ERROR: AWS credentials not configured"
+        exit 1
+      fi
+  script:
+    - echo "Analyzing data infrastructure cost changes..."
+    - cd packages/data-infra
+    - |
+      cdk-cost-analyzer pipeline \
+        --base-branch ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME} \
+        --target-branch ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME} \
+        --cdk-app-path . \
+        --region ${AWS_REGION} \
+        --format markdown \
+        --post-to-gitlab
+  cache:
+    key: pricing-cache-data
+    paths:
+      - .cdk-cost-analyzer-cache/
+  artifacts:
+    paths:
+      - packages/data-infra/cost-report.md
+    expire_in: 30 days
+  only:
+    - merge_requests
+  allow_failure: false
+
+# Deploy frontend infrastructure
+deploy:frontend:
+  stage: deploy
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  before_script:
+    - npm install -g aws-cdk
+  script:
+    - cd packages/frontend-infra
+    - echo "Deploying frontend infrastructure..."
+    - cdk deploy --require-approval never
+  only:
+    - main
+  when: manual
+  environment:
+    name: production/frontend
+    action: start
+
+# Deploy backend infrastructure
+deploy:backend:
+  stage: deploy
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  before_script:
+    - npm install -g aws-cdk
+  script:
+    - cd packages/backend-infra
+    - echo "Deploying backend infrastructure..."
+    - cdk deploy --require-approval never
+  only:
+    - main
+  when: manual
+  environment:
+    name: production/backend
+    action: start
+
+# Deploy data infrastructure
+deploy:data:
+  stage: deploy
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  before_script:
+    - npm install -g aws-cdk
+  script:
+    - cd packages/data-infra
+    - echo "Deploying data infrastructure..."
+    - cdk deploy --require-approval never
+  only:
+    - main
+  when: manual
+  environment:
+    name: production/data
+    action: start
+
+# Optional: Deploy all to development environment
+deploy:dev:all:
+  stage: deploy
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  before_script:
+    - npm install -g aws-cdk
+  script:
+    - echo "Deploying all infrastructure to development..."
+    - cd packages/frontend-infra && cdk deploy --require-approval never
+    - cd ../backend-infra && cdk deploy --require-approval never
+    - cd ../data-infra && cdk deploy --require-approval never
+  only:
+    - develop
+  environment:
+    name: development
+    action: start

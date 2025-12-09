@@ -1,14 +1,14 @@
-import { describe, it, expect } from "vitest";
-import * as fc from "fast-check";
-import { ConfigManager } from "../../src/config/ConfigManager";
-import { CostAnalyzerConfig } from "../../src/config/types";
+import * as fc from 'fast-check';
+import { describe, it, expect } from 'vitest';
+import { ConfigManager } from '../../src/config/ConfigManager';
+import { CostAnalyzerConfig } from '../../src/config/types';
 
-describe("ConfigManager - Property Tests", () => {
+describe('ConfigManager - Property Tests', () => {
   const manager = new ConfigManager();
 
   // Feature: production-readiness, Property 3: Configuration file validation catches invalid schemas
   // Validates: Requirements 6.5
-  it("should reject configurations with negative threshold values", () => {
+  it('should reject configurations with negative threshold values', () => {
     const invalidThresholdConfigArb = fc
       .record({
         thresholds: fc.record({
@@ -43,7 +43,7 @@ describe("ConfigManager - Property Tests", () => {
 
         // Should have descriptive error messages
         const hasThresholdError = result.errors.some((err) =>
-          err.includes("must be non-negative"),
+          err.includes('must be non-negative'),
         );
         expect(hasThresholdError).toBe(true);
       }),
@@ -53,7 +53,7 @@ describe("ConfigManager - Property Tests", () => {
 
   // Feature: production-readiness, Property 3: Configuration file validation catches invalid schemas
   // Validates: Requirements 6.5
-  it("should reject configurations with negative usage assumptions", () => {
+  it('should reject configurations with negative usage assumptions', () => {
     const invalidUsageAssumptionsArb = fc.oneof(
       fc.record({
         usageAssumptions: fc.record({
@@ -110,7 +110,7 @@ describe("ConfigManager - Property Tests", () => {
 
         // Should have descriptive error messages
         const hasUsageAssumptionError = result.errors.some((err) =>
-          err.includes("must be non-negative"),
+          err.includes('must be non-negative'),
         );
         expect(hasUsageAssumptionError).toBe(true);
       }),
@@ -120,7 +120,7 @@ describe("ConfigManager - Property Tests", () => {
 
   // Feature: production-readiness, Property 3: Configuration file validation catches invalid schemas
   // Validates: Requirements 6.5
-  it("should reject configurations with non-positive cache duration", () => {
+  it('should reject configurations with non-positive cache duration', () => {
     const invalidCacheConfigArb = fc.record({
       cache: fc.record({
         durationHours: fc.oneof(
@@ -140,7 +140,7 @@ describe("ConfigManager - Property Tests", () => {
 
         // Should have descriptive error message
         const hasCacheError = result.errors.some((err) =>
-          err.includes("cache.durationHours must be positive"),
+          err.includes('cache.durationHours must be positive'),
         );
         expect(hasCacheError).toBe(true);
       }),
@@ -150,7 +150,7 @@ describe("ConfigManager - Property Tests", () => {
 
   // Feature: production-readiness, Property 3: Configuration file validation catches invalid schemas
   // Validates: Requirements 6.5
-  it("should accept valid configurations with all fields", () => {
+  it('should accept valid configurations with all fields', () => {
     const validConfigArb = fc.record({
       thresholds: fc.option(
         fc.record({
@@ -168,7 +168,7 @@ describe("ConfigManager - Property Tests", () => {
           ),
           environments: fc.option(
             fc.dictionary(
-              fc.constantFrom("development", "staging", "production"),
+              fc.constantFrom('development', 'staging', 'production'),
               fc.record({
                 warning: fc.option(
                   fc.double({ min: 0, max: 1000, noNaN: true }),
@@ -271,9 +271,9 @@ describe("ConfigManager - Property Tests", () => {
           resourceTypes: fc.option(
             fc.array(
               fc.constantFrom(
-                "AWS::IAM::Role",
-                "AWS::IAM::Policy",
-                "AWS::Logs::LogGroup",
+                'AWS::IAM::Role',
+                'AWS::IAM::Policy',
+                'AWS::Logs::LogGroup',
               ),
               { maxLength: 5 },
             ),
@@ -298,7 +298,7 @@ describe("ConfigManager - Property Tests", () => {
 
   // Feature: production-readiness, Property 3: Configuration file validation catches invalid schemas
   // Validates: Requirements 6.5
-  it("should warn when warning threshold exceeds error threshold", () => {
+  it('should warn when warning threshold exceeds error threshold', () => {
     const warningExceedsErrorArb = fc.record({
       thresholds: fc.record({
         default: fc.record({
@@ -319,9 +319,9 @@ describe("ConfigManager - Property Tests", () => {
         expect(result.warnings.length).toBeGreaterThan(0);
         const hasWarningMessage = result.warnings.some(
           (warn) =>
-            warn.includes("warning") &&
-            warn.includes("greater than") &&
-            warn.includes("error"),
+            warn.includes('warning') &&
+            warn.includes('greater than') &&
+            warn.includes('error'),
         );
         expect(hasWarningMessage).toBe(true);
       }),
@@ -331,11 +331,11 @@ describe("ConfigManager - Property Tests", () => {
 
   // Feature: production-readiness, Property 3: Configuration file validation catches invalid schemas
   // Validates: Requirements 6.5
-  it("should validate environment-specific thresholds independently", () => {
+  it('should validate environment-specific thresholds independently', () => {
     const multiEnvConfigArb = fc.record({
       thresholds: fc.record({
         environments: fc.dictionary(
-          fc.constantFrom("development", "staging", "production"),
+          fc.constantFrom('development', 'staging', 'production'),
           fc.record({
             warning: fc.option(
               fc.double({ min: -100, max: 1000, noNaN: true }),
@@ -370,7 +370,7 @@ describe("ConfigManager - Property Tests", () => {
 
           // Should mention the environment in error
           const hasEnvError = result.errors.some((err) =>
-            err.includes("thresholds.environments"),
+            err.includes('thresholds.environments'),
           );
           expect(hasEnvError).toBe(true);
         } else {

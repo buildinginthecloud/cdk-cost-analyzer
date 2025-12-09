@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { Reporter } from '../../src/reporter/Reporter';
 import { CostDelta } from '../../src/pricing/types';
+import { Reporter } from '../../src/reporter/Reporter';
 
 describe('Markdown Reporter', () => {
   const reporter = new Reporter();

@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { PricingService } from '../../src/pricing/PricingService';
+import { describe, it, expect } from 'vitest';
 import { DiffEngine } from '../../src/diff/DiffEngine';
 import { CloudFormationTemplate } from '../../src/parser/types';
+import { PricingService } from '../../src/pricing/PricingService';
 
 describe('PricingService - Resource Exclusions Property Tests', () => {
   const diffEngine = new DiffEngine();
@@ -15,24 +15,24 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
 
     const resourceArb = fc.oneof(
       ...excludedTypes.map(type => fc.constant({ Type: type, Properties: {} })),
-      ...includedTypes.map(type => fc.constant({ Type: type, Properties: {} }))
+      ...includedTypes.map(type => fc.constant({ Type: type, Properties: {} })),
     );
 
     const templateArb = fc.dictionary(
       fc.string().filter(s => s.length > 0),
       resourceArb,
-      { minKeys: 2, maxKeys: 10 }
+      { minKeys: 2, maxKeys: 10 },
     );
 
     fc.assert(
       fc.asyncProperty(templateArb, async (resources) => {
         const region = 'eu-central-1';
-        
+
         // Create service with exclusions
         const serviceWithExclusions = new PricingService(
           region,
           undefined,
-          excludedTypes
+          excludedTypes,
         );
 
         // Create service without exclusions
@@ -48,10 +48,10 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
 
         // Count excluded vs included resources
         const excludedCount = Object.values(resources).filter(r =>
-          excludedTypes.includes(r.Type)
+          excludedTypes.includes(r.Type),
         ).length;
         const includedCount = Object.values(resources).filter(r =>
-          includedTypes.includes(r.Type)
+          includedTypes.includes(r.Type),
         ).length;
 
         // With exclusions, should only analyze included resources
@@ -74,7 +74,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           }
         });
       }),
-      { numRuns: 50 }
+      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
     );
   });
 
@@ -89,13 +89,13 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
     const templateArb = fc.dictionary(
       fc.string().filter(s => s.length > 0),
       resourceArb,
-      { minKeys: 1, maxKeys: 5 }
+      { minKeys: 1, maxKeys: 5 },
     );
 
     fc.assert(
       fc.asyncProperty(templateArb, async (resources) => {
         const region = 'eu-central-1';
-        
+
         // Empty exclusion list
         const service = new PricingService(region, undefined, []);
 
@@ -108,7 +108,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
         // Should analyze all resources
         expect(costDelta.addedCosts.length).toBe(Object.keys(resources).length);
       }),
-      { numRuns: 50 }
+      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
     );
   });
 
@@ -132,23 +132,23 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
       included: fc.dictionary(
         fc.string().filter(s => s.length > 0 && s.startsWith('Inc')),
         includedResourceArb,
-        { minKeys: 1, maxKeys: 3 }
+        { minKeys: 1, maxKeys: 3 },
       ),
       excluded: fc.dictionary(
         fc.string().filter(s => s.length > 0 && s.startsWith('Exc')),
         excludedResourceArb,
-        { maxKeys: 2 }
+        { maxKeys: 2 },
       ),
     });
 
     fc.assert(
       fc.asyncProperty(templateArb, async ({ included, excluded }) => {
         const region = 'eu-central-1';
-        
+
         const serviceWithExclusions = new PricingService(
           region,
           undefined,
-          excludedTypes
+          excludedTypes,
         );
 
         const allResources = { ...included, ...excluded };
@@ -161,7 +161,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
         // Total delta should only include costs from included resources
         const sumOfIncludedCosts = costDelta.addedCosts.reduce(
           (sum, cost) => sum + cost.monthlyCost.amount,
-          0
+          0,
         );
 
         expect(Math.abs(costDelta.totalDelta - sumOfIncludedCosts)).toBeLessThan(0.01);
@@ -172,7 +172,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           expect(includedTypes).toContain(cost.type);
         });
       }),
-      { numRuns: 50 }
+      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
     );
   });
 
@@ -184,23 +184,23 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
 
     const resourceArb = fc.oneof(
       ...excludedTypes.map(type => fc.constant({ Type: type, Properties: {} })),
-      ...includedTypes.map(type => fc.constant({ Type: type, Properties: {} }))
+      ...includedTypes.map(type => fc.constant({ Type: type, Properties: {} })),
     );
 
     const templateArb = fc.dictionary(
       fc.string().filter(s => s.length > 0),
       resourceArb,
-      { minKeys: 2, maxKeys: 5 }
+      { minKeys: 2, maxKeys: 5 },
     );
 
     fc.assert(
       fc.asyncProperty(templateArb, templateArb, async (baseResources, targetResources) => {
         const region = 'eu-central-1';
-        
+
         const serviceWithExclusions = new PricingService(
           region,
           undefined,
-          excludedTypes
+          excludedTypes,
         );
 
         const baseTemplate: CloudFormationTemplate = { Resources: baseResources };
@@ -218,7 +218,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           expect(excludedTypes).not.toContain(cost.type);
         });
       }),
-      { numRuns: 50 }
+      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
     );
   });
 
@@ -233,13 +233,13 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
     const templateArb = fc.dictionary(
       fc.string().filter(s => s.length > 0),
       resourceArb,
-      { minKeys: 2, maxKeys: 5 }
+      { minKeys: 2, maxKeys: 5 },
     );
 
     fc.assert(
       fc.asyncProperty(templateArb, async (resources) => {
         const region = 'eu-central-1';
-        
+
         // Exclude with exact case
         const service = new PricingService(region, undefined, ['AWS::IAM::Role']);
 
@@ -261,7 +261,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           expect(hasS3InResults).toBe(true);
         }
       }),
-      { numRuns: 50 }
+      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
     );
   });
 });

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
+import { describe, it, expect } from 'vitest';
 import { NatGatewayCalculator } from '../../src/pricing/calculators/NatGatewayCalculator';
 import { PricingClient } from '../../src/pricing/PricingClient';
 
@@ -31,7 +31,7 @@ describe('NatGatewayCalculator - Property Tests', () => {
         expect(assumptionText).toMatch(/hour|hourly/);
         expect(assumptionText).toMatch(/data|processing|gb/);
       }),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -59,14 +59,14 @@ describe('NatGatewayCalculator - Property Tests', () => {
           resource,
           region,
           pricingClient,
-          { dataProcessedGB: dataGB1 }
+          { dataProcessedGB: dataGB1 },
         );
 
         const cost2 = await calculator.calculateCost(
           resource,
           region,
           pricingClient,
-          { dataProcessedGB: dataGB2 }
+          { dataProcessedGB: dataGB2 },
         );
 
         // Higher data processing should result in higher or equal cost
@@ -80,7 +80,7 @@ describe('NatGatewayCalculator - Property Tests', () => {
         expect(cost1.amount).toBeGreaterThanOrEqual(0);
         expect(cost2.amount).toBeGreaterThanOrEqual(0);
       }),
-      { numRuns: 30 }
+      { numRuns: 30 },
     );
   });
 
@@ -96,13 +96,13 @@ describe('NatGatewayCalculator - Property Tests', () => {
     fc.assert(
       fc.asyncProperty(natGatewayResourceArb, async (resource) => {
         const region = 'eu-central-1';
-        
+
         // Even with zero data processing, should have hourly cost
         const cost = await calculator.calculateCost(
           resource,
           region,
           pricingClient,
-          { dataProcessedGB: 0 }
+          { dataProcessedGB: 0 },
         );
 
         // Should have some cost from hourly charges
@@ -111,7 +111,7 @@ describe('NatGatewayCalculator - Property Tests', () => {
         expect(cost.currency).toBe('USD');
         expect(cost.assumptions.length).toBeGreaterThan(0);
       }),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -141,14 +141,14 @@ describe('NatGatewayCalculator - Property Tests', () => {
           resource,
           region,
           pricingClient,
-          { dataProcessedGB: dataGB }
+          { dataProcessedGB: dataGB },
         );
 
         // Assumptions should mention the data processing amount
         const assumptionText = cost.assumptions.join(' ');
         expect(assumptionText).toContain(dataGB.toString());
       }),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 });

@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
+import { describe, it, expect } from 'vitest';
 
 describe('Repository Structure - Property Tests', () => {
   const projectRoot = path.resolve(__dirname, '..');
@@ -8,7 +8,7 @@ describe('Repository Structure - Property Tests', () => {
   /**
    * Property 1: No temporary or backup file suffixes
    * Validates: Requirements 1.4, 5.3
-   * 
+   *
    * Ensures no files with temporary suffixes exist in the repository.
    * This maintains a clean repository structure by preventing temporary
    * files from being committed to version control.
@@ -50,7 +50,7 @@ describe('Repository Structure - Property Tests', () => {
   /**
    * Property 2: All documentation links are valid
    * Validates: Requirements 2.3, 3.4
-   * 
+   *
    * Verifies that all markdown file references in documentation are valid.
    * This ensures documentation remains consistent after file reorganization.
    */
@@ -81,7 +81,7 @@ describe('Repository Structure - Property Tests', () => {
 
     // Regex patterns for different link types
     const relativeLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-    
+
     for (const markdownFile of markdownFiles) {
       const content = fs.readFileSync(markdownFile, 'utf-8');
       const relativePath = path.relative(projectRoot, markdownFile);
@@ -114,7 +114,7 @@ describe('Repository Structure - Property Tests', () => {
           brokenLinks.push({
             file: relativePath,
             link: linkPath,
-            reason: `Target does not exist: ${path.relative(projectRoot, targetPath)}`
+            reason: `Target does not exist: ${path.relative(projectRoot, targetPath)}`,
           });
         }
       }
@@ -133,7 +133,7 @@ describe('Repository Structure - Property Tests', () => {
   /**
    * Property 3: Functional files are preserved
    * Validates: Requirements 3.3, 4.5
-   * 
+   *
    * Ensures all critical functional files remain in the repository after cleanup.
    * This prevents accidental deletion of important source code, tests, or configuration.
    */
@@ -143,7 +143,7 @@ describe('Repository Structure - Property Tests', () => {
       'package.json',
       'tsconfig.json',
       'vitest.config.mts',
-      'README.md'
+      'README.md',
     ];
 
     const missingItems: string[] = [];
@@ -170,13 +170,13 @@ describe('Repository Structure - Property Tests', () => {
   /**
    * Property 4: Documentation files are in docs directory
    * Validates: Requirements 2.1, 2.2
-   * 
+   *
    * Verifies that supplementary documentation has been moved to the docs/ folder.
    */
   it('should have documentation files in docs directory', () => {
     const expectedDocs = [
       'docs/IMPLEMENTATION.md',
-      'docs/DEVELOPMENT.md'
+      'docs/DEVELOPMENT.md',
     ];
 
     const missingDocs: string[] = [];
@@ -194,7 +194,7 @@ describe('Repository Structure - Property Tests', () => {
   /**
    * Property 5: Example files are organized in examples directory
    * Validates: Requirements 3.1, 3.2, 3.5
-   * 
+   *
    * Verifies that example templates and usage scripts are in the examples/ folder.
    */
   it('should have example files organized in examples directory', () => {
@@ -203,7 +203,7 @@ describe('Repository Structure - Property Tests', () => {
       'examples/simple/target.json',
       'examples/complex/base.json',
       'examples/complex/target.json',
-      'examples/api-usage.js'
+      'examples/api-usage.js',
     ];
 
     const missingExamples: string[] = [];
@@ -221,7 +221,7 @@ describe('Repository Structure - Property Tests', () => {
   /**
    * Property 6: Root directory contains only essential files
    * Validates: Requirements 1.1, 1.4
-   * 
+   *
    * Ensures the root directory is clean and contains only essential files,
    * with documentation and examples moved to their respective subdirectories.
    */
@@ -234,22 +234,32 @@ describe('Repository Structure - Property Tests', () => {
       'node_modules',
       'docs',
       'examples',
-      'test-cdk-project',
+      'test-cdk-project', // Legacy test project, kept for backwards compatibility
       '.git',
       '.kiro',
-      
+
       // Configuration files
       'package.json',
       'package-lock.json',
       'tsconfig.json',
+      'tsconfig.dev.json', // Projen dev config
       'vitest.config.mts',
       '.gitignore',
       '.npmignore',
-      
+      '.gitattributes', // Projen generated
+      '.eslintrc.json', // Projen generated
+      '.projenrc.ts', // Projen configuration
+      '.projen', // Projen metadata
+      'yarn.lock', // Projen uses yarn
+
       // Documentation
       'README.md',
       'LICENSE',
-      'LICENSE.md'
+      'LICENSE.md',
+      'CHANGELOG.md', // Project changelog
+
+      // CI/CD
+      '.gitlab-ci.yml', // GitLab CI configuration
     ]);
 
     const rootEntries = fs.readdirSync(projectRoot);

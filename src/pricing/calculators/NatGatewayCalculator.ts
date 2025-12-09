@@ -14,7 +14,7 @@ export class NatGatewayCalculator implements ResourceCostCalculator {
   async calculateCost(
     _resource: ResourceWithId,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     try {
       // Get hourly rate

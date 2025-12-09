@@ -1,0 +1,38 @@
+# CDK Cost Analyzer Configuration for Data Infrastructure
+
+thresholds:
+  default:
+    warning: 100   # USD per month
+    error: 500     # USD per month
+
+usageAssumptions:
+  rds:
+    instanceClass: db.t3.medium
+    storageGB: 100
+    backupRetentionDays: 7
+    multiAZ: false
+
+  elasticache:
+    nodeType: cache.t3.micro
+    numNodes: 2
+    engineType: redis
+
+  s3:
+    storageGB: 1000
+    getRequests: 500000
+    putRequests: 50000
+    dataTransferGB: 200
+
+synthesis:
+  appPath: .
+  outputPath: cdk.out
+
+exclusions:
+  resourceTypes:
+    - AWS::IAM::Role
+    - AWS::IAM::Policy
+    - AWS::EC2::SecurityGroup
+
+cache:
+  enabled: true
+  durationHours: 24

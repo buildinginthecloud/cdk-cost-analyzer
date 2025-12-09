@@ -9,7 +9,7 @@ export class ECSCalculator implements ResourceCostCalculator {
   async calculateCost(
     resource: ResourceWithId,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     const desiredCount = (resource.properties.DesiredCount as number) || 1;
     const launchType = (resource.properties.LaunchType as string) || 'FARGATE';
@@ -32,7 +32,7 @@ export class ECSCalculator implements ResourceCostCalculator {
     _resource: ResourceWithId,
     desiredCount: number,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     try {
       // Default assumptions for Fargate task

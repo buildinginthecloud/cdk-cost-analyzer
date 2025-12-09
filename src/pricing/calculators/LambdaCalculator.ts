@@ -13,7 +13,7 @@ export class LambdaCalculator implements ResourceCostCalculator {
   async calculateCost(
     resource: ResourceWithId,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     const memorySize = (resource.properties.MemorySize as number) || this.DEFAULT_MEMORY_MB;
 

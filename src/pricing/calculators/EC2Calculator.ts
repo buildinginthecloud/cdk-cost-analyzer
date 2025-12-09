@@ -9,7 +9,7 @@ export class EC2Calculator implements ResourceCostCalculator {
   async calculateCost(
     resource: ResourceWithId,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     const instanceType = resource.properties.InstanceType as string;
 

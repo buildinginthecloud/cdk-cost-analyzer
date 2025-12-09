@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { ThresholdEnforcer } from '../../src/threshold/ThresholdEnforcer';
+import { describe, it, expect } from 'vitest';
 import { ThresholdConfig } from '../../src/config/types';
 import { ResourceCost, ModifiedResourceCost } from '../../src/pricing/types';
+import { ThresholdEnforcer } from '../../src/threshold/ThresholdEnforcer';
 
 describe('ThresholdEnforcer - Property Tests', () => {
   const enforcer = new ThresholdEnforcer();
@@ -10,7 +10,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
   const monthlyCostArb = fc.record({
     amount: fc.double({ min: 0, max: 1000, noNaN: true }),
     currency: fc.constant('USD'),
-    confidence: fc.constantFrom('high', 'medium', 'low', 'unknown'),
+    confidence: fc.constantFrom('high', 'medium', 'low', 'unknown') as fc.Arbitrary<'high' | 'medium' | 'low' | 'unknown'>,
     assumptions: fc.array(fc.string()),
   });
 
@@ -53,21 +53,21 @@ describe('ThresholdEnforcer - Property Tests', () => {
           costDelta,
           addedResources,
           modifiedResources,
-          config as ThresholdConfig
+          config as ThresholdConfig,
         );
 
         const result2 = enforcer.evaluateThreshold(
           costDelta,
           addedResources,
           modifiedResources,
-          config as ThresholdConfig
+          config as ThresholdConfig,
         );
 
         const result3 = enforcer.evaluateThreshold(
           costDelta,
           addedResources,
           modifiedResources,
-          config as ThresholdConfig
+          config as ThresholdConfig,
         );
 
         // All results should be identical
@@ -84,7 +84,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
         expect(result1.recommendations).toEqual(result2.recommendations);
         expect(result1.recommendations).toEqual(result3.recommendations);
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -107,7 +107,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
             costDelta,
             [],
             [],
-            config as ThresholdConfig
+            config as ThresholdConfig,
           );
 
           const warning = config.default.warning!;
@@ -131,9 +131,9 @@ describe('ThresholdEnforcer - Property Tests', () => {
 
           // Delta should always match input
           expect(result.delta).toBe(costDelta);
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -164,7 +164,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
         expect(result3.level).toBe('none');
         expect(result3.delta).toBe(costDelta);
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -190,7 +190,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
           highDelta,
           [],
           [],
-          config as ThresholdConfig
+          config as ThresholdConfig,
         );
 
         // Should be classified as error, not warning
@@ -199,7 +199,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
         expect(result.threshold).toBe(error);
         expect(result.threshold).not.toBe(warning);
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -225,21 +225,21 @@ describe('ThresholdEnforcer - Property Tests', () => {
             highDelta,
             addedResources,
             [],
-            config as ThresholdConfig
+            config as ThresholdConfig,
           );
 
           // Should have recommendations when threshold exceeded
           expect(result.recommendations.length).toBeGreaterThan(0);
           expect(Array.isArray(result.recommendations)).toBe(true);
-          
+
           // Recommendations should be strings
           result.recommendations.forEach(rec => {
             expect(typeof rec).toBe('string');
             expect(rec.length).toBeGreaterThan(0);
           });
-        }
+        },
       ),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -277,7 +277,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
           [],
           [],
           config as ThresholdConfig,
-          'production'
+          'production',
         );
 
         // Should use default thresholds when no environment specified
@@ -285,7 +285,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
           costDelta,
           [],
           [],
-          config as ThresholdConfig
+          config as ThresholdConfig,
         );
 
         // Should use development thresholds when environment is specified
@@ -294,7 +294,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
           [],
           [],
           config as ThresholdConfig,
-          'development'
+          'development',
         );
 
         // Production should be error (100 > any value in 40-60 range)
@@ -313,7 +313,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
         // Verify environment selection works - different thresholds used
         expect(prodResult.threshold).not.toBe(defaultResult.threshold);
       }),
-      { numRuns: 50 }
+      { numRuns: 50 },
     );
   });
 
@@ -335,7 +335,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
           costDelta,
           [],
           [],
-          config as ThresholdConfig
+          config as ThresholdConfig,
         );
 
         // Negative deltas (cost savings) should always pass
@@ -343,7 +343,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
         expect(result.level).toBe('none');
         expect(result.delta).toBe(costDelta);
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -361,7 +361,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
 
     // Evaluate multiple times
     const results = Array.from({ length: 5 }, () =>
-      enforcer.evaluateThreshold(costDelta, [], [], config)
+      enforcer.evaluateThreshold(costDelta, [], [], config),
     );
 
     // All messages should be identical

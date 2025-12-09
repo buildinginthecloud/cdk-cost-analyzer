@@ -1,8 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
 import * as fc from 'fast-check';
+import { describe, it, expect, vi } from 'vitest';
+import { APIGatewayCalculator } from '../../src/pricing/calculators/APIGatewayCalculator';
 import { DynamoDBCalculator } from '../../src/pricing/calculators/DynamoDBCalculator';
 import { ECSCalculator } from '../../src/pricing/calculators/ECSCalculator';
-import { APIGatewayCalculator } from '../../src/pricing/calculators/APIGatewayCalculator';
 import { PricingClient } from '../../src/pricing/types';
 
 describe('New Calculators - Property-Based Tests', () => {
@@ -28,9 +28,9 @@ describe('New Calculators - Property-Based Tests', () => {
                 ProvisionedThroughput:
                   billingMode === 'PROVISIONED'
                     ? {
-                        ReadCapacityUnits: readCapacity,
-                        WriteCapacityUnits: writeCapacity,
-                      }
+                      ReadCapacityUnits: readCapacity,
+                      WriteCapacityUnits: writeCapacity,
+                    }
                     : undefined,
               },
             };
@@ -41,8 +41,8 @@ describe('New Calculators - Property-Based Tests', () => {
             expect(result.currency).toBe('USD');
             expect(['high', 'medium', 'low', 'unknown']).toContain(result.confidence);
             expect(Array.isArray(result.assumptions)).toBe(true);
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -81,17 +81,17 @@ describe('New Calculators - Property-Based Tests', () => {
             const lowResult = await calculator.calculateCost(
               lowCapacityResource,
               'us-east-1',
-              mockPricingClient
+              mockPricingClient,
             );
             const highResult = await calculator.calculateCost(
               highCapacityResource,
               'us-east-1',
-              mockPricingClient
+              mockPricingClient,
             );
 
             expect(highResult.amount).toBeGreaterThanOrEqual(lowResult.amount);
-          }
-        )
+          },
+        ),
       );
     });
   });
@@ -120,8 +120,8 @@ describe('New Calculators - Property-Based Tests', () => {
             expect(result.currency).toBe('USD');
             expect(['high', 'medium', 'low', 'unknown']).toContain(result.confidence);
             expect(Array.isArray(result.assumptions)).toBe(true);
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -152,19 +152,19 @@ describe('New Calculators - Property-Based Tests', () => {
             const lowResult = await calculator.calculateCost(
               lowCountResource,
               'us-east-1',
-              mockPricingClient
+              mockPricingClient,
             );
             const highResult = await calculator.calculateCost(
               highCountResource,
               'us-east-1',
-              mockPricingClient
+              mockPricingClient,
             );
 
             if (lowResult.confidence === 'medium' && highResult.confidence === 'medium') {
               expect(highResult.amount).toBeGreaterThan(lowResult.amount);
             }
-          }
-        )
+          },
+        ),
       );
     });
   });
@@ -190,8 +190,8 @@ describe('New Calculators - Property-Based Tests', () => {
             expect(result.currency).toBe('USD');
             expect(['high', 'medium', 'low', 'unknown']).toContain(result.confidence);
             expect(Array.isArray(result.assumptions)).toBe(true);
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -201,8 +201,8 @@ describe('New Calculators - Property-Based Tests', () => {
           fc.constantFrom('AWS::ApiGateway::RestApi', 'AWS::ApiGatewayV2::Api'),
           (resourceType) => {
             expect(calculator.supports(resourceType)).toBe(true);
-          }
-        )
+          },
+        ),
       );
     });
   });
@@ -224,8 +224,8 @@ describe('New Calculators - Property-Based Tests', () => {
               calcIndex === 0
                 ? 'AWS::DynamoDB::Table'
                 : calcIndex === 1
-                ? 'AWS::ECS::Service'
-                : 'AWS::ApiGateway::RestApi';
+                  ? 'AWS::ECS::Service'
+                  : 'AWS::ApiGateway::RestApi';
 
             const resource = {
               logicalId: 'TestResource',
@@ -240,8 +240,8 @@ describe('New Calculators - Property-Based Tests', () => {
             expect(['high', 'medium', 'low', 'unknown']).toContain(result.confidence);
             expect(Array.isArray(result.assumptions)).toBe(true);
             expect(result.assumptions.length).toBeGreaterThan(0);
-          }
-        )
+          },
+        ),
       );
     });
   });

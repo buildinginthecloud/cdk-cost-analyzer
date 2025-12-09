@@ -10,9 +10,9 @@ describe('TemplateParser', () => {
         Resources: {
           MyBucket: {
             Type: 'AWS::S3::Bucket',
-            Properties: {}
-          }
-        }
+            Properties: {},
+          },
+        },
       });
 
       const result = parser.parse(template);
@@ -29,15 +29,15 @@ describe('TemplateParser', () => {
           MyInstance: {
             Type: 'AWS::EC2::Instance',
             Properties: {
-              InstanceType: 't3.micro'
-            }
-          }
+              InstanceType: 't3.micro',
+            },
+          },
         },
         Outputs: {
           InstanceId: {
-            Value: { Ref: 'MyInstance' }
-          }
-        }
+            Value: { Ref: 'MyInstance' },
+          },
+        },
       });
 
       const result = parser.parse(template);
@@ -107,7 +107,7 @@ Outputs:
     it('should throw error for template without Resources section', () => {
       const template = JSON.stringify({
         AWSTemplateFormatVersion: '2010-09-09',
-        Description: 'Test template'
+        Description: 'Test template',
       });
 
       expect(() => parser.parse(template)).toThrow(TemplateParseError);

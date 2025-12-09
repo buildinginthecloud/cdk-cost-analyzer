@@ -23,7 +23,7 @@ export class TemplateParser implements ITemplateParser {
         template = yaml.load(content);
       } catch (yamlError) {
         throw new TemplateParseError(
-          `Failed to parse template as JSON or YAML: ${yamlError instanceof Error ? yamlError.message : String(yamlError)}`
+          `Failed to parse template as JSON or YAML: ${yamlError instanceof Error ? yamlError.message : String(yamlError)}`,
         );
       }
     }
