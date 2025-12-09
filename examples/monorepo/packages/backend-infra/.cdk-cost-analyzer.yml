@@ -1,0 +1,34 @@
+# CDK Cost Analyzer Configuration for Backend Infrastructure
+
+thresholds:
+  default:
+    warning: 50   # USD per month
+    error: 200    # USD per month
+
+usageAssumptions:
+  lambda:
+    invocationsPerMonth: 2000000
+    averageDurationMs: 300
+    memoryMB: 512
+
+  apiGateway:
+    requestsPerMonth: 2000000
+
+  dynamodb:
+    readCapacityUnits: 10
+    writeCapacityUnits: 10
+    storageGB: 25
+
+synthesis:
+  appPath: .
+  outputPath: cdk.out
+
+exclusions:
+  resourceTypes:
+    - AWS::IAM::Role
+    - AWS::IAM::Policy
+    - AWS::Logs::LogGroup
+
+cache:
+  enabled: true
+  durationHours: 24

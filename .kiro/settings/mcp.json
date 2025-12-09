@@ -4,7 +4,7 @@
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp", "--api-key", "ctx7sk-cd86342d-1e80-4236-b12b-7697ce5fe257"],
       "env": {},
-      "disabled": false,
+      "disabled": true,
       "autoApprove": []
     },
     "aws-docs": {

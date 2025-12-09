@@ -1,0 +1,27 @@
+*.js
+!jest.config.js
+*.d.ts
+node_modules
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+dist
+
+# Cost analyzer cache
+.cdk-cost-analyzer-cache/
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Package-specific
+packages/*/cdk.out
+packages/*/dist
+packages/*/node_modules

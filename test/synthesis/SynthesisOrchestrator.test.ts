@@ -18,9 +18,9 @@ describe('SynthesisOrchestrator', () => {
     });
 
     // Integration test with actual CDK project
-    it('should synthesize test CDK project', async () => {
+    it('should synthesize single-stack example project', async () => {
       const result = await orchestrator.synthesize({
-        cdkAppPath: './test-cdk-project',
+        cdkAppPath: './examples/single-stack',
       });
 
       // Should either succeed or fail gracefully
@@ -44,7 +44,7 @@ describe('SynthesisOrchestrator', () => {
 
     it('should accept custom output path option', async () => {
       const result = await orchestrator.synthesize({
-        cdkAppPath: './test-cdk-project',
+        cdkAppPath: './examples/single-stack',
         outputPath: 'custom.out',
       });
 
@@ -54,7 +54,7 @@ describe('SynthesisOrchestrator', () => {
 
     it('should accept custom command option', async () => {
       const result = await orchestrator.synthesize({
-        cdkAppPath: './test-cdk-project',
+        cdkAppPath: './examples/single-stack',
         customCommand: 'echo test',
       });
 
@@ -64,7 +64,7 @@ describe('SynthesisOrchestrator', () => {
 
     it('should accept context option', async () => {
       const result = await orchestrator.synthesize({
-        cdkAppPath: './test-cdk-project',
+        cdkAppPath: './examples/single-stack',
         context: {
           environment: 'test',
           region: 'us-east-1',

@@ -1,0 +1,126 @@
+# GitLab CI/CD Pipeline with CDK Cost Analysis
+# This pipeline runs cost analysis on merge requests to prevent unexpected infrastructure costs
+
+stages:
+  - build
+  - test
+  - cost-analysis
+  - deploy
+
+variables:
+  AWS_REGION: us-east-1
+  CDK_APP_PATH: examples/single-stack
+  NODE_VERSION: "18"
+
+# Install dependencies for the application
+build:
+  stage: build
+  image: node:${NODE_VERSION}
+  script:
+    - echo "Installing dependencies..."
+    - npm ci
+    - cd ${CDK_APP_PATH}
+    - npm ci
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+      - ${CDK_APP_PATH}/node_modules/
+  artifacts:
+    paths:
+      - node_modules/
+      - ${CDK_APP_PATH}/node_modules/
+    expire_in: 1 hour
+
+# Run application tests
+test:
+  stage: test
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  script:
+    - cd ${CDK_APP_PATH}
+    - npm test
+  only:
+    - merge_requests
+    - main
+
+# Analyze infrastructure cost changes for merge requests
+cost-analysis:
+  stage: cost-analysis
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  before_script:
+    # Install CDK Cost Analyzer globally
+    - npm install -g cdk-cost-analyzer
+    # Verify AWS credentials are configured
+    - |
+      if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+        echo "ERROR: AWS credentials not configured"
+        echo "Please configure AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY as CI/CD variables"
+        exit 1
+      fi
+  script:
+    - echo "Analyzing infrastructure cost changes..."
+    - cd ${CDK_APP_PATH}
+    # Run cost analysis with automatic CDK synthesis
+    - |
+      cdk-cost-analyzer pipeline \
+        --base-branch ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME} \
+        --target-branch ${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME} \
+        --cdk-app-path . \
+        --region ${AWS_REGION} \
+        --format markdown \
+        --post-to-gitlab
+  cache:
+    key: pricing-cache
+    paths:
+      - .cdk-cost-analyzer-cache/
+  artifacts:
+    reports:
+      # Store cost analysis report as artifact
+      dotenv: cost-analysis.env
+    paths:
+      - cost-report.md
+    expire_in: 30 days
+  only:
+    - merge_requests
+  allow_failure: false  # Fail pipeline if cost threshold exceeded
+
+# Deploy to AWS (requires manual approval if cost threshold exceeded)
+deploy:
+  stage: deploy
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  before_script:
+    - npm install -g aws-cdk
+  script:
+    - cd ${CDK_APP_PATH}
+    - echo "Deploying infrastructure to AWS..."
+    - cdk deploy --require-approval never
+  only:
+    - main
+  when: manual
+  environment:
+    name: production
+    action: start
+
+# Optional: Deploy to development environment automatically
+deploy:dev:
+  stage: deploy
+  image: node:${NODE_VERSION}
+  dependencies:
+    - build
+  before_script:
+    - npm install -g aws-cdk
+  script:
+    - cd ${CDK_APP_PATH}
+    - echo "Deploying to development environment..."
+    - cdk deploy --require-approval never
+  only:
+    - develop
+  environment:
+    name: development
+    action: start

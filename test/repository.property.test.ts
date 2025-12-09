@@ -234,7 +234,7 @@ describe('Repository Structure - Property Tests', () => {
       'node_modules',
       'docs',
       'examples',
-      'test-cdk-project',
+      'test-cdk-project', // Legacy test project, kept for backwards compatibility
       '.git',
       '.kiro',
 

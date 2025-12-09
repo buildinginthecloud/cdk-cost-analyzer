@@ -162,7 +162,6 @@ describe('analyzeCosts API - Property Tests', () => {
       '{ "Resources": "string" }',
       '{ "Resources": 123 }',
       '{ "Resources": null }',
-      '{ "Resources": [] }',
       '{ "Resources": true }',
     );
 

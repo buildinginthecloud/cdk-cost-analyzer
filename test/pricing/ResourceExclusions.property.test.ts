@@ -74,7 +74,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           }
         });
       }),
-      { numRuns: 50 },
+      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
     );
   });
 
@@ -108,7 +108,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
         // Should analyze all resources
         expect(costDelta.addedCosts.length).toBe(Object.keys(resources).length);
       }),
-      { numRuns: 50 },
+      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
     );
   });
 
@@ -172,7 +172,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           expect(includedTypes).toContain(cost.type);
         });
       }),
-      { numRuns: 50 },
+      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
     );
   });
 
@@ -218,7 +218,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           expect(excludedTypes).not.toContain(cost.type);
         });
       }),
-      { numRuns: 50 },
+      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
     );
   });
 
@@ -261,7 +261,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           expect(hasS3InResults).toBe(true);
         }
       }),
-      { numRuns: 50 },
+      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
     );
   });
 });

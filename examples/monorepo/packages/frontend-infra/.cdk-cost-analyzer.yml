@@ -1,0 +1,31 @@
+# CDK Cost Analyzer Configuration for Frontend Infrastructure
+
+thresholds:
+  default:
+    warning: 30   # USD per month
+    error: 100    # USD per month
+
+usageAssumptions:
+  s3:
+    storageGB: 50
+    getRequests: 100000
+    putRequests: 5000
+    dataTransferGB: 100
+
+  cloudfront:
+    dataTransferGB: 200
+    requests: 5000000
+
+synthesis:
+  appPath: .
+  outputPath: cdk.out
+
+exclusions:
+  resourceTypes:
+    - AWS::IAM::Role
+    - AWS::IAM::Policy
+    - AWS::CertificateManager::Certificate
+
+cache:
+  enabled: true
+  durationHours: 24

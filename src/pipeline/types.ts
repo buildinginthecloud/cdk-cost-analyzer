@@ -7,6 +7,7 @@ export interface PipelineOptions {
   baseBranch?: string;
   targetBranch?: string;
   cdkAppPath?: string;
+  outputPath?: string;
   configPath?: string;
   region?: string;
   synthesize?: boolean;

@@ -105,8 +105,13 @@ export class PricingService implements IPricingService {
   }
 
   async getCostDelta(diff: ResourceDiff, region: string): Promise<CostDelta> {
+    // Filter out excluded resources before processing
+    const filteredAdded = diff.added.filter(r => !this.excludedResourceTypes.has(r.type));
+    const filteredRemoved = diff.removed.filter(r => !this.excludedResourceTypes.has(r.type));
+    const filteredModified = diff.modified.filter(r => !this.excludedResourceTypes.has(r.type));
+
     const addedCosts = await Promise.all(
-      diff.added.map(async (resource) => {
+      filteredAdded.map(async (resource) => {
         const monthlyCost = await this.getResourceCost(resource, region);
         return {
           logicalId: resource.logicalId,
@@ -117,7 +122,7 @@ export class PricingService implements IPricingService {
     );
 
     const removedCosts = await Promise.all(
-      diff.removed.map(async (resource) => {
+      filteredRemoved.map(async (resource) => {
         const monthlyCost = await this.getResourceCost(resource, region);
         return {
           logicalId: resource.logicalId,
@@ -128,7 +133,7 @@ export class PricingService implements IPricingService {
     );
 
     const modifiedCosts = await Promise.all(
-      diff.modified.map(async (resource) => {
+      filteredModified.map(async (resource) => {
         const oldResource: ResourceWithId = {
           logicalId: resource.logicalId,
           type: resource.type,

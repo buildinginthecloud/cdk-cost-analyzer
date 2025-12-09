@@ -16,7 +16,7 @@ export class SynthesisOrchestrator {
       const outputPath = options.outputPath || this.DEFAULT_OUTPUT_PATH;
       const command = options.customCommand || 'npx cdk synth';
 
-      await this.executeSynthesis(command, options.cdkAppPath, options.context);
+      await this.executeSynthesis(command, options.cdkAppPath, options.context, outputPath);
 
       const fullOutputPath = path.join(options.cdkAppPath, outputPath);
       const { templatePaths, stackNames } = await this.findTemplates(fullOutputPath);
@@ -60,6 +60,7 @@ export class SynthesisOrchestrator {
     command: string,
     cdkAppPath: string,
     context?: Record<string, string>,
+    outputPath?: string,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       const [cmd, ...args] = command.split(' ');
@@ -70,6 +71,11 @@ export class SynthesisOrchestrator {
         for (const [key, value] of Object.entries(context)) {
           allArgs.push('-c', `${key}=${value}`);
         }
+      }
+
+      // Add output path if specified
+      if (outputPath) {
+        allArgs.push('--output', outputPath);
       }
 
       const proc = spawn(cmd, allArgs, {

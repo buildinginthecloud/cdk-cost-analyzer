@@ -243,27 +243,27 @@
   - Update installation instructions
   - _Requirements: 3.1, 3.2, 3.3, 22.1, 22.2, 22.3, 22.4_
 
-- [ ] 11. Create example projects
-- [ ] 11.1 Create example single-stack CDK project (examples/single-stack/)
+- [x] 11. Create example projects
+- [x] 11.1 Create example single-stack CDK project (examples/single-stack/)
   - Create minimal CDK application with basic infrastructure
   - Add .cdk-cost-analyzer.yml configuration with thresholds
   - Add .gitlab-ci.yml with cost analysis pipeline
   - Add README with setup and usage instructions
   - _Requirements: 3.1, 3.2, 14.1, 14.2_
 
-- [ ] 11.2 Create example multi-stack CDK project (examples/multi-stack/)
+- [x] 11.2 Create example multi-stack CDK project (examples/multi-stack/)
   - Create CDK application with multiple stacks (e.g., networking, compute, storage)
   - Add configuration for multi-stack analysis
   - Add .gitlab-ci.yml with cost analysis pipeline
   - Add README with setup and usage instructions
   - _Requirements: 2.1, 2.2, 2.3, 3.2, 14.1, 14.2_
 
-- [ ] 11.3 Create example monorepo project (examples/monorepo/)
+- [x] 11.3 Create example monorepo project (examples/monorepo/)
   - Create monorepo structure with multiple CDK applications
   - Add configuration for monorepo structure
   - Add .gitlab-ci.yml with parallel cost analysis for each app
   - Add README with setup and usage instructions
   - _Requirements: 3.3, 14.4, 14.5_
 
-- [ ] 12. Final checkpoint - Ensure all tests pass
+- [x] 12. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.

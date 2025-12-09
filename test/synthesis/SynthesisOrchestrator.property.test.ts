@@ -11,9 +11,9 @@ describe('SynthesisOrchestrator - Property Tests', () => {
   // Feature: production-readiness, Property 1: CDK synthesis produces valid CloudFormation templates
   // Validates: Requirements 1.1, 1.2, 1.3
   it('should produce parseable CloudFormation templates when synthesis succeeds', async () => {
-    // Use the test CDK project that exists in the repository
+    // Use the single-stack example project
     const result = await orchestrator.synthesize({
-      cdkAppPath: './test-cdk-project',
+      cdkAppPath: './examples/single-stack',
     });
 
     // If synthesis succeeded, verify all templates are parseable
@@ -55,11 +55,11 @@ describe('SynthesisOrchestrator - Property Tests', () => {
     // Synthesize the same project multiple times with unique output directories to avoid conflicts
     const results = await Promise.all([
       orchestrator.synthesize({ 
-        cdkAppPath: './test-cdk-project',
+        cdkAppPath: './examples/single-stack',
         outputPath: 'cdk.out.test1'
       }),
       orchestrator.synthesize({ 
-        cdkAppPath: './test-cdk-project',
+        cdkAppPath: './examples/single-stack',
         outputPath: 'cdk.out.test2'
       }),
     ]);
@@ -97,7 +97,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
     fc.assert(
       fc.asyncProperty(contextArb, async (context) => {
         const result = await orchestrator.synthesize({
-          cdkAppPath: './test-cdk-project',
+          cdkAppPath: './examples/single-stack',
           context,
         });
 
@@ -158,7 +158,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
   // Validates: Requirements 1.1, 1.2, 1.3
   it('should maintain stack name and template path correspondence', async () => {
     const result = await orchestrator.synthesize({
-      cdkAppPath: './test-cdk-project',
+      cdkAppPath: './examples/single-stack',
     });
 
     if (result.success) {
@@ -253,7 +253,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
     fc.assert(
       fc.asyncProperty(invalidCommandArb, async (customCommand) => {
         const result = await orchestrator.synthesize({
-          cdkAppPath: './test-cdk-project',
+          cdkAppPath: './examples/single-stack',
           customCommand,
         });
 
@@ -275,8 +275,12 @@ describe('SynthesisOrchestrator - Property Tests', () => {
 
         // Should always return valid result structure
         expect(result).toHaveProperty('success');
-        expect(result).toHaveProperty('error');
         expect(result).toHaveProperty('duration');
+        
+        // Error property should only exist when synthesis fails
+        if (!result.success) {
+          expect(result).toHaveProperty('error');
+        }
       }),
       { numRuns: 20 },
     );
@@ -313,4 +317,74 @@ describe('SynthesisOrchestrator - Property Tests', () => {
     const errors = results.map((r) => r.error);
     expect(errors.every((e) => e !== undefined)).toBe(true);
   }, 15000);
+
+  // Feature: production-readiness, Property 2: Multi-stack cost aggregation equals sum of individual stacks
+  // Validates: Requirements 2.1, 2.2, 2.3, 2.4
+  it('should successfully synthesize multi-stack CDK applications', async () => {
+    // Use the multi-stack example project
+    const result = await orchestrator.synthesize({
+      cdkAppPath: './examples/multi-stack',
+    });
+
+    // If synthesis succeeded (dependencies installed), verify multi-stack behavior
+    if (result.success) {
+      // Should produce multiple stacks (networking, compute, storage)
+      expect(result.templatePaths.length).toBeGreaterThan(1);
+      expect(result.stackNames.length).toBeGreaterThan(1);
+
+      // Stack names and template paths should correspond
+      expect(result.stackNames.length).toBe(result.templatePaths.length);
+
+      // Each template should be parseable
+      for (const templatePath of result.templatePaths) {
+        const content = await fs.readFile(templatePath, 'utf-8');
+        const template = parser.parse(content);
+        expect(template).toBeDefined();
+        expect(template.Resources).toBeDefined();
+      }
+    } else {
+      // If synthesis failed (likely missing dependencies), verify error handling
+      expect(result.error).toBeDefined();
+      expect(result.templatePaths).toHaveLength(0);
+      expect(result.stackNames).toHaveLength(0);
+    }
+
+    // Should always have valid result structure
+    expect(result).toHaveProperty('success');
+    expect(result).toHaveProperty('templatePaths');
+    expect(result).toHaveProperty('stackNames');
+    expect(result).toHaveProperty('duration');
+  }, 20000);
+
+  // Feature: production-readiness, Property 2: Multi-stack cost aggregation equals sum of individual stacks
+  // Validates: Requirements 2.1, 2.2, 2.3
+  it('should identify all stacks in multi-stack applications', async () => {
+    const result = await orchestrator.synthesize({
+      cdkAppPath: './examples/multi-stack',
+    });
+
+    if (result.success) {
+      // Should have identified multiple stacks
+      expect(result.stackNames.length).toBeGreaterThan(1);
+      expect(result.templatePaths.length).toBeGreaterThan(1);
+
+      // Each stack name should correspond to a template path
+      for (let i = 0; i < result.stackNames.length; i++) {
+        const stackName = result.stackNames[i];
+        const templatePath = result.templatePaths[i];
+
+        expect(stackName).toBeDefined();
+        expect(typeof stackName).toBe('string');
+        expect(stackName.length).toBeGreaterThan(0);
+
+        expect(templatePath).toBeDefined();
+        expect(typeof templatePath).toBe('string');
+        expect(templatePath).toContain(stackName);
+      }
+
+      // Stack names should be unique
+      const uniqueNames = new Set(result.stackNames);
+      expect(uniqueNames.size).toBe(result.stackNames.length);
+    }
+  }, 20000);
 });

@@ -8,12 +8,12 @@ const project = new typescript.TypeScriptProject({
 
   // Package metadata
   packageName: 'cdk-cost-analyzer',
-  authorName: 'ANWB',
-  authorEmail: 'cce@anwb.nl',
+  authorName: 'Yvo van Zee',
+  authorEmail: 'yvo@buildinginthecloud.com',
   license: 'MIT',
 
   // Repository
-  repository: 'https://gitlab.com/anwb/cdk-cost-analyzer.git',
+  repository: 'https://gitlab.com/buildinginthecloud/cdk-cost-analyzer.git',
 
   // Publishing
   releaseToNpm: true,

@@ -34,7 +34,11 @@ export class PipelineOrchestrator {
 
       if (options.synthesize && options.cdkAppPath) {
         // Synthesize both branches
-        const synthResult = await this.synthesizeBothBranches(options.cdkAppPath, config);
+        const synthResult = await this.synthesizeBothBranches(
+          options.cdkAppPath,
+          config,
+          options.outputPath,
+        );
         baseTemplatePath = synthResult.baseTemplatePath;
         targetTemplatePath = synthResult.targetTemplatePath;
         synthesisInfo = synthResult.synthesisInfo;
@@ -94,6 +98,7 @@ export class PipelineOrchestrator {
   private async synthesizeBothBranches(
     cdkAppPath: string,
     config: any,
+    outputPath?: string,
   ): Promise<{
       baseTemplatePath: string;
       targetTemplatePath: string;
@@ -103,7 +108,7 @@ export class PipelineOrchestrator {
     // In a full implementation, this would checkout branches and synthesize each
     const result = await this.synthesisOrchestrator.synthesize({
       cdkAppPath,
-      outputPath: config.synthesis?.outputPath,
+      outputPath: outputPath || config.synthesis?.outputPath,
       context: config.synthesis?.context,
       customCommand: config.synthesis?.customCommand,
     });

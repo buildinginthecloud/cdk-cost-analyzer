@@ -1,0 +1,52 @@
+# CDK Cost Analyzer Configuration
+# This file configures cost thresholds and usage assumptions for cost analysis
+
+# Cost thresholds for pipeline enforcement
+thresholds:
+  default:
+    warning: 50   # USD per month - displays warning but passes pipeline
+    error: 200    # USD per month - fails pipeline, requires review
+
+# Custom usage assumptions for cost estimation
+# Adjust these values to match your expected application usage
+usageAssumptions:
+  # Amazon S3 usage patterns
+  s3:
+    storageGB: 100           # Expected storage size in GB
+    getRequests: 50000       # Monthly GET requests
+    putRequests: 5000        # Monthly PUT requests
+    dataTransferGB: 50       # Monthly data transfer out in GB
+
+  # AWS Lambda usage patterns
+  lambda:
+    invocationsPerMonth: 1000000  # Monthly function invocations
+    averageDurationMs: 200        # Average execution duration in milliseconds
+    memoryMB: 512                 # Allocated memory in MB
+
+  # Amazon DynamoDB usage patterns
+  dynamodb:
+    readCapacityUnits: 5     # Provisioned read capacity units
+    writeCapacityUnits: 5    # Provisioned write capacity units
+    storageGB: 10            # Expected data storage in GB
+
+  # Amazon API Gateway usage patterns
+  apiGateway:
+    requestsPerMonth: 1000000  # Monthly API requests
+
+# CDK synthesis configuration (optional)
+synthesis:
+  appPath: .                 # Path to CDK application
+  outputPath: cdk.out        # CDK synthesis output directory
+
+# Resource exclusions (optional)
+# Exclude specific resource types from cost analysis
+exclusions:
+  resourceTypes:
+    - AWS::IAM::Role         # IAM roles have no direct cost
+    - AWS::IAM::Policy       # IAM policies have no direct cost
+    - AWS::Logs::LogGroup    # CloudWatch Logs analyzed separately
+
+# Cache configuration
+cache:
+  enabled: true              # Enable pricing data caching
+  durationHours: 24          # Cache duration in hours

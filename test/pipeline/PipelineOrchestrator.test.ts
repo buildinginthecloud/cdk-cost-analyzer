@@ -43,7 +43,7 @@ describe('PipelineOrchestrator', () => {
       // Use unique output directory to avoid conflicts with parallel tests
       const promise = orchestrator.runPipelineAnalysis({
         synthesize: true,
-        cdkAppPath: './test-cdk-project',
+        cdkAppPath: './examples/single-stack',
         outputPath: 'cdk.out.pipeline-test',
         region: 'eu-central-1',
       });

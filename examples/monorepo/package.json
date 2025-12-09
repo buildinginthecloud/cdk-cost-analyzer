@@ -1,0 +1,27 @@
+{
+  "name": "cdk-cost-analyzer-monorepo-example",
+  "version": "1.0.0",
+  "description": "Monorepo CDK application example with cost analysis",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm test --workspaces",
+    "clean": "npm run clean --workspaces"
+  },
+  "keywords": [
+    "aws",
+    "cdk",
+    "monorepo",
+    "cost-analysis",
+    "example"
+  ],
+  "author": "ANWB",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
