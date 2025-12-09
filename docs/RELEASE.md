@@ -1,6 +1,7 @@
 # Release Process
 
 This document describes the release process for the CDK Cost Analyzer package.
+awesome
 
 ## Overview
 
