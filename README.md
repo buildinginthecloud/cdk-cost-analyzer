@@ -119,7 +119,7 @@ cost-analysis:
     - merge_requests
 ```
 
-See the [GitLab CI/CD Guide](docs/GITLAB_CI.md) for complete documentation.
+See the [CI/CD Integration Guide](docs/CI_CD.md) for complete documentation.
 
 ### GitHub Actions Integration
 
@@ -150,7 +150,7 @@ jobs:
       - run: npm run test:silent
 ```
 
-The GitHub Actions workflow automatically runs on every push and pull request, executing linting, type checking, build verification, and the complete test suite. See the [GitHub Actions Guide](docs/GITHUB_ACTIONS.md) for complete documentation.
+The GitHub Actions workflow automatically runs on every push and pull request, executing linting, type checking, build verification, and the complete test suite. See the [CI/CD Integration Guide](docs/CI_CD.md) for complete documentation.
 
 ### Programmatic Usage
 

@@ -180,8 +180,12 @@ describe('Repository Structure - Property Tests', () => {
    */
   it('should have documentation files in docs directory', () => {
     const expectedDocs = [
-      'docs/IMPLEMENTATION.md',
       'docs/DEVELOPMENT.md',
+      'docs/CI_CD.md',
+      'docs/CONFIGURATION.md',
+      'docs/CALCULATORS.md',
+      'docs/TROUBLESHOOTING.md',
+      'docs/RELEASE.md',
     ];
 
     const missingDocs: string[] = [];
