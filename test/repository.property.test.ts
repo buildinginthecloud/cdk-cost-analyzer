@@ -266,6 +266,8 @@ describe('Repository Structure - Property Tests', () => {
       'LICENSE',
       'LICENSE.md',
       'CHANGELOG.md', // Project changelog
+      'CONTRIBUTING.md', // Contribution guidelines
+      'SECURITY.md', // Security policy
 
       // CI/CD
       '.gitlab-ci.yml', // GitLab CI configuration
