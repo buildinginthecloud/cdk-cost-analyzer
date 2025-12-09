@@ -33,12 +33,11 @@ npm install cdk-cost-analyzer
 ## Documentation
 
 - **[Configuration Guide](docs/CONFIGURATION.md)** - Configure thresholds, usage assumptions, and exclusions
-- **[GitLab CI/CD Integration](docs/GITLAB_CI.md)** - Complete GitLab pipeline setup guide
-- **[GitHub Actions Integration](docs/GITHUB_ACTIONS.md)** - GitHub Actions CI/CD setup guide
+- **[CI/CD Integration](docs/CI_CD.md)** - GitHub Actions and GitLab CI/CD setup guides
 - **[Resource Calculator Reference](docs/CALCULATORS.md)** - Detailed cost calculation methods and assumptions
 - **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Common issues and solutions
-- **[Development Guide](docs/DEVELOPMENT.md)** - Setup, testing, and troubleshooting
-- **[Implementation Details](docs/IMPLEMENTATION.md)** - Technical implementation documentation
+- **[Development Guide](docs/DEVELOPMENT.md)** - Local development, testing, and architecture
+- **[Release Process](docs/RELEASE.md)** - How to release new versions
 - **[Examples](examples/)** - Example templates and API usage demonstrations
 
 ## Quick Start

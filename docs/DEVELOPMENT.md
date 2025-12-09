@@ -1,127 +1,226 @@
-# Development Guide - CDK Cost Analyzer
+# Development Guide
 
-## Completed Tasks
+This guide covers local development, testing, and the technical implementation of CDK Cost Analyzer.
 
-All 17 main tasks from the implementation plan have been completed:
-
-1. Project structure and dependencies configured
-2. CloudFormation template parser implemented
-3. Diff engine implemented
-4. Pricing service foundation implemented
-5. EC2 cost calculator implemented
-6. S3 cost calculator implemented
-7. Lambda cost calculator implemented
-8. RDS cost calculator implemented
-9. Cost aggregation and delta calculation implemented
-10. Checkpoint - Tests verification
-11. Text report formatter implemented
-12. JSON report formatter implemented
-13. Programmatic API implemented
-14. CLI interface implemented
-15. package.json configured
-16. README documentation created
-17. Final checkpoint - Full verification
-
-## Completed Steps
-
-### 1. Install Dependencies
+## Quick Start
 
 ```bash
+# Install dependencies
 npm install
-```
 
-**Result**: Successfully installed all dependencies
-- Production: @aws-sdk/client-pricing, js-yaml, commander
-- Development: typescript, vitest, fast-check, @types/*
-- 133 packages audited
-
-### 2. Build the Project
-
-```bash
+# Build the project
 npm run build
+
+# Run tests
+npm run test
+
+# Run linting
+npm run lint
 ```
 
-**Result**: Build successful
-- TypeScript compiled to JavaScript in `dist/` directory
-- Type definition files (.d.ts) generated
-- Source maps created
-- Fixed TypeScript errors (unused imports, export conflicts)
+## Architecture
 
-### 3. Run All Tests (Task 10 & 17 Checkpoints)
+The application follows a modular, layered architecture:
+
+```
+┌─────────────────────────────────────────────┐
+│           Entry Points                       │
+│  (CLI: src/cli, API: src/api)               │
+└──────────────────┬──────────────────────────┘
+                   │
+┌──────────────────▼──────────────────────────┐
+│         Main Orchestration                   │
+│    (analyzeCosts function in api/index.ts)  │
+└──────┬─────────┬──────────┬─────────────────┘
+       │         │          │          
+   ┌───▼───┐ ┌──▼──┐  ┌────▼────┐ ┌──────────┐
+   │Parser │ │Diff │  │Pricing  │ │Reporter  │
+   │       │ │     │  │Service  │ │          │
+   └───────┘ └─────┘  └────┬────┘ └──────────┘
+                            │
+                       ┌────▼────┐
+                       │AWS API  │
+                       └─────────┘
+```
+
+## Project Structure
+
+```
+cdk-cost-analyzer/
+├── src/
+│   ├── api/          # Programmatic API
+│   ├── cli/          # Command-line interface
+│   ├── diff/         # Template comparison
+│   ├── parser/       # CloudFormation parsing
+│   ├── pricing/      # Cost calculation
+│   │   └── calculators/  # Resource-specific calculators
+│   └── reporter/     # Report formatting
+├── test/             # Mirror structure with tests
+├── dist/             # Built JavaScript (after npm run build)
+├── examples/         # Example CDK projects
+├── docs/             # Documentation
+├── package.json
+├── tsconfig.json
+└── vitest.config.mts
+```
+
+## Module Descriptions
+
+### Parser Module (`src/parser/`)
+
+Parses CloudFormation templates from JSON or YAML format.
+
+**Files**:
+- `TemplateParser.ts`: Main parser implementation
+- `types.ts`: Type definitions for CloudFormation templates
+- `index.ts`: Module exports
+
+**Key Features**:
+- Supports both JSON and YAML formats
+- Validates template structure (requires Resources section)
+- Provides detailed error messages for malformed templates
+
+### Diff Module (`src/diff/`)
+
+Compares two CloudFormation templates and identifies changes.
+
+**Files**:
+- `DiffEngine.ts`: Template comparison logic
+- `types.ts`: Type definitions for diff results
+- `index.ts`: Module exports
+
+**Key Features**:
+- Identifies added resources (in target, not in base)
+- Identifies removed resources (in base, not in target)
+- Identifies modified resources (properties changed)
+- Deep comparison of nested properties
+
+### Pricing Module (`src/pricing/`)
+
+Calculates AWS resource costs using the AWS Pricing API.
+
+**Files**:
+- `PricingService.ts`: Main service orchestrating cost calculations
+- `PricingClient.ts`: AWS Pricing API client with caching and retry logic
+- `types.ts`: Type definitions for costs and pricing
+- `calculators/*.ts`: Resource-specific cost calculators
+
+**Key Features**:
+- Pluggable calculator architecture (easy to add new resource types)
+- Caching to reduce API calls
+- Retry logic with exponential backoff (3 retries)
+- Graceful fallback to cached data on API failures
+- Confidence levels for cost estimates
+- Documented assumptions for usage-based pricing
+
+### Reporter Module (`src/reporter/`)
+
+Formats cost analysis results for output.
+
+**Files**:
+- `Reporter.ts`: Report generation in multiple formats
+- `types.ts`: Type definitions for reporting
+- `index.ts`: Module exports
+
+**Key Features**:
+- Text format: Human-readable console output
+- JSON format: Structured data for programmatic use
+- Markdown format: GitLab merge request comments
+- Configuration summary with thresholds and assumptions
+- Multi-stack support with per-stack breakdowns
+- Resources sorted by cost impact
+
+### API Module (`src/api/`)
+
+Provides programmatic TypeScript/JavaScript API.
+
+**Files**:
+- `index.ts`: Main `analyzeCosts` function
+- `types.ts`: Type definitions for API
+
+**Key Features**:
+- Simple, promise-based interface
+- Full TypeScript type definitions
+- Error handling with typed exceptions
+- Orchestrates all components
+
+### CLI Module (`src/cli/`)
+
+Provides command-line interface.
+
+**Files**:
+- `index.ts`: CLI implementation using Commander
+
+**Key Features**:
+- Template file paths as arguments
+- Region flag (--region, default: eu-central-1)
+- Format flag (--format, default: text)
+- Exit codes: 0 for success, 1 for errors
+
+## Data Flow
+
+1. **Input**: User provides two CloudFormation templates (base and target)
+2. **Parsing**: Templates are parsed into structured objects
+3. **Diffing**: Templates are compared to identify changes
+4. **Cost Calculation**: 
+   - For each added/removed/modified resource
+   - Calculator is selected based on resource type
+   - AWS Pricing API is queried (with caching and retries)
+   - Monthly cost is calculated
+5. **Aggregation**: Total cost delta is calculated
+6. **Reporting**: Results are formatted and output
+
+## Error Handling Strategy
+
+### Input Errors (Fail Fast)
+- Invalid template syntax → TemplateParseError with details
+- Missing Resources section → TemplateParseError
+- Invalid file paths → Error message to stderr, exit code 1
+
+### API Errors (Retry with Fallback)
+- Transient failures → Retry up to 3 times with exponential backoff
+- No cached data → PricingAPIError after retries exhausted
+- Cached data available → Use cached data, log warning
+
+### Calculation Errors (Graceful Degradation)
+- Unsupported resource type → Mark as "unknown" cost, continue
+- Missing pricing data → Mark as "unknown" confidence, continue
+- Calculator errors → Mark as "unknown" cost, continue
+
+## Testing
+
+### Running Tests
 
 ```bash
-npm test
+# Run all tests
+npm run test
+
+# Run tests silently (minimal output)
+npm run test:silent
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run specific test file
+npx vitest run test/parser/TemplateParser.test.ts
 ```
 
-**Result**: All tests passed
-- 12 test files passed
-- 53 tests passed (0 failed)
-- All unit tests passed
-- All property-based tests passed (100 runs each)
-- Duration: 9.54s
+### Test Structure
 
-Test coverage:
-- API tests (8 tests)
-- CLI tests (3 tests)
-- Diff engine tests (9 tests)
-- Parser tests (11 tests)
-- Pricing service tests (9 tests)
-- Reporter tests (13 tests)
+- **Unit Tests**: Test specific behaviors and edge cases
+- **Property-Based Tests**: Use fast-check to verify universal properties
+- **Integration Tests**: Test complete workflows
 
-### 4. Verify CLI Functionality
+### Test Coverage
 
-**Test templates created**: base.json and target.json
+- Parser: 2 test files (13 unit tests + 2 properties)
+- Diff: 2 test files (7 unit tests + 2 properties)
+- Pricing: 3 test files (unit + property + calculator tests)
+- Reporter: 2 test files (10 unit tests + 4 properties)
+- API: 2 test files (6 unit tests + 2 properties)
+- CLI: 1 test file (3 unit tests + property tests)
 
-**Command executed**:
-```bash
-node dist/cli/index.js base.json target.json --region eu-central-1
-```
-
-**Result**: CLI works correctly
-```
-============================================================
-CDK Cost Analysis Report
-============================================================
-
-Total Cost Delta: $0.00
-
-ADDED RESOURCES:
-------------------------------------------------------------
-  • MyInstance (AWS::EC2::Instance): $0.00 [unknown]
-
-============================================================
-```
-
-**Note**: Costs show as $0.00 with 'unknown' confidence because AWS credentials are not configured. This is expected behavior - the tool gracefully handles missing pricing data.
-
-### 5. Verify Programmatic API
-
-**Test script created**: test-api.js
-
-**Command executed**:
-```bash
-node test-api.js
-```
-
-**Result**: API works correctly
-```
-Total Delta: 0
-Currency: USD
-Added Resources: 1
-Removed Resources: 0
-Modified Resources: 0
-
-Added Resources Details:
-  - MyInstance (AWS::EC2::Instance): USD 0.00 [unknown]
-```
-
-The API correctly:
-- Parses both templates
-- Identifies the added EC2 instance
-- Returns structured data
-- Handles missing pricing data gracefully
-
-### 6. AWS Credentials Setup
+## AWS Credentials Setup
 
 The tool requires AWS credentials to query the Pricing API:
 
@@ -135,6 +234,9 @@ aws configure
 
 # Option 3: IAM role (when running in AWS)
 # Credentials are automatically available
+
+# Verify credentials
+aws sts get-caller-identity --no-cli-pager
 ```
 
 Required IAM permissions:
@@ -153,184 +255,133 @@ Required IAM permissions:
 }
 ```
 
-## Implementation Summary
+## Building and Running
 
-### Files Created
-- **Source**: 20 TypeScript files across 6 modules
-- **Tests**: 12 test files with unit and property-based tests
-- **Config**: 5 configuration files
-- **Docs**: 3 documentation files (README, IMPLEMENTATION, DEVELOPMENT)
+### Development Build
 
-### Code Structure
-```
-cdk-cost-analyzer/
-├── src/
-│   ├── api/          # Programmatic API
-│   ├── cli/          # Command-line interface
-│   ├── diff/         # Template comparison
-│   ├── parser/       # CloudFormation parsing
-│   ├── pricing/      # Cost calculation
-│   │   └── calculators/  # Resource-specific calculators
-│   └── reporter/     # Report formatting
-├── test/             # Mirror structure with tests
-├── dist/             # Built JavaScript (after npm run build)
-├── package.json
-├── tsconfig.json
-├── vitest.config.ts
-└── README.md
+```bash
+# Build TypeScript to JavaScript
+npm run build
+
+# Watch mode for development
+npm run watch
 ```
 
-### Test Coverage
-- 32+ unit tests
-- 12+ property-based tests
-- All 24 correctness properties from design document
+### CLI Usage
 
-## Expected Behavior
+```bash
+# Basic usage
+node dist/cli/index.js base.json target.json --region eu-central-1
 
-### Successful Execution
-- Exit code 0
-- Cost report to stdout
-- Resources categorized by added/removed/modified
-- Costs in USD with 2 decimal places
-- +/- signs for deltas
+# JSON output
+node dist/cli/index.js base.json target.json --region eu-central-1 --format json
 
-### Error Cases
-- Invalid templates: Error message to stderr, exit code 1
-- Missing files: Error message, exit code 1
-- Unsupported resources: Marked as "unknown cost", continues
-- Pricing API failures: Retries 3 times, uses cache, or marks unknown
+# Different region
+node dist/cli/index.js base.json target.json --region us-east-1
+```
+
+### Programmatic Usage
+
+```typescript
+import { analyzeCosts } from 'cdk-cost-analyzer';
+
+const result = await analyzeCosts({
+  baseTemplate: baseContent,
+  targetTemplate: targetContent,
+  region: 'eu-central-1',
+});
+
+console.log(`Total Delta: ${result.totalDelta.amount}`);
+```
+
+## Extensibility
+
+### Adding New Resource Types
+
+1. Create new calculator in `src/pricing/calculators/`
+2. Implement `ResourceCostCalculator` interface
+3. Register in `PricingService` constructor
+4. Add tests
+
+Example:
+```typescript
+export class DynamoDBCalculator implements ResourceCostCalculator {
+  supports(resourceType: string): boolean {
+    return resourceType === 'AWS::DynamoDB::Table';
+  }
+  
+  async calculateCost(resource, region, pricingClient): Promise<MonthlyCost> {
+    // Implementation
+  }
+}
+```
+
+### Adding New Report Formats
+
+1. Add format to `ReportFormat` type in `src/reporter/types.ts`
+2. Implement format method in `Reporter` class
+3. Add tests
 
 ## Troubleshooting
 
 ### Build Errors
-- Check Node.js version (>= 18.0.0): `node --version`
-- Clear node_modules and reinstall: `rm -rf node_modules && npm install`
-- Check TypeScript errors: `npm run lint`
+
+Check Node.js version (>= 18.0.0):
+```bash
+node --version
+```
+
+Clear and reinstall dependencies:
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
 
 ### Test Failures
-- Review error messages for specific test failures
-- Check AWS credentials if pricing tests fail
-- Run tests with verbose output: `npm test -- --reporter=verbose`
+
+Run tests with verbose output:
+```bash
+npx vitest run --reporter=verbose
+```
+
+Check AWS credentials if pricing tests fail:
+```bash
+aws sts get-caller-identity --no-cli-pager
+```
 
 ### Runtime Errors
+
 - Verify AWS credentials are configured
 - Check template file paths are correct
 - Ensure region is valid AWS region
 - Review error messages in stderr
 
-## Future Enhancements (Phase 2)
+## Code Quality Standards
 
-Once the MVP is validated, consider implementing:
-- GitLab MR integration
-- Cost threshold enforcement
-- Automatic CDK synthesis
-- Multi-region support
-- Additional resource types (DynamoDB, ECS, API Gateway, etc.)
-- Historical cost tracking
-- Configurable usage assumptions
+- TypeScript strict mode enabled
+- No implicit any
+- All functions have return types
+- Comprehensive error handling
+- Descriptive variable names
+- Comments for complex logic
+- Exported interfaces for extensibility
 
-## Success Criteria - ALL MET
+## Dependencies
 
-The implementation is successful when:
-1. All dependencies install without errors - **PASSED**
-2. Project builds successfully (npm run build) - **PASSED**
-3. All tests pass (npm test) - **PASSED (53/53 tests)**
-4. CLI accepts valid templates and outputs cost report - **PASSED**
-5. Programmatic API returns structured results - **PASSED**
-6. AWS Pricing API integration works (requires credentials) - **NOT TESTED** (no AWS credentials configured)
-7. Error handling works gracefully - **PASSED** (handles missing pricing data correctly)
+### Production
+- `@aws-sdk/client-pricing`: AWS Pricing API client
+- `js-yaml`: YAML template parsing
+- `commander`: CLI argument parsing
+
+### Development
+- `typescript`: TypeScript compiler
+- `vitest`: Testing framework
+- `fast-check`: Property-based testing
+- `@types/*`: Type definitions
 
 ## Additional Resources
 
-- [AWS Pricing API Documentation](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/price-changes.html)
-- [CloudFormation Template Reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-reference.html)
-- [Fast-check Documentation](https://fast-check.dev/)
-- [Vitest Documentation](https://vitest.dev/)
-
----
-
-## Implementation Complete
-
-**All core functionality has been implemented and tested successfully.**
-
-The CDK Cost Analyzer is ready for use. To get actual cost estimates, configure AWS credentials as described in section 6 above.
-
-**Next Steps**:
-1. Configure AWS credentials to get real pricing data
-2. Test with your own CloudFormation templates
-3. Consider implementing Phase 2 features (GitLab integration, etc.)
-
-**Quick Start**:
-```bash
-# With AWS credentials configured
-node dist/cli/index.js your-base-template.json your-target-template.json --region eu-central-1
-```
-
-
-## AWS Pricing Integration Verified
-
-**Tested with AWS credentials (dev profile)** - All pricing features work perfectly.
-
-### Simple Test (1 resource added)
-
-```bash
-AWS_PROFILE=dev node dist/cli/index.js base.json target.json --region eu-central-1
-```
-
-**Result**:
-```
-Total Cost Delta: +$7.96
-
-ADDED RESOURCES:
-  • MyInstance (AWS::EC2::Instance): $7.96 [high]
-```
-
-### Complex Test (Multiple resource types)
-
-```bash
-AWS_PROFILE=dev node dist/cli/index.js complex-base.json complex-target.json --region eu-central-1
-```
-
-**Result**:
-```
-Total Cost Delta: +$69.62
-
-ADDED RESOURCES:
-  • MyInstance (AWS::EC2::Instance): $36.43 [high]
-  • MyDatabase (AWS::RDS::DBInstance): $26.94 [high]
-
-MODIFIED RESOURCES:
-  • MyFunction (AWS::Lambda::Function): $2.08 → $8.33 (+$6.25)
-```
-
-### Key Features Verified
-
-- Real-time AWS Pricing API integration
-- Multiple resource types (EC2, RDS, Lambda, S3)
-- Accurate cost calculations with detailed assumptions
-- Modified resource cost deltas
-- High confidence pricing data
-- JSON output format
-- Currency formatting ($XX.XX)
-- Proper sorting by cost impact
-
-### Updated Success Criteria
-
-6. AWS Pricing API integration works - **FULLY TESTED AND WORKING**
-
-**All 7 success criteria are now met.**
-
-### Production Ready Commands
-
-```bash
-# Text output (default)
-AWS_PROFILE=dev node dist/cli/index.js base.json target.json --region eu-central-1
-
-# JSON output for programmatic use
-AWS_PROFILE=dev node dist/cli/index.js base.json target.json --region eu-central-1 --format json
-
-# Different region
-AWS_PROFILE=dev node dist/cli/index.js base.json target.json --region us-east-1
-```
-
-**The CDK Cost Analyzer is fully functional and production-ready.**
+- [Configuration Guide](./CONFIGURATION.md) - Detailed configuration options
+- [Calculator Reference](./CALCULATORS.md) - Resource calculator documentation
+- [Troubleshooting Guide](./TROUBLESHOOTING.md) - Common issues and solutions
+- [Release Process](./RELEASE.md) - How to release new versions

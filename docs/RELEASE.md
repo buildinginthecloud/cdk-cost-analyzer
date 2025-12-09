@@ -1,7 +1,6 @@
 # Release Process
 
 This document describes the release process for the CDK Cost Analyzer package.
-awesome
 
 ## Overview
 
@@ -33,10 +32,10 @@ git checkout main
 git pull origin main
 
 # Verify tests pass
-npx projen test
+npm run test
 
 # Verify build succeeds
-npx projen build
+npm run build
 ```
 
 ### 2. Update CHANGELOG.md
@@ -118,7 +117,7 @@ If automated release fails, you can publish manually:
 
 ```bash
 # Build the package
-npx projen build
+npm run build
 
 # Login to NPM
 npm login
