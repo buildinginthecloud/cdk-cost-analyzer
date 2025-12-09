@@ -49,12 +49,12 @@ describe('GitHub Actions Workflow - Unit Tests', () => {
       expect(workflow.on.pull_request).toBeDefined();
     });
 
-    it('should trigger on all branches for push events', () => {
+    it('should trigger on main branch for push events', () => {
       const workflowContent = fs.readFileSync(workflowPath, 'utf-8');
       const workflow = yaml.load(workflowContent) as any;
       expect(workflow.on.push.branches).toBeDefined();
       expect(Array.isArray(workflow.on.push.branches)).toBe(true);
-      expect(workflow.on.push.branches).toContain('**');
+      expect(workflow.on.push.branches).toContain('main');
     });
 
     it('should trigger on all branches for pull_request events', () => {
@@ -125,7 +125,8 @@ describe('GitHub Actions Workflow - Unit Tests', () => {
       const steps = workflow.jobs.test.steps;
       const typeCheckStep = steps.find(
         (step: any) =>
-          step.run?.includes('npm run lint') ||
+          step.run?.includes('npm projen lint') ||
+          step.run?.includes('npx projen lint') ||
           (step.run?.includes('tsc') && step.run?.includes('--noEmit')),
       );
       expect(typeCheckStep).toBeDefined();
@@ -151,6 +152,7 @@ describe('GitHub Actions Workflow - Unit Tests', () => {
           step.run?.includes('npm test') ||
           step.run?.includes('npm run test') ||
           step.run?.includes('npx projen test') ||
+          step.run?.includes('npx projen build') ||
           step.run?.includes('vitest'),
       );
       expect(testStep).toBeDefined();

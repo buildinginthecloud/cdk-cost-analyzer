@@ -25,17 +25,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Install example project dependencies
+      - name: Install example project dependencies, needed for testing
         run: npm ci --prefix examples/single-stack
       
       - name: Run linting
         run: npx projen eslint
       
       - name: Run type checking
-        run: npm run lint
+        run: npm projen lint
       
-      - name: Build project
+      - name: Test and build project
         run: npx projen build
-      
-      - name: Run tests
-        run: npx projen test
