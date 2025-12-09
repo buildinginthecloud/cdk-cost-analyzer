@@ -16,15 +16,18 @@ export class VPCEndpointCalculator implements ResourceCostCalculator {
     region: string,
     pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
-    const endpointType = resource.properties?.VpcEndpointType || 'Interface';
+    const explicitEndpointType = resource.properties?.VpcEndpointType as string | undefined;
     const serviceName = (resource.properties?.ServiceName as string | undefined) || '';
 
+    // Determine if this is a Gateway endpoint
+    // Priority: explicit type > inferred from service name
+    const isGatewayEndpoint =
+      explicitEndpointType === 'Gateway' ||
+      (explicitEndpointType === undefined &&
+        (serviceName.includes('s3') || serviceName.includes('dynamodb')));
+
     // Gateway endpoints (S3 and DynamoDB) are free
-    if (
-      endpointType === 'Gateway' ||
-      serviceName.includes('s3') ||
-      serviceName.includes('dynamodb')
-    ) {
+    if (isGatewayEndpoint) {
       return {
         amount: 0,
         currency: 'USD',
