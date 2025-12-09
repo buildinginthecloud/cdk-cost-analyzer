@@ -59,6 +59,11 @@ describe('Repository Structure - Property Tests', () => {
     const brokenLinks: Array<{ file: string; link: string; reason: string }> = [];
 
     const findMarkdownFiles = (dir: string) => {
+      // Skip if directory doesn't exist (e.g., temporary test directories)
+      if (!fs.existsSync(dir)) {
+        return;
+      }
+
       const entries = fs.readdirSync(dir, { withFileTypes: true });
 
       for (const entry of entries) {

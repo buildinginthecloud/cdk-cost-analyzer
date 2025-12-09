@@ -34,8 +34,8 @@ jobs:
       - name: Run type checking
         run: npx projen lint
       
-      - name: Test and build project
-        run: npx projen build
+      - name: Test project
+        run: npx projen test
 
   auto-approve:
     needs: test

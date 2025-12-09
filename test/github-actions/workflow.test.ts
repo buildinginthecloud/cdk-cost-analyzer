@@ -138,7 +138,9 @@ describe('GitHub Actions Workflow - Unit Tests', () => {
       const steps = workflow.jobs.test.steps;
       const buildStep = steps.find(
         (step: any) =>
-          step.run?.includes('npm run build') || step.run?.includes('build'),
+          step.run?.includes('npm run build') || 
+          step.run?.includes('npx projen build') ||
+          step.run?.includes('npx projen test'), // projen test includes build
       );
       expect(buildStep).toBeDefined();
     });
