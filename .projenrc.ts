@@ -83,8 +83,17 @@ const project = new typescript.TypeScriptProject({
   // Node version
   minNodeVersion: '18.0.0',
 
-  // Disable GitHub workflows (using GitLab CI)
-  github: false,
+  // GitHub configuration
+  github: true,
+  githubOptions: {
+    mergify: false,
+    pullRequestLint: false,
+  },
+
+  // Release configuration
+  release: true,
+  releaseWorkflow: true,
+  workflowNodeVersion: '18.x',
 
   // Gitignore
   gitignore: [

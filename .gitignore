@@ -35,8 +35,12 @@ coverage/
 *.tgz
 .cdk-cost-analyzer-cache/
 .test-cache/
+!/.github/workflows/build.yml
 /dist/changelog.md
 /dist/version.txt
+!/.github/workflows/release.yml
+!/.github/workflows/upgrade-main.yml
+!/.github/pull_request_template.md
 !/test/
 !/tsconfig.json
 !/tsconfig.dev.json
