@@ -1,0 +1,671 @@
+build	Set up job	﻿2026-01-06T12:46:33.8270536Z Current runner version: '2.330.0'
+build	Set up job	2026-01-06T12:46:33.8294923Z ##[group]Runner Image Provisioner
+build	Set up job	2026-01-06T12:46:33.8295863Z Hosted Compute Agent
+build	Set up job	2026-01-06T12:46:33.8296443Z Version: 20251211.462
+build	Set up job	2026-01-06T12:46:33.8297028Z Commit: 6cbad8c2bb55d58165063d031ccabf57e2d2db61
+build	Set up job	2026-01-06T12:46:33.8297843Z Build Date: 2025-12-11T16:28:49Z
+build	Set up job	2026-01-06T12:46:33.8298506Z Worker ID: {ab3fa78f-3983-4f00-b354-46b21747da5f}
+build	Set up job	2026-01-06T12:46:33.8299154Z ##[endgroup]
+build	Set up job	2026-01-06T12:46:33.8299768Z ##[group]Operating System
+build	Set up job	2026-01-06T12:46:33.8300310Z Ubuntu
+build	Set up job	2026-01-06T12:46:33.8300969Z 24.04.3
+build	Set up job	2026-01-06T12:46:33.8301525Z LTS
+build	Set up job	2026-01-06T12:46:33.8302031Z ##[endgroup]
+build	Set up job	2026-01-06T12:46:33.8302506Z ##[group]Runner Image
+build	Set up job	2026-01-06T12:46:33.8303141Z Image: ubuntu-24.04
+build	Set up job	2026-01-06T12:46:33.8303692Z Version: 20251215.174.1
+build	Set up job	2026-01-06T12:46:33.8304697Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20251215.174/images/ubuntu/Ubuntu2404-Readme.md
+build	Set up job	2026-01-06T12:46:33.8306161Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20251215.174
+build	Set up job	2026-01-06T12:46:33.8307309Z ##[endgroup]
+build	Set up job	2026-01-06T12:46:33.8308413Z ##[group]GITHUB_TOKEN Permissions
+build	Set up job	2026-01-06T12:46:33.8310137Z Contents: write
+build	Set up job	2026-01-06T12:46:33.8310867Z Metadata: read
+build	Set up job	2026-01-06T12:46:33.8311528Z ##[endgroup]
+build	Set up job	2026-01-06T12:46:33.8313794Z Secret source: Actions
+build	Set up job	2026-01-06T12:46:33.8314527Z Prepare workflow directory
+build	Set up job	2026-01-06T12:46:33.8704138Z Prepare all required actions
+build	Set up job	2026-01-06T12:46:33.8744572Z Getting action download info
+build	Set up job	2026-01-06T12:46:34.3825399Z Download action repository 'actions/checkout@v5' (SHA:93cb6efe18208431cddfb8368fd83d5badbf9bfd)
+build	Set up job	2026-01-06T12:46:34.5181994Z Download action repository 'actions/setup-node@v5' (SHA:a0853c24544627f65ddf259abe73b1d18a591444)
+build	Set up job	2026-01-06T12:46:34.7026509Z Download action repository 'actions/upload-artifact@v4.6.2' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+build	Set up job	2026-01-06T12:46:34.9140503Z Complete job name: build
+build	Checkout	﻿2026-01-06T12:46:34.9887572Z ##[group]Run actions/checkout@v5
+build	Checkout	2026-01-06T12:46:34.9888549Z with:
+build	Checkout	2026-01-06T12:46:34.9888967Z   ref: fix/testing
+build	Checkout	2026-01-06T12:46:34.9889497Z   repository: buildinginthecloud/cdk-cost-analyzer
+build	Checkout	2026-01-06T12:46:34.9890311Z   token: ***
+build	Checkout	2026-01-06T12:46:34.9890892Z   ssh-strict: true
+build	Checkout	2026-01-06T12:46:34.9891328Z   ssh-user: git
+build	Checkout	2026-01-06T12:46:34.9891783Z   persist-credentials: true
+build	Checkout	2026-01-06T12:46:34.9892278Z   clean: true
+build	Checkout	2026-01-06T12:46:34.9892720Z   sparse-checkout-cone-mode: true
+build	Checkout	2026-01-06T12:46:34.9893266Z   fetch-depth: 1
+build	Checkout	2026-01-06T12:46:34.9893702Z   fetch-tags: false
+build	Checkout	2026-01-06T12:46:34.9894140Z   show-progress: true
+build	Checkout	2026-01-06T12:46:34.9894577Z   lfs: false
+build	Checkout	2026-01-06T12:46:34.9894985Z   submodules: false
+build	Checkout	2026-01-06T12:46:34.9895420Z   set-safe-directory: true
+build	Checkout	2026-01-06T12:46:34.9896123Z env:
+build	Checkout	2026-01-06T12:46:34.9896518Z   CI: true
+build	Checkout	2026-01-06T12:46:34.9896910Z ##[endgroup]
+build	Checkout	2026-01-06T12:46:35.0827551Z Syncing repository: buildinginthecloud/cdk-cost-analyzer
+build	Checkout	2026-01-06T12:46:35.0829780Z ##[group]Getting Git version info
+build	Checkout	2026-01-06T12:46:35.0830958Z Working directory is '/home/runner/work/cdk-cost-analyzer/cdk-cost-analyzer'
+build	Checkout	2026-01-06T12:46:35.0832293Z [command]/usr/bin/git version
+build	Checkout	2026-01-06T12:46:35.0884359Z git version 2.52.0
+build	Checkout	2026-01-06T12:46:35.0937306Z ##[endgroup]
+build	Checkout	2026-01-06T12:46:35.0952456Z Temporarily overriding HOME='/home/runner/work/_temp/958b2ab7-98fa-4b3e-b20d-845a598c3c66' before making global git config changes
+build	Checkout	2026-01-06T12:46:35.0954456Z Adding repository directory to the temporary git global config as a safe directory
+build	Checkout	2026-01-06T12:46:35.0956938Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/cdk-cost-analyzer/cdk-cost-analyzer
+build	Checkout	2026-01-06T12:46:35.0997945Z Deleting the contents of '/home/runner/work/cdk-cost-analyzer/cdk-cost-analyzer'
+build	Checkout	2026-01-06T12:46:35.1001421Z ##[group]Initializing the repository
+build	Checkout	2026-01-06T12:46:35.1006411Z [command]/usr/bin/git init /home/runner/work/cdk-cost-analyzer/cdk-cost-analyzer
+build	Checkout	2026-01-06T12:46:35.1123881Z hint: Using 'master' as the name for the initial branch. This default branch name
+build	Checkout	2026-01-06T12:46:35.1125564Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+build	Checkout	2026-01-06T12:46:35.1126753Z hint: to use in all of your new repositories, which will suppress this warning,
+build	Checkout	2026-01-06T12:46:35.1127592Z hint: call:
+build	Checkout	2026-01-06T12:46:35.1128022Z hint:
+build	Checkout	2026-01-06T12:46:35.1128572Z hint: 	git config --global init.defaultBranch <name>
+build	Checkout	2026-01-06T12:46:35.1129262Z hint:
+build	Checkout	2026-01-06T12:46:35.1129905Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+build	Checkout	2026-01-06T12:46:35.1131300Z hint: 'development'. The just-created branch can be renamed via this command:
+build	Checkout	2026-01-06T12:46:35.1132679Z hint:
+build	Checkout	2026-01-06T12:46:35.1133168Z hint: 	git branch -m <name>
+build	Checkout	2026-01-06T12:46:35.1133690Z hint:
+build	Checkout	2026-01-06T12:46:35.1134388Z hint: Disable this message with "git config set advice.defaultBranchName false"
+build	Checkout	2026-01-06T12:46:35.1135773Z Initialized empty Git repository in /home/runner/work/cdk-cost-analyzer/cdk-cost-analyzer/.git/
+build	Checkout	2026-01-06T12:46:35.1144204Z [command]/usr/bin/git remote add origin https://github.com/buildinginthecloud/cdk-cost-analyzer
+build	Checkout	2026-01-06T12:46:35.1180175Z ##[endgroup]
+build	Checkout	2026-01-06T12:46:35.1181161Z ##[group]Disabling automatic garbage collection
+build	Checkout	2026-01-06T12:46:35.1184159Z [command]/usr/bin/git config --local gc.auto 0
+build	Checkout	2026-01-06T12:46:35.1212431Z ##[endgroup]
+build	Checkout	2026-01-06T12:46:35.1213182Z ##[group]Setting up auth
+build	Checkout	2026-01-06T12:46:35.1219429Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+build	Checkout	2026-01-06T12:46:35.1251526Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+build	Checkout	2026-01-06T12:46:35.1585505Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build	Checkout	2026-01-06T12:46:35.1618411Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+build	Checkout	2026-01-06T12:46:35.1842709Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+build	Checkout	2026-01-06T12:46:35.1874286Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+build	Checkout	2026-01-06T12:46:35.2097802Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+build	Checkout	2026-01-06T12:46:35.2131729Z ##[endgroup]
+build	Checkout	2026-01-06T12:46:35.2132640Z ##[group]Fetching the repository
+build	Checkout	2026-01-06T12:46:35.2141212Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +refs/heads/fix/testing*:refs/remotes/origin/fix/testing* +refs/tags/fix/testing*:refs/tags/fix/testing*
+build	Checkout	2026-01-06T12:46:35.7976007Z From https://github.com/buildinginthecloud/cdk-cost-analyzer
+build	Checkout	2026-01-06T12:46:35.7979400Z  * [new branch]      fix/testing -> origin/fix/testing
+build	Checkout	2026-01-06T12:46:35.8013828Z ##[endgroup]
+build	Checkout	2026-01-06T12:46:35.8015548Z ##[group]Determining the checkout info
+build	Checkout	2026-01-06T12:46:35.8020401Z [command]/usr/bin/git branch --list --remote origin/fix/testing
+build	Checkout	2026-01-06T12:46:35.8045384Z   origin/fix/testing
+build	Checkout	2026-01-06T12:46:35.8055185Z ##[endgroup]
+build	Checkout	2026-01-06T12:46:35.8058474Z [command]/usr/bin/git sparse-checkout disable
+build	Checkout	2026-01-06T12:46:35.8097908Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+build	Checkout	2026-01-06T12:46:35.8134199Z ##[group]Checking out the ref
+build	Checkout	2026-01-06T12:46:35.8136744Z [command]/usr/bin/git checkout --progress --force -B fix/testing refs/remotes/origin/fix/testing
+build	Checkout	2026-01-06T12:46:35.8335222Z Switched to a new branch 'fix/testing'
+build	Checkout	2026-01-06T12:46:35.8337486Z branch 'fix/testing' set up to track 'origin/fix/testing'.
+build	Checkout	2026-01-06T12:46:35.8346068Z ##[endgroup]
+build	Checkout	2026-01-06T12:46:35.8385314Z [command]/usr/bin/git log -1 --format=%H
+build	Checkout	2026-01-06T12:46:35.8410997Z 4cc9ffbd0836c6c64594f7a38e3e11303dc6f2ea
+build	Setup Node.js	﻿2026-01-06T12:46:35.8737265Z ##[group]Run actions/setup-node@v5
+build	Setup Node.js	2026-01-06T12:46:35.8738690Z with:
+build	Setup Node.js	2026-01-06T12:46:35.8739475Z   node-version: 18.x
+build	Setup Node.js	2026-01-06T12:46:35.8740395Z   always-auth: false
+build	Setup Node.js	2026-01-06T12:46:35.8741533Z   check-latest: false
+build	Setup Node.js	2026-01-06T12:46:35.8742757Z   token: ***
+build	Setup Node.js	2026-01-06T12:46:35.8743641Z   package-manager-cache: true
+build	Setup Node.js	2026-01-06T12:46:35.8744891Z env:
+build	Setup Node.js	2026-01-06T12:46:35.8745815Z   CI: true
+build	Setup Node.js	2026-01-06T12:46:35.8746601Z ##[endgroup]
+build	Setup Node.js	2026-01-06T12:46:36.0239822Z Attempting to download 18.x...
+build	Setup Node.js	2026-01-06T12:46:36.0402371Z (node:2114) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+build	Setup Node.js	2026-01-06T12:46:36.0405160Z (Use `node --trace-deprecation ...` to show where the warning was created)
+build	Setup Node.js	2026-01-06T12:46:36.6524856Z Acquiring 18.20.8 - x64 from https://github.com/actions/node-versions/releases/download/18.20.8-14110393767/node-18.20.8-linux-x64.tar.gz
+build	Setup Node.js	2026-01-06T12:46:37.1455835Z Extracting ...
+build	Setup Node.js	2026-01-06T12:46:37.1605465Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/8e93d5a0-102b-46ef-8771-8f355b258b83 -f /home/runner/work/_temp/f6ae8ce3-ee7f-436c-a5b9-2e1abb10a005
+build	Setup Node.js	2026-01-06T12:46:38.1170080Z Adding to the cache ...
+build	Setup Node.js	2026-01-06T12:46:39.7372035Z ##[group]Environment details
+build	Setup Node.js	2026-01-06T12:46:39.9699772Z node: v18.20.8
+build	Setup Node.js	2026-01-06T12:46:39.9700581Z npm: 10.8.2
+build	Setup Node.js	2026-01-06T12:46:39.9701166Z yarn: 1.22.22
+build	Setup Node.js	2026-01-06T12:46:39.9701958Z ##[endgroup]
+build	Install dependencies	﻿2026-01-06T12:46:39.9886844Z ##[group]Run npm ci
+build	Install dependencies	2026-01-06T12:46:39.9887152Z [36;1mnpm ci[0m
+build	Install dependencies	2026-01-06T12:46:39.9926930Z shell: /usr/bin/bash -e {0}
+build	Install dependencies	2026-01-06T12:46:39.9927202Z env:
+build	Install dependencies	2026-01-06T12:46:39.9927375Z   CI: true
+build	Install dependencies	2026-01-06T12:46:39.9927558Z ##[endgroup]
+build	Install dependencies	2026-01-06T12:46:47.0649895Z 
+build	Install dependencies	2026-01-06T12:46:47.0660502Z added 538 packages, and audited 631 packages in 7s
+build	Install dependencies	2026-01-06T12:46:47.0661319Z 
+build	Install dependencies	2026-01-06T12:46:47.0661688Z 152 packages are looking for funding
+build	Install dependencies	2026-01-06T12:46:47.0662241Z   run `npm fund` for details
+build	Install dependencies	2026-01-06T12:46:47.0876524Z 
+build	Install dependencies	2026-01-06T12:46:47.0877120Z 5 moderate severity vulnerabilities
+build	Install dependencies	2026-01-06T12:46:47.0877496Z 
+build	Install dependencies	2026-01-06T12:46:47.0877806Z To address all issues (including breaking changes), run:
+build	Install dependencies	2026-01-06T12:46:47.0878174Z   npm audit fix --force
+build	Install dependencies	2026-01-06T12:46:47.0878330Z 
+build	Install dependencies	2026-01-06T12:46:47.0878486Z Run `npm audit` for details.
+build	Install example project dependencies, needed for testing	﻿2026-01-06T12:46:47.1163686Z ##[group]Run npm ci --prefix examples/single-stack
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:47.1164110Z [36;1mnpm ci --prefix examples/single-stack[0m
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:47.1164463Z [36;1mnpm ci --prefix examples/multi-stack[0m
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:47.1196952Z shell: /usr/bin/bash -e {0}
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:47.1197193Z env:
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:47.1197368Z   CI: true
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:47.1197548Z ##[endgroup]
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:54.2148339Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:54.5335015Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:55.4254594Z 
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:55.4255375Z added 299 packages, and audited 336 packages in 8s
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:55.4255906Z 
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:55.4256199Z 37 packages are looking for funding
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:55.4256841Z   run `npm fund` for details
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:55.4266656Z 
+build	Install example project dependencies, needed for testing	2026-01-06T12:46:55.4267035Z found 0 vulnerabilities
+build	Install example project dependencies, needed for testing	2026-01-06T12:47:01.6214475Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+build	Install example project dependencies, needed for testing	2026-01-06T12:47:01.7058588Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+build	Install example project dependencies, needed for testing	2026-01-06T12:47:02.4677616Z 
+build	Install example project dependencies, needed for testing	2026-01-06T12:47:02.4678573Z added 299 packages, and audited 336 packages in 7s
+build	Install example project dependencies, needed for testing	2026-01-06T12:47:02.4680532Z 
+build	Install example project dependencies, needed for testing	2026-01-06T12:47:02.4681147Z 37 packages are looking for funding
+build	Install example project dependencies, needed for testing	2026-01-06T12:47:02.4682028Z   run `npm fund` for details
+build	Install example project dependencies, needed for testing	2026-01-06T12:47:02.4692537Z 
+build	Install example project dependencies, needed for testing	2026-01-06T12:47:02.4692821Z found 0 vulnerabilities
+build	build	﻿2026-01-06T12:47:02.4954260Z ##[group]Run npx projen build
+build	build	2026-01-06T12:47:02.4954573Z [36;1mnpx projen build[0m
+build	build	2026-01-06T12:47:02.4986558Z shell: /usr/bin/bash -e {0}
+build	build	2026-01-06T12:47:02.4986800Z env:
+build	build	2026-01-06T12:47:02.4986965Z   CI: true
+build	build	2026-01-06T12:47:02.4987141Z ##[endgroup]
+build	build	2026-01-06T12:47:04.0992867Z 👾 build » default | ts-node --project tsconfig.dev.json .projenrc.ts
+build	build	2026-01-06T12:47:06.2915704Z 👾 build » compile | tsc
+build	build	2026-01-06T12:47:08.6180159Z 👾 build » test | vitest run --silent
+build	build	2026-01-06T12:47:08.9010608Z 
+build	build	2026-01-06T12:47:08.9012828Z [1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/cdk-cost-analyzer/cdk-cost-analyzer[39m
+build	build	2026-01-06T12:47:08.9013553Z 
+build	build	2026-01-06T12:47:09.4212976Z  [32m✓[39m test/pricing/ElastiCacheCalculator.test.ts [2m([22m[2m24 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+build	build	2026-01-06T12:47:09.4452217Z  [32m✓[39m test/reporter/Reporter.test.ts [2m([22m[2m64 tests[22m[2m)[22m[90m 35[2mms[22m[39m
+build	build	2026-01-06T12:47:09.4579549Z  [32m✓[39m test/cli/index.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 32[2mms[22m[39m
+build	build	2026-01-06T12:47:10.2342130Z  [32m✓[39m test/threshold/ThresholdEnforcer.property.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 234[2mms[22m[39m
+build	build	2026-01-06T12:47:10.5962976Z  [32m✓[39m test/cli/index.property.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 626[2mms[22m[39m
+build	build	2026-01-06T12:47:10.9626343Z (node:2509) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+build	build	2026-01-06T12:47:10.9634870Z no longer support Node.js v18.20.8 in January 2026.
+build	build	2026-01-06T12:47:10.9635300Z 
+build	build	2026-01-06T12:47:10.9635811Z To continue receiving updates to AWS services, bug fixes, and security
+build	build	2026-01-06T12:47:10.9636728Z updates please upgrade to a supported Node.js LTS version.
+build	build	2026-01-06T12:47:10.9637161Z 
+build	build	2026-01-06T12:47:10.9637559Z More information can be found at: https://a.co/c895JFp
+build	build	2026-01-06T12:47:10.9638505Z (Use `node --trace-warnings ...` to show where the warning was created)
+build	build	2026-01-06T12:47:10.9640205Z  [32m✓[39m test/cli/CredentialDetection.property.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 62[2mms[22m[39m
+build	build	2026-01-06T12:47:11.2248755Z  [32m✓[39m test/config/ConfigManager.property.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 151[2mms[22m[39m
+build	build	2026-01-06T12:47:11.5399063Z  [32m✓[39m test/pricing/RDSCalculator.property.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+build	build	2026-01-06T12:47:11.7663224Z  [32m✓[39m test/pricing/ALBCalculator.property.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+build	build	2026-01-06T12:47:12.1911367Z (node:2610) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+build	build	2026-01-06T12:47:12.1912699Z no longer support Node.js v18.20.8 in January 2026.
+build	build	2026-01-06T12:47:12.1913229Z 
+build	build	2026-01-06T12:47:12.1913917Z To continue receiving updates to AWS services, bug fixes, and security
+build	build	2026-01-06T12:47:12.1915776Z updates please upgrade to a supported Node.js LTS version.
+build	build	2026-01-06T12:47:12.1917896Z 
+build	build	2026-01-06T12:47:12.1918710Z More information can be found at: https://a.co/c895JFp
+build	build	2026-01-06T12:47:12.1920348Z (Use `node --trace-warnings ...` to show where the warning was created)
+build	build	2026-01-06T12:47:12.1924813Z  [32m✓[39m test/pricing/CustomAssumptions.property.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 33[2mms[22m[39m
+build	build	2026-01-06T12:47:12.3071157Z (node:2652) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+build	build	2026-01-06T12:47:12.3072198Z no longer support Node.js v18.20.8 in January 2026.
+build	build	2026-01-06T12:47:12.3072954Z 
+build	build	2026-01-06T12:47:12.3074491Z To continue receiving updates to AWS services, bug fixes, and security
+build	build	2026-01-06T12:47:12.3075445Z updates please upgrade to a supported Node.js LTS version.
+build	build	2026-01-06T12:47:12.3075942Z 
+build	build	2026-01-06T12:47:12.3076618Z More information can be found at: https://a.co/c895JFp
+build	build	2026-01-06T12:47:12.3077737Z (Use `node --trace-warnings ...` to show where the warning was created)
+build	build	2026-01-06T12:47:12.3646976Z  [32m✓[39m test/pipeline/PipelineOrchestrator.property.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 36[2mms[22m[39m
+build	build	2026-01-06T12:47:12.6396884Z  [32m✓[39m test/pricing/RDSCalculator.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+build	build	2026-01-06T12:47:12.7100015Z  [32m✓[39m test/pricing/PricingService.property.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 72[2mms[22m[39m
+build	build	2026-01-06T12:47:13.4299226Z  [32m✓[39m test/reporter/Reporter.property.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 323[2mms[22m[39m
+build	build	2026-01-06T12:47:14.1335592Z  [32m✓[39m test/pricing/PricingClient.property.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 90[2mms[22m[39m
+build	build	2026-01-06T12:47:14.2010062Z (node:2745) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+build	build	2026-01-06T12:47:14.2015672Z no longer support Node.js v18.20.8 in January 2026.
+build	build	2026-01-06T12:47:14.2019655Z 
+build	build	2026-01-06T12:47:14.2022933Z To continue receiving updates to AWS services, bug fixes, and security
+build	build	2026-01-06T12:47:14.2031453Z updates please upgrade to a supported Node.js LTS version.
+build	build	2026-01-06T12:47:14.2033811Z 
+build	build	2026-01-06T12:47:14.2035465Z More information can be found at: https://a.co/c895JFp
+build	build	2026-01-06T12:47:14.2038371Z (Use `node --trace-warnings ...` to show where the warning was created)
+build	build	2026-01-06T12:47:14.2043685Z  [32m✓[39m test/pricing/ResourceExclusions.property.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 863[2mms[22m[39m
+build	build	2026-01-06T12:47:14.2045701Z    [33m[2m✓[22m[39m PricingService - Resource Exclusions Property Tests[2m > [22mshould maintain total cost consistency with exclusions [33m828[2mms[22m[39m
+build	build	2026-01-06T12:47:14.5307955Z  [32m✓[39m test/repository.property.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+build	build	2026-01-06T12:47:14.6605348Z  [32m✓[39m test/pricing/VPCEndpointCalculator.property.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+build	build	2026-01-06T12:47:14.9732682Z  [32m✓[39m test/pricing/CacheManager.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 38[2mms[22m[39m
+build	build	2026-01-06T12:47:14.9993391Z  [32m✓[39m test/pricing/LambdaCalculator.property.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 36[2mms[22m[39m
+build	build	2026-01-06T12:47:15.4397396Z  [32m✓[39m test/pricing/EC2Calculator.property.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+build	build	2026-01-06T12:47:15.5380062Z  [32m✓[39m test/pricing/NewCalculators.property.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 65[2mms[22m[39m
+build	build	2026-01-06T12:47:15.7309026Z  [32m✓[39m test/pricing/LambdaCalculator.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 38[2mms[22m[39m
+build	build	2026-01-06T12:47:15.8002784Z  [32m✓[39m test/reporter/MarkdownReporter.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+build	build	2026-01-06T12:47:15.9926047Z  [32m✓[39m test/pricing/EC2Calculator.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+build	build	2026-01-06T12:47:16.0819466Z  [32m✓[39m test/diff/DiffEngine.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+build	build	2026-01-06T12:47:16.3912657Z  [32m✓[39m test/pricing/CacheIntegration.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+build	build	2026-01-06T12:47:16.7543395Z  [32m✓[39m test/api/index.property.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 53[2mms[22m[39m
+build	build	2026-01-06T12:47:16.9745939Z  [32m✓[39m test/pricing/S3Calculator.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+build	build	2026-01-06T12:47:17.2115193Z  [32m✓[39m test/threshold/ThresholdEnforcer.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+build	build	2026-01-06T12:47:17.5277672Z  [32m✓[39m test/integrations/GitLabIntegration.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+build	build	2026-01-06T12:47:17.9617803Z  [32m✓[39m test/pricing/S3Calculator.property.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 25[2mms[22m[39m
+build	build	2026-01-06T12:47:18.5035309Z  [32m✓[39m test/diff/DiffEngine.property.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 198[2mms[22m[39m
+build	build	2026-01-06T12:47:18.8941534Z (node:3217) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+build	build	2026-01-06T12:47:18.8942975Z no longer support Node.js v18.20.8 in January 2026.
+build	build	2026-01-06T12:47:18.8943332Z 
+build	build	2026-01-06T12:47:18.8943781Z To continue receiving updates to AWS services, bug fixes, and security
+build	build	2026-01-06T12:47:18.8944594Z updates please upgrade to a supported Node.js LTS version.
+build	build	2026-01-06T12:47:18.8944983Z 
+build	build	2026-01-06T12:47:18.8945341Z More information can be found at: https://a.co/c895JFp
+build	build	2026-01-06T12:47:18.8946139Z (Use `node --trace-warnings ...` to show where the warning was created)
+build	build	2026-01-06T12:47:18.9288545Z  [32m✓[39m test/pricing/NATGatewayCalculator.property.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+build	build	2026-01-06T12:47:19.1797730Z  [32m✓[39m test/pricing/CloudFrontCalculator.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+build	build	2026-01-06T12:47:19.3960268Z  [32m✓[39m test/pricing/ECSCalculator.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+build	build	2026-01-06T12:47:19.6123518Z  [32m✓[39m test/pricing/APIGatewayCalculator.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+build	build	2026-01-06T12:47:19.8365534Z  [32m✓[39m test/pricing/DynamoDBCalculator.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 25[2mms[22m[39m
+build	build	2026-01-06T12:47:20.0521065Z  [32m✓[39m test/parser/TemplateParser.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+build	build	2026-01-06T12:47:20.4232685Z (node:3355) Warning: NodeDeprecationWarning: The AWS SDK for JavaScript (v3) will
+build	build	2026-01-06T12:47:20.4234233Z no longer support Node.js v18.20.8 in January 2026.
+build	build	2026-01-06T12:47:20.4234769Z 
+build	build	2026-01-06T12:47:20.4235255Z To continue receiving updates to AWS services, bug fixes, and security
+build	build	2026-01-06T12:47:20.4236077Z updates please upgrade to a supported Node.js LTS version.
+build	build	2026-01-06T12:47:20.4236470Z 
+build	build	2026-01-06T12:47:20.4236821Z More information can be found at: https://a.co/c895JFp
+build	build	2026-01-06T12:47:20.4237640Z (Use `node --trace-warnings ...` to show where the warning was created)
+build	build	2026-01-06T12:47:34.7679247Z  [32m✓[39m test/api/index.test.ts [2m([22m[2m14 tests[22m[2m)[22m[33m 18058[2mms[22m[39m
+build	build	2026-01-06T12:47:34.7682446Z    [33m[2m✓[22m[39m analyzeCosts API[2m > [22mshould return structured results for valid templates [33m3009[2mms[22m[39m
+build	build	2026-01-06T12:47:34.7687618Z    [33m[2m✓[22m[39m analyzeCosts API[2m > [22mshould use default region if not specified [33m3005[2mms[22m[39m
+build	build	2026-01-06T12:47:34.7692852Z    [33m[2m✓[22m[39m analyzeCosts API[2m > [22mshould identify added resources [33m3003[2mms[22m[39m
+build	build	2026-01-06T12:47:34.7697809Z    [33m[2m✓[22m[39m analyzeCosts API[2m > [22mshould handle invalid region gracefully [33m3009[2mms[22m[39m
+build	build	2026-01-06T12:47:34.7702953Z    [33m[2m✓[22m[39m analyzeCosts API[2m > [22mshould support text output format [33m3006[2mms[22m[39m
+build	build	2026-01-06T12:47:34.7707966Z    [33m[2m✓[22m[39m analyzeCosts API[2m > [22mshould support json output format [33m3007[2mms[22m[39m
+build	build	2026-01-06T12:47:35.3204711Z  [32m✓[39m test/config/ConfigManager.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+build	build	2026-01-06T12:47:35.8935471Z  [32m✓[39m test/pricing/calculators.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+build	build	2026-01-06T12:47:36.4133570Z  [32m✓[39m test/pricing/PricingService.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 68[2mms[22m[39m
+build	build	2026-01-06T12:47:38.1493791Z  [32m✓[39m test/parser/TemplateParser.property.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 863[2mms[22m[39m
+build	build	2026-01-06T12:47:38.1496084Z    [33m[2m✓[22m[39m TemplateParser - Property Tests[2m > [22mshould successfully parse any valid CloudFormation template [33m706[2mms[22m[39m
+build	build	2026-01-06T12:47:42.1923074Z  [32m✓[39m test/pipeline/PipelineOrchestrator.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 21782[2mms[22m[39m
+build	build	2026-01-06T12:47:42.1927852Z    [33m[2m✓[22m[39m PipelineOrchestrator[2m > [22mrunPipelineAnalysis[2m > [22mshould accept template paths [33m3050[2mms[22m[39m
+build	build	2026-01-06T12:47:42.1930159Z    [33m[2m✓[22m[39m PipelineOrchestrator[2m > [22mrunPipelineAnalysis[2m > [22mshould accept synthesis options [33m12648[2mms[22m[39m
+build	build	2026-01-06T12:47:42.1932437Z    [33m[2m✓[22m[39m PipelineOrchestrator[2m > [22mrunPipelineAnalysis[2m > [22mshould accept environment parameter [33m3037[2mms[22m[39m
+build	build	2026-01-06T12:47:42.1934355Z    [33m[2m✓[22m[39m PipelineOrchestrator[2m > [22mrunPipelineAnalysis[2m > [22mshould accept region parameter [33m3033[2mms[22m[39m
+build	build	2026-01-06T12:47:58.9583031Z  [32m✓[39m test/synthesis/SynthesisOrchestrator.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 20326[2mms[22m[39m
+build	build	2026-01-06T12:47:58.9590028Z    [33m[2m✓[22m[39m SynthesisOrchestrator[2m > [22msynthesize[2m > [22mshould synthesize single-stack example project [33m3061[2mms[22m[39m
+build	build	2026-01-06T12:47:58.9596755Z    [33m[2m✓[22m[39m SynthesisOrchestrator[2m > [22msynthesize[2m > [22mshould accept custom output path option [33m14788[2mms[22m[39m
+build	build	2026-01-06T12:47:58.9598287Z    [33m[2m✓[22m[39m SynthesisOrchestrator[2m > [22msynthesize[2m > [22mshould accept context option [33m2457[2mms[22m[39m
+build	build	2026-01-06T12:48:03.4855136Z  [32m✓[39m test/synthesis/SynthesisOrchestrator.property.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 53486[2mms[22m[39m
+build	build	2026-01-06T12:48:03.4858963Z    [33m[2m✓[22m[39m SynthesisOrchestrator - Property Tests[2m > [22mshould produce parseable CloudFormation templates when synthesis succeeds [33m10201[2mms[22m[39m
+build	build	2026-01-06T12:48:03.4861192Z    [33m[2m✓[22m[39m SynthesisOrchestrator - Property Tests[2m > [22mshould produce consistent results for the same CDK project [33m10851[2mms[22m[39m
+build	build	2026-01-06T12:48:03.4863135Z    [33m[2m✓[22m[39m SynthesisOrchestrator - Property Tests[2m > [22mshould maintain stack name and template path correspondence [33m2050[2mms[22m[39m
+build	build	2026-01-06T12:48:03.4865093Z    [33m[2m✓[22m[39m SynthesisOrchestrator - Property Tests[2m > [22mshould successfully synthesize multi-stack CDK applications [33m17031[2mms[22m[39m
+build	build	2026-01-06T12:48:03.4866437Z    [33m[2m✓[22m[39m SynthesisOrchestrator - Property Tests[2m > [22mshould identify all stacks in multi-stack applications [33m13322[2mms[22m[39m
+build	build	2026-01-06T12:48:03.4999898Z 
+build	build	2026-01-06T12:48:03.5044076Z [2m Test Files [22m [1m[32m47 passed[39m[22m[90m (47)[39m
+build	build	2026-01-06T12:48:03.5058679Z [2m      Tests [22m [1m[32m408 passed[39m[22m[90m (408)[39m
+build	build	2026-01-06T12:48:03.5059815Z [2m   Start at [22m 12:47:08
+build	build	2026-01-06T12:48:03.5061313Z [2m   Duration [22m 54.60s[2m (transform 1.33s, setup 0ms, collect 7.29s, tests 117.96s, environment 14ms, prepare 4.44s)[22m
+build	build	2026-01-06T12:48:03.5061981Z 
+build	build	2026-01-06T12:48:04.6922375Z 👾 build » package | mkdir -p dist/js
+build	build	2026-01-06T12:48:04.6967756Z 👾 build » package | npm pack --pack-destination dist/js
+build	build	2026-01-06T12:48:06.0401898Z npm notice
+build	build	2026-01-06T12:48:06.0404931Z npm notice 📦  cdk-cost-analyzer@0.0.0
+build	build	2026-01-06T12:48:06.0406022Z npm notice Tarball Contents
+build	build	2026-01-06T12:48:06.0412873Z npm notice 5.5kB .gitlab-ci.yml
+build	build	2026-01-06T12:48:06.0413506Z npm notice 973B .kiro/hooks/accessibility-audit.kiro.hook
+build	build	2026-01-06T12:48:06.0414326Z npm notice 1.1kB .kiro/hooks/api-schema-validation.kiro.hook
+build	build	2026-01-06T12:48:06.0415050Z npm notice 799B .kiro/hooks/auto-test-on-save.kiro.hook
+build	build	2026-01-06T12:48:06.0415770Z npm notice 946B .kiro/hooks/cdk-synth-on-change.kiro.hook
+build	build	2026-01-06T12:48:06.0416539Z npm notice 1.0kB .kiro/hooks/code-coverage-check.kiro.hook
+build	build	2026-01-06T12:48:06.0417320Z npm notice 939B .kiro/hooks/commit-message-helper.kiro.hook
+build	build	2026-01-06T12:48:06.0418093Z npm notice 1.1kB .kiro/hooks/dependency-update-check.kiro.hook
+build	build	2026-01-06T12:48:06.0418911Z npm notice 996B .kiro/hooks/env-file-validation.kiro.hook
+build	build	2026-01-06T12:48:06.0419698Z npm notice 814B .kiro/hooks/lint-and-format-on-save.kiro.hook
+build	build	2026-01-06T12:48:06.0421120Z npm notice 1.0kB .kiro/hooks/mcp-config-validation.kiro.hook
+build	build	2026-01-06T12:48:06.0422133Z npm notice 998B .kiro/hooks/mcp-server-test.kiro.hook
+build	build	2026-01-06T12:48:06.0422857Z npm notice 1.0kB .kiro/hooks/performance-analysis.kiro.hook
+build	build	2026-01-06T12:48:06.0423584Z npm notice 934B .kiro/hooks/readme-spell-check.kiro.hook
+build	build	2026-01-06T12:48:06.0424427Z npm notice 944B .kiro/hooks/security-scan-on-dependency-change.kiro.hook
+build	build	2026-01-06T12:48:06.0425264Z npm notice 1.0kB .kiro/hooks/translation-update.kiro.hook
+build	build	2026-01-06T12:48:06.0426014Z npm notice 1.1kB .kiro/hooks/update-documentation.kiro.hook
+build	build	2026-01-06T12:48:06.0426634Z npm notice 468B .kiro/settings/mcp.json
+build	build	2026-01-06T12:48:06.0427248Z npm notice 21.7kB .kiro/specs/cdk-cost-analyzer/design.md
+build	build	2026-01-06T12:48:06.0427970Z npm notice 12.3kB .kiro/specs/cdk-cost-analyzer/requirements.md
+build	build	2026-01-06T12:48:06.0428425Z npm notice 14.7kB .kiro/specs/cdk-cost-analyzer/tasks.md
+build	build	2026-01-06T12:48:06.0428839Z npm notice 10.1kB .kiro/specs/github-actions-ci/design.md
+build	build	2026-01-06T12:48:06.0429300Z npm notice 4.7kB .kiro/specs/github-actions-ci/requirements.md
+build	build	2026-01-06T12:48:06.0429732Z npm notice 3.9kB .kiro/specs/github-actions-ci/tasks.md
+build	build	2026-01-06T12:48:06.0430143Z npm notice 34.5kB .kiro/specs/production-readiness/design.md
+build	build	2026-01-06T12:48:06.0430621Z npm notice 20.2kB .kiro/specs/production-readiness/requirements.md
+build	build	2026-01-06T12:48:06.0431321Z npm notice 11.0kB .kiro/specs/production-readiness/tasks.md
+build	build	2026-01-06T12:48:06.0431746Z npm notice 10.8kB .kiro/specs/repository-cleanup/design.md
+build	build	2026-01-06T12:48:06.0432178Z npm notice 4.3kB .kiro/specs/repository-cleanup/requirements.md
+build	build	2026-01-06T12:48:06.0432601Z npm notice 3.0kB .kiro/specs/repository-cleanup/tasks.md
+build	build	2026-01-06T12:48:06.0433002Z npm notice 1.4kB .kiro/steering/aws-cli-best-practices.md
+build	build	2026-01-06T12:48:06.0433413Z npm notice 2.0kB .kiro/steering/cdk-best-practices.md
+build	build	2026-01-06T12:48:06.0433817Z npm notice 2.2kB .kiro/steering/development-standards.md
+build	build	2026-01-06T12:48:06.0434224Z npm notice 930B .kiro/steering/docker-best-practices.md
+build	build	2026-01-06T12:48:06.0434618Z npm notice 4.3kB .kiro/steering/documentation-style.md
+build	build	2026-01-06T12:48:06.0435004Z npm notice 1.2kB .kiro/steering/git-best-practices.md
+build	build	2026-01-06T12:48:06.0435401Z npm notice 3.6kB .kiro/steering/mcp-best-practices.md
+build	build	2026-01-06T12:48:06.0435809Z npm notice 1.5kB .kiro/steering/python-best-practices.md
+build	build	2026-01-06T12:48:06.0436209Z npm notice 1.3kB .kiro/steering/react-best-practices.md
+build	build	2026-01-06T12:48:06.0436620Z npm notice 1.2kB .kiro/steering/security-best-practices.md
+build	build	2026-01-06T12:48:06.0437029Z npm notice 1.8kB .kiro/steering/testing-best-practices.md
+build	build	2026-01-06T12:48:06.0437457Z npm notice 1.3kB .kiro/steering/typescript-best-practices.md
+build	build	2026-01-06T12:48:06.0437799Z npm notice 1.6kB CHANGELOG.md
+build	build	2026-01-06T12:48:06.0438065Z npm notice 5.9kB CONTRIBUTING.md
+build	build	2026-01-06T12:48:06.0438313Z npm notice 1.1kB LICENSE
+build	build	2026-01-06T12:48:06.0438535Z npm notice 14.4kB README.md
+build	build	2026-01-06T12:48:06.0438770Z npm notice 3.6kB SECURITY.md
+build	build	2026-01-06T12:48:06.0439039Z npm notice 504B dist/api/index.d.ts
+build	build	2026-01-06T12:48:06.0439321Z npm notice 7.3kB dist/api/index.js
+build	build	2026-01-06T12:48:06.0439604Z npm notice 453B dist/api/types.d.ts
+build	build	2026-01-06T12:48:06.0439883Z npm notice 907B dist/api/types.js
+build	build	2026-01-06T12:48:06.0440151Z npm notice 31B dist/cli/index.d.ts
+build	build	2026-01-06T12:48:06.0440422Z npm notice 35.2kB dist/cli/index.js
+build	build	2026-01-06T12:48:06.0440878Z npm notice 1.1kB dist/config/ConfigManager.d.ts
+build	build	2026-01-06T12:48:06.0441236Z npm notice 27.8kB dist/config/ConfigManager.js
+build	build	2026-01-06T12:48:06.0441555Z npm notice 58B dist/config/index.d.ts
+build	build	2026-01-06T12:48:06.0441840Z npm notice 1.2kB dist/config/index.js
+build	build	2026-01-06T12:48:06.0442128Z npm notice 1.8kB dist/config/types.d.ts
+build	build	2026-01-06T12:48:06.0442424Z npm notice 3.4kB dist/config/types.js
+build	build	2026-01-06T12:48:06.0442714Z npm notice 326B dist/diff/DiffEngine.d.ts
+build	build	2026-01-06T12:48:06.0443022Z npm notice 9.6kB dist/diff/DiffEngine.js
+build	build	2026-01-06T12:48:06.0443473Z npm notice 68B dist/diff/index.d.ts
+build	build	2026-01-06T12:48:06.0443835Z npm notice 1.4kB dist/diff/index.js
+build	build	2026-01-06T12:48:06.0444150Z npm notice 589B dist/diff/types.d.ts
+build	build	2026-01-06T12:48:06.0444552Z npm notice 1.1kB dist/diff/types.js
+build	build	2026-01-06T12:48:06.0444895Z npm notice 367B dist/integrations/GitLabIntegration.d.ts
+build	build	2026-01-06T12:48:06.0445302Z npm notice 6.1kB dist/integrations/GitLabIntegration.js
+build	build	2026-01-06T12:48:06.0445649Z npm notice 82B dist/integrations/index.d.ts
+build	build	2026-01-06T12:48:06.0445976Z npm notice 1.5kB dist/integrations/index.js
+build	build	2026-01-06T12:48:06.0446299Z npm notice 375B dist/integrations/types.d.ts
+build	build	2026-01-06T12:48:06.0446620Z npm notice 1.4kB dist/integrations/types.js
+build	build	2026-01-06T12:48:06.0446925Z npm notice 96B dist/parser/index.d.ts
+build	build	2026-01-06T12:48:06.0447218Z npm notice 1.7kB dist/parser/index.js
+build	build	2026-01-06T12:48:06.0447532Z npm notice 370B dist/parser/TemplateParser.d.ts
+build	build	2026-01-06T12:48:06.0447874Z npm notice 6.4kB dist/parser/TemplateParser.js
+build	build	2026-01-06T12:48:06.0448183Z npm notice 771B dist/parser/types.d.ts
+build	build	2026-01-06T12:48:06.0448484Z npm notice 1.3kB dist/parser/types.js
+build	build	2026-01-06T12:48:06.0449089Z npm notice 65B dist/pipeline/index.d.ts
+build	build	2026-01-06T12:48:06.0449584Z npm notice 1.2kB dist/pipeline/index.js
+build	build	2026-01-06T12:48:06.0450186Z npm notice 615B dist/pipeline/PipelineOrchestrator.d.ts
+build	build	2026-01-06T12:48:06.0451073Z npm notice 24.3kB dist/pipeline/PipelineOrchestrator.js
+build	build	2026-01-06T12:48:06.0451681Z npm notice 1.1kB dist/pipeline/types.d.ts
+build	build	2026-01-06T12:48:06.0452209Z npm notice 2.4kB dist/pipeline/types.js
+build	build	2026-01-06T12:48:06.0452772Z npm notice 2.2kB dist/pricing/CacheManager.d.ts
+build	build	2026-01-06T12:48:06.0453408Z npm notice 18.4kB dist/pricing/CacheManager.js
+build	build	2026-01-06T12:48:06.0454038Z npm notice 920B dist/pricing/calculators/ALBCalculator.d.ts
+build	build	2026-01-06T12:48:06.0454753Z npm notice 19.9kB dist/pricing/calculators/ALBCalculator.js
+build	build	2026-01-06T12:48:06.0455560Z npm notice 501B dist/pricing/calculators/APIGatewayCalculator.d.ts
+build	build	2026-01-06T12:48:06.0456326Z npm notice 23.1kB dist/pricing/calculators/APIGatewayCalculator.js
+build	build	2026-01-06T12:48:06.0457136Z npm notice 2.4kB dist/pricing/calculators/CloudFrontCalculator.d.ts
+build	build	2026-01-06T12:48:06.0457983Z npm notice 16.5kB dist/pricing/calculators/CloudFrontCalculator.js
+build	build	2026-01-06T12:48:06.0458709Z npm notice 468B dist/pricing/calculators/DynamoDBCalculator.d.ts
+build	build	2026-01-06T12:48:06.0459440Z npm notice 20.2kB dist/pricing/calculators/DynamoDBCalculator.js
+build	build	2026-01-06T12:48:06.0460193Z npm notice 390B dist/pricing/calculators/EC2Calculator.d.ts
+build	build	2026-01-06T12:48:06.0461025Z npm notice 9.6kB dist/pricing/calculators/EC2Calculator.js
+build	build	2026-01-06T12:48:06.0461696Z npm notice 454B dist/pricing/calculators/ECSCalculator.d.ts
+build	build	2026-01-06T12:48:06.0462348Z npm notice 14.8kB dist/pricing/calculators/ECSCalculator.js
+build	build	2026-01-06T12:48:06.0462816Z npm notice 427B dist/pricing/calculators/ElastiCacheCalculator.d.ts
+build	build	2026-01-06T12:48:06.0463302Z npm notice 12.9kB dist/pricing/calculators/ElastiCacheCalculator.js
+build	build	2026-01-06T12:48:06.0463759Z npm notice 517B dist/pricing/calculators/LambdaCalculator.d.ts
+build	build	2026-01-06T12:48:06.0464208Z npm notice 10.6kB dist/pricing/calculators/LambdaCalculator.js
+build	build	2026-01-06T12:48:06.0464668Z npm notice 610B dist/pricing/calculators/NatGatewayCalculator.d.ts
+build	build	2026-01-06T12:48:06.0465134Z npm notice 13.8kB dist/pricing/calculators/NatGatewayCalculator.js
+build	build	2026-01-06T12:48:06.0465570Z npm notice 920B dist/pricing/calculators/NLBCalculator.d.ts
+build	build	2026-01-06T12:48:06.0465987Z npm notice 19.8kB dist/pricing/calculators/NLBCalculator.js
+build	build	2026-01-06T12:48:06.0466393Z npm notice 460B dist/pricing/calculators/RDSCalculator.d.ts
+build	build	2026-01-06T12:48:06.0466804Z npm notice 12.9kB dist/pricing/calculators/RDSCalculator.js
+build	build	2026-01-06T12:48:06.0467213Z npm notice 431B dist/pricing/calculators/S3Calculator.d.ts
+build	build	2026-01-06T12:48:06.0467615Z npm notice 8.0kB dist/pricing/calculators/S3Calculator.js
+build	build	2026-01-06T12:48:06.0468074Z npm notice 610B dist/pricing/calculators/VPCEndpointCalculator.d.ts
+build	build	2026-01-06T12:48:06.0468569Z npm notice 16.7kB dist/pricing/calculators/VPCEndpointCalculator.js
+build	build	2026-01-06T12:48:06.0469131Z npm notice 572B dist/pricing/index.d.ts
+build	build	2026-01-06T12:48:06.0469440Z npm notice 4.3kB dist/pricing/index.js
+build	build	2026-01-06T12:48:06.0469875Z npm notice 464B dist/pricing/PricingClient.d.ts
+build	build	2026-01-06T12:48:06.0470222Z npm notice 14.3kB dist/pricing/PricingClient.js
+build	build	2026-01-06T12:48:06.0470570Z npm notice 669B dist/pricing/PricingService.d.ts
+build	build	2026-01-06T12:48:06.0471189Z npm notice 21.9kB dist/pricing/PricingService.js
+build	build	2026-01-06T12:48:06.0471559Z npm notice 1.6kB dist/pricing/types.d.ts
+build	build	2026-01-06T12:48:06.0471866Z npm notice 3.8kB dist/pricing/types.js
+build	build	2026-01-06T12:48:06.0472159Z npm notice 64B dist/reporter/index.d.ts
+build	build	2026-01-06T12:48:06.0472457Z npm notice 1.4kB dist/reporter/index.js
+build	build	2026-01-06T12:48:06.0472757Z npm notice 737B dist/reporter/Reporter.d.ts
+build	build	2026-01-06T12:48:06.0473076Z npm notice 67.5kB dist/reporter/Reporter.js
+build	build	2026-01-06T12:48:06.0473386Z npm notice 2.4kB dist/reporter/types.d.ts
+build	build	2026-01-06T12:48:06.0473696Z npm notice 3.5kB dist/reporter/types.js
+build	build	2026-01-06T12:48:06.0474013Z npm notice 66B dist/synthesis/index.d.ts
+build	build	2026-01-06T12:48:06.0474317Z npm notice 1.2kB dist/synthesis/index.js
+build	build	2026-01-06T12:48:06.0474695Z npm notice 447B dist/synthesis/SynthesisOrchestrator.d.ts
+build	build	2026-01-06T12:48:06.0475111Z npm notice 17.7kB dist/synthesis/SynthesisOrchestrator.js
+build	build	2026-01-06T12:48:06.0475458Z npm notice 439B dist/synthesis/types.d.ts
+build	build	2026-01-06T12:48:06.0475764Z npm notice 1.5kB dist/synthesis/types.js
+build	build	2026-01-06T12:48:06.0476068Z npm notice 62B dist/threshold/index.d.ts
+build	build	2026-01-06T12:48:06.0476357Z npm notice 1.2kB dist/threshold/index.js
+build	build	2026-01-06T12:48:06.0476701Z npm notice 965B dist/threshold/ThresholdEnforcer.d.ts
+build	build	2026-01-06T12:48:06.0477083Z npm notice 20.7kB dist/threshold/ThresholdEnforcer.js
+build	build	2026-01-06T12:48:06.0477421Z npm notice 501B dist/threshold/types.d.ts
+build	build	2026-01-06T12:48:06.0477723Z npm notice 1.8kB dist/threshold/types.js
+build	build	2026-01-06T12:48:06.0478014Z npm notice 18.3kB docs/CALCULATORS.md
+build	build	2026-01-06T12:48:06.0478300Z npm notice 11.0kB docs/CI_CD.md
+build	build	2026-01-06T12:48:06.0478583Z npm notice 8.8kB docs/CONFIGURATION.md
+build	build	2026-01-06T12:48:06.0478867Z npm notice 10.7kB docs/DEVELOPMENT.md
+build	build	2026-01-06T12:48:06.0479153Z npm notice 5.2kB docs/RELEASE.md
+build	build	2026-01-06T12:48:06.0479436Z npm notice 15.0kB docs/TROUBLESHOOTING.md
+build	build	2026-01-06T12:48:06.0479775Z npm notice 2.9kB examples/.cdk-cost-analyzer.yml
+build	build	2026-01-06T12:48:06.0480104Z npm notice 2.6kB examples/.gitlab-ci.yml
+build	build	2026-01-06T12:48:06.0480398Z npm notice 978B examples/api-usage.js
+build	build	2026-01-06T12:48:06.0480862Z npm notice 370B examples/complex/base.json
+build	build	2026-01-06T12:48:06.0481190Z npm notice 591B examples/complex/target.json
+build	build	2026-01-06T12:48:06.0481527Z npm notice 5.9kB examples/monorepo/.gitlab-ci.yml
+build	build	2026-01-06T12:48:06.0481879Z npm notice 566B examples/monorepo/package.json
+build	build	2026-01-06T12:48:06.0482351Z npm notice 580B examples/monorepo/packages/backend-infra/.cdk-cost-analyzer.yml
+build	build	2026-01-06T12:48:06.0482886Z npm notice 445B examples/monorepo/packages/backend-infra/bin/app.ts
+build	build	2026-01-06T12:48:06.0483365Z npm notice 180B examples/monorepo/packages/backend-infra/cdk.json
+build	build	2026-01-06T12:48:06.0483877Z npm notice 4.0kB examples/monorepo/packages/backend-infra/lib/backend-stack.ts
+build	build	2026-01-06T12:48:06.0484415Z npm notice 662B examples/monorepo/packages/backend-infra/package.json
+build	build	2026-01-06T12:48:06.0484916Z npm notice 165B examples/monorepo/packages/backend-infra/tsconfig.json
+build	build	2026-01-06T12:48:06.0485438Z npm notice 651B examples/monorepo/packages/data-infra/.cdk-cost-analyzer.yml
+build	build	2026-01-06T12:48:06.0485936Z npm notice 421B examples/monorepo/packages/data-infra/bin/app.ts
+build	build	2026-01-06T12:48:06.0486384Z npm notice 180B examples/monorepo/packages/data-infra/cdk.json
+build	build	2026-01-06T12:48:06.0486856Z npm notice 3.8kB examples/monorepo/packages/data-infra/lib/data-stack.ts
+build	build	2026-01-06T12:48:06.0487344Z npm notice 653B examples/monorepo/packages/data-infra/package.json
+build	build	2026-01-06T12:48:06.0487809Z npm notice 165B examples/monorepo/packages/data-infra/tsconfig.json
+build	build	2026-01-06T12:48:06.0488340Z npm notice 536B examples/monorepo/packages/frontend-infra/.cdk-cost-analyzer.yml
+build	build	2026-01-06T12:48:06.0489026Z npm notice 435B examples/monorepo/packages/frontend-infra/bin/app.ts
+build	build	2026-01-06T12:48:06.0490167Z npm notice 180B examples/monorepo/packages/frontend-infra/cdk.json
+build	build	2026-01-06T12:48:06.0491343Z npm notice 2.0kB examples/monorepo/packages/frontend-infra/lib/frontend-stack.ts
+build	build	2026-01-06T12:48:06.0491930Z npm notice 665B examples/monorepo/packages/frontend-infra/package.json
+build	build	2026-01-06T12:48:06.0492459Z npm notice 165B examples/monorepo/packages/frontend-infra/tsconfig.json
+build	build	2026-01-06T12:48:06.0492886Z npm notice 8.8kB examples/monorepo/README.md
+build	build	2026-01-06T12:48:06.0493228Z npm notice 794B examples/monorepo/tsconfig.json
+build	build	2026-01-06T12:48:06.0493619Z npm notice 2.1kB examples/multi-stack/.cdk-cost-analyzer.yml
+build	build	2026-01-06T12:48:06.0494028Z npm notice 4.4kB examples/multi-stack/.gitlab-ci.yml
+build	build	2026-01-06T12:48:06.0494389Z npm notice 1.1kB examples/multi-stack/bin/app.ts
+build	build	2026-01-06T12:48:06.0494733Z npm notice 3.5kB examples/multi-stack/cdk.json
+build	build	2026-01-06T12:48:06.0495123Z npm notice 3.6kB examples/multi-stack/lib/compute-stack.ts
+build	build	2026-01-06T12:48:06.0495543Z npm notice 2.0kB examples/multi-stack/lib/networking-stack.ts
+build	build	2026-01-06T12:48:06.0495976Z npm notice 4.3kB examples/multi-stack/lib/storage-stack.ts
+build	build	2026-01-06T12:48:06.0496385Z npm notice 156.0kB examples/multi-stack/package-lock.json
+build	build	2026-01-06T12:48:06.0496759Z npm notice 976B examples/multi-stack/package.json
+build	build	2026-01-06T12:48:06.0497112Z npm notice 7.7kB examples/multi-stack/README.md
+build	build	2026-01-06T12:48:06.0497458Z npm notice 782B examples/multi-stack/tsconfig.json
+build	build	2026-01-06T12:48:06.0497793Z npm notice 105B examples/simple/base.json
+build	build	2026-01-06T12:48:06.0498113Z npm notice 233B examples/simple/target.json
+build	build	2026-01-06T12:48:06.0498418Z npm notice 0B examples/single-stack/,
+build	build	2026-01-06T12:48:06.0498796Z npm notice 1.9kB examples/single-stack/.cdk-cost-analyzer.yml
+build	build	2026-01-06T12:48:06.0499203Z npm notice 3.0kB examples/single-stack/.gitlab-ci.yml
+build	build	2026-01-06T12:48:06.0499563Z npm notice 476B examples/single-stack/bin/app.ts
+build	build	2026-01-06T12:48:06.0499916Z npm notice 3.5kB examples/single-stack/cdk.json
+build	build	2026-01-06T12:48:06.0500312Z npm notice 33.2kB examples/single-stack/custom.out/manifest.json
+build	build	2026-01-06T12:48:06.0501034Z npm notice 1.5kB examples/single-stack/custom.out/SingleStackExample.assets.json
+build	build	2026-01-06T12:48:06.0501661Z npm notice 21.5kB examples/single-stack/custom.out/SingleStackExample.template.json
+build	build	2026-01-06T12:48:06.0502175Z npm notice 20.3kB examples/single-stack/custom.out/tree.json
+build	build	2026-01-06T12:48:06.0502624Z npm notice 3.8kB examples/single-stack/lib/infrastructure-stack.ts
+build	build	2026-01-06T12:48:06.0503059Z npm notice 156.1kB examples/single-stack/package-lock.json
+build	build	2026-01-06T12:48:06.0503443Z npm notice 802B examples/single-stack/package.json
+build	build	2026-01-06T12:48:06.0503791Z npm notice 4.8kB examples/single-stack/README.md
+build	build	2026-01-06T12:48:06.0504148Z npm notice 782B examples/single-stack/tsconfig.json
+build	build	2026-01-06T12:48:06.0504477Z npm notice 2.4kB package.json
+build	build	2026-01-06T12:48:06.0504814Z npm notice 2.9kB test-cdk-project/app-with-compute.js
+build	build	2026-01-06T12:48:06.0505166Z npm notice 2.2kB test-cdk-project/app.js
+build	build	2026-01-06T12:48:06.0505518Z npm notice 40B test-cdk-project/cdk-compute.json
+build	build	2026-01-06T12:48:06.0505870Z npm notice 137B test-cdk-project/cdk.context.json
+build	build	2026-01-06T12:48:06.0506204Z npm notice 27B test-cdk-project/cdk.json
+build	build	2026-01-06T12:48:06.0506552Z npm notice 20B test-cdk-project/cdk.out.base/cdk.out
+build	build	2026-01-06T12:48:06.0506958Z npm notice 26.4kB test-cdk-project/cdk.out.base/manifest.json
+build	build	2026-01-06T12:48:06.0507419Z npm notice 717B test-cdk-project/cdk.out.base/TestStack.assets.json
+build	build	2026-01-06T12:48:06.0507908Z npm notice 2.6kB test-cdk-project/cdk.out.base/TestStack.template.json
+build	build	2026-01-06T12:48:06.0508346Z npm notice 2.9kB test-cdk-project/cdk.out.base/tree.json
+build	build	2026-01-06T12:48:06.0508736Z npm notice 20B test-cdk-project/cdk.out.target/cdk.out
+build	build	2026-01-06T12:48:06.0509149Z npm notice 26.9kB test-cdk-project/cdk.out.target/manifest.json
+build	build	2026-01-06T12:48:06.0529649Z npm notice 717B test-cdk-project/cdk.out.target/TestStack.assets.json
+build	build	2026-01-06T12:48:06.0530596Z npm notice 4.1kB test-cdk-project/cdk.out.target/TestStack.template.json
+build	build	2026-01-06T12:48:06.0531905Z npm notice 4.9kB test-cdk-project/cdk.out.target/tree.json
+build	build	2026-01-06T12:48:06.0532595Z npm notice 20B test-cdk-project/cdk.out/cdk.out
+build	build	2026-01-06T12:48:06.0533269Z npm notice 26.4kB test-cdk-project/cdk.out/manifest.json
+build	build	2026-01-06T12:48:06.0534029Z npm notice 717B test-cdk-project/cdk.out/TestStack.assets.json
+build	build	2026-01-06T12:48:06.0534691Z npm notice 2.6kB test-cdk-project/cdk.out/TestStack.template.json
+build	build	2026-01-06T12:48:06.0535134Z npm notice 2.9kB test-cdk-project/cdk.out/tree.json
+build	build	2026-01-06T12:48:06.0535560Z npm notice 11.4kB test-cdk-project/package-lock.json
+build	build	2026-01-06T12:48:06.0535940Z npm notice 336B test-cdk-project/package.json
+build	build	2026-01-06T12:48:06.0536310Z npm notice 3.9kB test-cdk-project/README-COMPUTE.md
+build	build	2026-01-06T12:48:06.0536673Z npm notice 2.4kB test-cdk-project/README.md
+build	build	2026-01-06T12:48:06.0537016Z npm notice 362B vitest.config.mts
+build	build	2026-01-06T12:48:06.0537279Z npm notice Tarball Details
+build	build	2026-01-06T12:48:06.0537550Z npm notice name: cdk-cost-analyzer
+build	build	2026-01-06T12:48:06.0537813Z npm notice version: 0.0.0
+build	build	2026-01-06T12:48:06.0538116Z npm notice filename: cdk-cost-analyzer-0.0.0.tgz
+build	build	2026-01-06T12:48:06.0538442Z npm notice package size: 323.8 kB
+build	build	2026-01-06T12:48:06.0538716Z npm notice unpacked size: 1.4 MB
+build	build	2026-01-06T12:48:06.0539066Z npm notice shasum: 9c915ee2ad930269165a4889c12e4da377b53e69
+build	build	2026-01-06T12:48:06.0539501Z npm notice integrity: sha512-MS6MJ2R+ssZMS[...]LZ3YqtlLtm2sQ==
+build	build	2026-01-06T12:48:06.0539839Z npm notice total files: 223
+build	build	2026-01-06T12:48:06.0540058Z npm notice
+build	build	2026-01-06T12:48:06.0540282Z cdk-cost-analyzer-0.0.0.tgz
+build	Find mutations	﻿2026-01-06T12:48:06.0936104Z ##[group]Run git add .
+build	Find mutations	2026-01-06T12:48:06.0936398Z [36;1mgit add .[0m
+build	Find mutations	2026-01-06T12:48:06.0936821Z [36;1mgit diff --staged --patch --exit-code > repo.patch || echo "self_mutation_happened=true" >> $GITHUB_OUTPUT[0m
+build	Find mutations	2026-01-06T12:48:06.0971867Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+build	Find mutations	2026-01-06T12:48:06.0972193Z env:
+build	Find mutations	2026-01-06T12:48:06.0972360Z   CI: true
+build	Find mutations	2026-01-06T12:48:06.0972545Z ##[endgroup]
+build	Upload patch	﻿2026-01-06T12:48:06.1382791Z ##[group]Run actions/upload-artifact@v4.6.2
+build	Upload patch	2026-01-06T12:48:06.1383344Z with:
+build	Upload patch	2026-01-06T12:48:06.1383654Z   name: repo.patch
+build	Upload patch	2026-01-06T12:48:06.1383987Z   path: repo.patch
+build	Upload patch	2026-01-06T12:48:06.1384301Z   overwrite: true
+build	Upload patch	2026-01-06T12:48:06.1384628Z   if-no-files-found: warn
+build	Upload patch	2026-01-06T12:48:06.1384995Z   compression-level: 6
+build	Upload patch	2026-01-06T12:48:06.1385366Z   include-hidden-files: false
+build	Upload patch	2026-01-06T12:48:06.1385725Z env:
+build	Upload patch	2026-01-06T12:48:06.1385992Z   CI: true
+build	Upload patch	2026-01-06T12:48:06.1386267Z ##[endgroup]
+build	Upload patch	2026-01-06T12:48:06.3830423Z With the provided path, there will be 1 file uploaded
+build	Upload patch	2026-01-06T12:48:06.6787783Z Artifact name is valid!
+build	Upload patch	2026-01-06T12:48:06.6790561Z Root directory input is valid!
+build	Upload patch	2026-01-06T12:48:06.7873320Z Beginning upload of artifact content to blob storage
+build	Upload patch	2026-01-06T12:48:07.0934004Z Uploaded bytes 358
+build	Upload patch	2026-01-06T12:48:07.1715796Z Finished uploading artifact content to blob storage!
+build	Upload patch	2026-01-06T12:48:07.1717184Z SHA256 digest of uploaded artifact zip is aaa8980043eccebcea44a01838039bce2f61d982030d07a565ea942e0428805c
+build	Upload patch	2026-01-06T12:48:07.1718282Z Finalizing artifact upload
+build	Upload patch	2026-01-06T12:48:07.3588835Z Artifact repo.patch.zip successfully finalized. Artifact ID 5036596216
+build	Upload patch	2026-01-06T12:48:07.3590437Z Artifact repo.patch has been successfully uploaded! Final size is 358 bytes. Artifact ID is 5036596216
+build	Upload patch	2026-01-06T12:48:07.3598751Z Artifact download URL: https://github.com/buildinginthecloud/cdk-cost-analyzer/actions/runs/20748718994/artifacts/5036596216
+build	Fail build on mutation	﻿2026-01-06T12:48:07.3727486Z ##[group]Run echo "::error::Files were changed during build (see build log). If this was triggered from a fork, you will need to update your branch."
+build	Fail build on mutation	2026-01-06T12:48:07.3729030Z [36;1mecho "::error::Files were changed during build (see build log). If this was triggered from a fork, you will need to update your branch."[0m
+build	Fail build on mutation	2026-01-06T12:48:07.3730245Z [36;1mcat repo.patch[0m
+build	Fail build on mutation	2026-01-06T12:48:07.3730630Z [36;1mexit 1[0m
+build	Fail build on mutation	2026-01-06T12:48:07.3813567Z shell: /usr/bin/bash -e {0}
+build	Fail build on mutation	2026-01-06T12:48:07.3813940Z env:
+build	Fail build on mutation	2026-01-06T12:48:07.3814123Z   CI: true
+build	Fail build on mutation	2026-01-06T12:48:07.3814365Z ##[endgroup]
+build	Fail build on mutation	2026-01-06T12:48:07.3936009Z ##[error]Files were changed during build (see build log). If this was triggered from a fork, you will need to update your branch.
+build	Fail build on mutation	2026-01-06T12:48:07.3950089Z diff --git a/.github/workflows/build.yml b/.github/workflows/build.yml
+build	Fail build on mutation	2026-01-06T12:48:07.3951063Z index 475df42..1c2e705 100644
+build	Fail build on mutation	2026-01-06T12:48:07.3951577Z --- a/.github/workflows/build.yml
+build	Fail build on mutation	2026-01-06T12:48:07.3952127Z +++ b/.github/workflows/build.yml
+build	Fail build on mutation	2026-01-06T12:48:07.3952643Z @@ -24,7 +24,7 @@ jobs:
+build	Fail build on mutation	2026-01-06T12:48:07.3953015Z          with:
+build	Fail build on mutation	2026-01-06T12:48:07.3953381Z            node-version: 18.x
+build	Fail build on mutation	2026-01-06T12:48:07.3953868Z        - name: Install dependencies
+build	Fail build on mutation	2026-01-06T12:48:07.3954342Z -        run: npm ci
+build	Fail build on mutation	2026-01-06T12:48:07.3954749Z +        run: npm install
+build	Fail build on mutation	2026-01-06T12:48:07.3955368Z        - name: Install example project dependencies, needed for testing
+build	Fail build on mutation	2026-01-06T12:48:07.3955962Z          run: |-
+build	Fail build on mutation	2026-01-06T12:48:07.3956409Z            npm ci --prefix examples/single-stack
+build	Fail build on mutation	2026-01-06T12:48:07.3958764Z ##[error]Process completed with exit code 1.
+build	Post Checkout	﻿2026-01-06T12:48:07.4074732Z Post job cleanup.
+build	Post Checkout	2026-01-06T12:48:07.5121422Z [command]/usr/bin/git version
+build	Post Checkout	2026-01-06T12:48:07.5171506Z git version 2.52.0
+build	Post Checkout	2026-01-06T12:48:07.5219670Z Temporarily overriding HOME='/home/runner/work/_temp/1297dd13-cfa1-48b5-927a-7d45ea017932' before making global git config changes
+build	Post Checkout	2026-01-06T12:48:07.5222784Z Adding repository directory to the temporary git global config as a safe directory
+build	Post Checkout	2026-01-06T12:48:07.5229468Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/cdk-cost-analyzer/cdk-cost-analyzer
+build	Post Checkout	2026-01-06T12:48:07.5340142Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+build	Post Checkout	2026-01-06T12:48:07.5382495Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+build	Post Checkout	2026-01-06T12:48:07.5665911Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build	Post Checkout	2026-01-06T12:48:07.5693034Z http.https://github.com/.extraheader
+build	Post Checkout	2026-01-06T12:48:07.5705974Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+build	Post Checkout	2026-01-06T12:48:07.5744238Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+build	Post Checkout	2026-01-06T12:48:07.6034289Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+build	Post Checkout	2026-01-06T12:48:07.6075547Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+build	Complete job	﻿2026-01-06T12:48:07.6487055Z Evaluate and set job outputs
+build	Complete job	2026-01-06T12:48:07.6493033Z Set output 'self_mutation_happened'
+build	Complete job	2026-01-06T12:48:07.6495107Z Cleaning up orphan processes
+build	Complete job	2026-01-06T12:48:07.6859267Z Terminate orphan process: pid (4454) (sh)
+build	Complete job	2026-01-06T12:48:07.6887080Z Terminate orphan process: pid (4455) (npm exec cdk synth -c environment=us-east-1 --output cdk.out)
+build	Complete job	2026-01-06T12:48:07.6917293Z Terminate orphan process: pid (4478) (sh)
+build	Complete job	2026-01-06T12:48:07.6955342Z Terminate orphan process: pid (4479) (node)
+build	Complete job	2026-01-06T12:48:07.6995994Z Terminate orphan process: pid (4507) (sh)
+build	Complete job	2026-01-06T12:48:07.7033573Z Terminate orphan process: pid (4508) (npm exec ts-nod)
+build	Complete job	2026-01-06T12:48:07.7094733Z Terminate orphan process: pid (4530) (sh)
+build	Complete job	2026-01-06T12:48:07.7136631Z Terminate orphan process: pid (4531) (node)
+self-mutation	Set up job	﻿2026-01-06T12:48:14.2593314Z Current runner version: '2.330.0'
+self-mutation	Set up job	2026-01-06T12:48:14.2618079Z ##[group]Runner Image Provisioner
+self-mutation	Set up job	2026-01-06T12:48:14.2618916Z Hosted Compute Agent
+self-mutation	Set up job	2026-01-06T12:48:14.2619556Z Version: 20251211.462
+self-mutation	Set up job	2026-01-06T12:48:14.2620184Z Commit: 6cbad8c2bb55d58165063d031ccabf57e2d2db61
+self-mutation	Set up job	2026-01-06T12:48:14.2620841Z Build Date: 2025-12-11T16:28:49Z
+self-mutation	Set up job	2026-01-06T12:48:14.2621738Z Worker ID: {a5e53ffa-269c-43e0-9b07-923c6e0c9c3d}
+self-mutation	Set up job	2026-01-06T12:48:14.2622449Z ##[endgroup]
+self-mutation	Set up job	2026-01-06T12:48:14.2622982Z ##[group]Operating System
+self-mutation	Set up job	2026-01-06T12:48:14.2623496Z Ubuntu
+self-mutation	Set up job	2026-01-06T12:48:14.2624037Z 24.04.3
+self-mutation	Set up job	2026-01-06T12:48:14.2624450Z LTS
+self-mutation	Set up job	2026-01-06T12:48:14.2624885Z ##[endgroup]
+self-mutation	Set up job	2026-01-06T12:48:14.2625469Z ##[group]Runner Image
+self-mutation	Set up job	2026-01-06T12:48:14.2625976Z Image: ubuntu-24.04
+self-mutation	Set up job	2026-01-06T12:48:14.2626466Z Version: 20251215.174.1
+self-mutation	Set up job	2026-01-06T12:48:14.2627518Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20251215.174/images/ubuntu/Ubuntu2404-Readme.md
+self-mutation	Set up job	2026-01-06T12:48:14.2628862Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20251215.174
+self-mutation	Set up job	2026-01-06T12:48:14.2630075Z ##[endgroup]
+self-mutation	Set up job	2026-01-06T12:48:14.2631035Z ##[group]GITHUB_TOKEN Permissions
+self-mutation	Set up job	2026-01-06T12:48:14.2633225Z Contents: write
+self-mutation	Set up job	2026-01-06T12:48:14.2633751Z Metadata: read
+self-mutation	Set up job	2026-01-06T12:48:14.2634253Z ##[endgroup]
+self-mutation	Set up job	2026-01-06T12:48:14.2636278Z Secret source: Actions
+self-mutation	Set up job	2026-01-06T12:48:14.2637065Z Prepare workflow directory
+self-mutation	Set up job	2026-01-06T12:48:14.2957268Z Prepare all required actions
+self-mutation	Set up job	2026-01-06T12:48:14.2995095Z Getting action download info
+self-mutation	Set up job	2026-01-06T12:48:14.7495372Z Download action repository 'actions/checkout@v5' (SHA:93cb6efe18208431cddfb8368fd83d5badbf9bfd)
+self-mutation	Set up job	2026-01-06T12:48:14.8624145Z Download action repository 'actions/download-artifact@v5' (SHA:634f93cb2916e3fdff6788551b99b062d0335ce0)
+self-mutation	Set up job	2026-01-06T12:48:15.5120239Z Complete job name: self-mutation
+self-mutation	Checkout	﻿2026-01-06T12:48:15.5810749Z ##[group]Run actions/checkout@v5
+self-mutation	Checkout	2026-01-06T12:48:15.5811799Z with:
+self-mutation	Checkout	2026-01-06T12:48:15.5812195Z   ref: fix/testing
+self-mutation	Checkout	2026-01-06T12:48:15.5812676Z   repository: buildinginthecloud/cdk-cost-analyzer
+self-mutation	Checkout	2026-01-06T12:48:15.5813262Z   ssh-strict: true
+self-mutation	Checkout	2026-01-06T12:48:15.5813637Z   ssh-user: git
+self-mutation	Checkout	2026-01-06T12:48:15.5814031Z   persist-credentials: true
+self-mutation	Checkout	2026-01-06T12:48:15.5814462Z   clean: true
+self-mutation	Checkout	2026-01-06T12:48:15.5814846Z   sparse-checkout-cone-mode: true
+self-mutation	Checkout	2026-01-06T12:48:15.5815305Z   fetch-depth: 1
+self-mutation	Checkout	2026-01-06T12:48:15.5815687Z   fetch-tags: false
+self-mutation	Checkout	2026-01-06T12:48:15.5816068Z   show-progress: true
+self-mutation	Checkout	2026-01-06T12:48:15.5816459Z   lfs: false
+self-mutation	Checkout	2026-01-06T12:48:15.5816821Z   submodules: false
+self-mutation	Checkout	2026-01-06T12:48:15.5817206Z   set-safe-directory: true
+self-mutation	Checkout	2026-01-06T12:48:15.5817858Z ##[endgroup]
+self-mutation	Checkout	2026-01-06T12:48:15.6685654Z ##[error]Input required and not supplied: token
+self-mutation	Post Checkout	﻿2026-01-06T12:48:15.6887786Z Post job cleanup.
+self-mutation	Complete job	﻿2026-01-06T12:48:15.7741168Z Cleaning up orphan processes

@@ -80,8 +80,8 @@ const project = new typescript.TypeScriptProject({
     'cloudformation',
   ],
 
-  // Node version
-  minNodeVersion: '18.0.0',
+  // Node version - pin to specific version for consistency
+  minNodeVersion: '20.0.0',
 
   // GitHub configuration
   github: true,
@@ -93,7 +93,7 @@ const project = new typescript.TypeScriptProject({
   // Release configuration
   release: true,
   releaseWorkflow: true,
-  workflowNodeVersion: '18.x',
+  workflowNodeVersion: '20.18.1',
   
   // Custom build workflow steps
   buildWorkflow: true,
