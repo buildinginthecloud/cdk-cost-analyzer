@@ -2,9 +2,8 @@
 
 name: build
 on:
+  pull_request: {}
   workflow_dispatch: {}
-  # Temporarily disable for PR to avoid mutation conflicts
-  # pull_request: {}
 jobs:
   build:
     runs-on: ubuntu-latest
