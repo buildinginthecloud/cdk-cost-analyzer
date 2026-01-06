@@ -94,6 +94,9 @@ const project = new typescript.TypeScriptProject({
   release: true,
   releaseWorkflow: true,
   workflowNodeVersion: '18.x',
+  
+  // Custom build workflow steps
+  buildWorkflow: true,
 
   // Gitignore
   gitignore: [
