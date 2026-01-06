@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Install example project dependencies, needed for testing
-        run: |
+        run: |-
           npm ci --prefix examples/single-stack
           npm ci --prefix examples/multi-stack
       - name: build

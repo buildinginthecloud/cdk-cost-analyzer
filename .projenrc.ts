@@ -97,6 +97,17 @@ const project = new typescript.TypeScriptProject({
   
   // Custom build workflow steps
   buildWorkflow: true,
+  buildWorkflowOptions: {
+    preBuildSteps: [
+      {
+        name: 'Install example project dependencies, needed for testing',
+        run: [
+          'npm ci --prefix examples/single-stack',
+          'npm ci --prefix examples/multi-stack'
+        ].join('\n'),
+      },
+    ],
+  },
 
   // Gitignore
   gitignore: [
