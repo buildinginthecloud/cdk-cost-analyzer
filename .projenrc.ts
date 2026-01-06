@@ -120,6 +120,10 @@ const project = new typescript.TypeScriptProject({
     '*.tgz',
     '.cdk-cost-analyzer-cache/',
     '.test-cache/',
+    'cdk.out/',
+    'examples/*/cdk.out/',
+    'examples/*/custom.out/',
+    'examples/*/*.out/',
   ],
 
   // Disable default projen tasks we don't need

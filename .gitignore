@@ -35,6 +35,10 @@ coverage/
 *.tgz
 .cdk-cost-analyzer-cache/
 .test-cache/
+cdk.out/
+examples/*/cdk.out/
+examples/*/custom.out/
+examples/*/*.out/
 !/.github/workflows/build.yml
 /dist/changelog.md
 /dist/version.txt
