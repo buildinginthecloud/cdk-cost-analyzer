@@ -80,11 +80,38 @@ const project = new typescript.TypeScriptProject({
     'cloudformation',
   ],
 
-  // Node version
-  minNodeVersion: '18.0.0',
+  // Node version - pin to specific version for consistency
+  minNodeVersion: '20.0.0',
 
-  // Disable GitHub workflows (using GitLab CI)
-  github: false,
+  // GitHub configuration
+  github: true,
+  githubOptions: {
+    mergify: false,
+    pullRequestLint: false,
+  },
+
+  // Release configuration
+  release: true,
+  releaseWorkflow: true,
+  workflowNodeVersion: '20.18.1',
+  
+  // Custom build workflow steps
+  buildWorkflow: true,
+  buildWorkflowOptions: {
+    preBuildSteps: [
+      {
+        name: 'Install specific npm version for consistency',
+        run: 'npm install -g npm@10.8.2',
+      },
+      {
+        name: 'Install example project dependencies, needed for testing',
+        run: [
+          'npm ci --prefix examples/single-stack',
+          'npm ci --prefix examples/multi-stack'
+        ].join('\n'),
+      },
+    ],
+  },
 
   // Gitignore
   gitignore: [
@@ -97,6 +124,10 @@ const project = new typescript.TypeScriptProject({
     '*.tgz',
     '.cdk-cost-analyzer-cache/',
     '.test-cache/',
+    'cdk.out/',
+    'examples/*/cdk.out/',
+    'examples/*/custom.out/',
+    'examples/*/*.out/',
   ],
 
   // Disable default projen tasks we don't need
