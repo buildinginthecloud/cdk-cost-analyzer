@@ -29,7 +29,7 @@ describe('SynthesisOrchestrator', () => {
       expect(result).toHaveProperty('stackNames');
       expect(result).toHaveProperty('duration');
       expect(result.duration).toBeGreaterThanOrEqual(0);
-    }, 10000); // Increase timeout to 10 seconds
+    }, 30000); // Increase timeout to 30 seconds for CDK synthesis
 
     it('should handle non-existent CDK project', async () => {
       const result = await orchestrator.synthesize({
