@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: 18.x
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Install example project dependencies, needed for testing
         run: |-
           npm ci --prefix examples/single-stack
