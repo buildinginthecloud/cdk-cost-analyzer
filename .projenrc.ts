@@ -100,6 +100,10 @@ const project = new typescript.TypeScriptProject({
   buildWorkflowOptions: {
     preBuildSteps: [
       {
+        name: 'Install specific npm version for consistency',
+        run: 'npm install -g npm@10.8.2',
+      },
+      {
         name: 'Install example project dependencies, needed for testing',
         run: [
           'npm ci --prefix examples/single-stack',
