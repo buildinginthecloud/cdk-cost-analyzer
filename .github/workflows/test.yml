@@ -1,0 +1,29 @@
+name: test
+on:
+  pull_request: {}
+  workflow_dispatch: {}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      CI: "true"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20.18.1
+      - name: Install dependencies
+        run: npm install
+      - name: Install specific npm version for consistency
+        run: npm install -g npm@10.8.2
+      - name: Install example project dependencies, needed for testing
+        run: |-
+          npm ci --prefix examples/single-stack
+          npm ci --prefix examples/multi-stack
+      - name: Run tests
+        run: npx projen test

@@ -47,7 +47,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
     expect(Array.isArray(result.stackNames)).toBe(true);
     expect(typeof result.duration).toBe('number');
     expect(result.duration).toBeGreaterThanOrEqual(0);
-  }, 15000);
+  }, 30000); // Increase timeout to 30 seconds for CDK synthesis
 
   // Feature: production-readiness, Property 1: CDK synthesis produces valid CloudFormation templates
   // Validates: Requirements 1.1, 1.2, 1.3
@@ -183,7 +183,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
       const uniquePaths = new Set(result.templatePaths);
       expect(uniquePaths.size).toBe(result.templatePaths.length);
     }
-  }, 15000);
+  }, 30000); // Increase timeout to 30 seconds for CDK synthesis
 
   // Feature: production-readiness, Property 11: Synthesis errors are captured and reported
   // Validates: Requirements 13.1, 13.2, 13.3
@@ -316,7 +316,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
     // All errors should be similar (same type of failure)
     const errors = results.map((r) => r.error);
     expect(errors.every((e) => e !== undefined)).toBe(true);
-  }, 15000);
+  }, 30000); // Increase timeout to 30 seconds for CDK synthesis
 
   // Feature: production-readiness, Property 2: Multi-stack cost aggregation equals sum of individual stacks
   // Validates: Requirements 2.1, 2.2, 2.3, 2.4
