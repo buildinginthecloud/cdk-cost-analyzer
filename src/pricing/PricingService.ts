@@ -32,15 +32,21 @@ export class PricingService implements IPricingService {
     usageAssumptions?: UsageAssumptionsConfig,
     excludedResourceTypes?: string[],
     cacheConfig?: CacheConfig,
+    pricingClient?: PricingClient,
   ) {
-    // Initialize cache manager if caching is enabled
-    let cacheManager: CacheManager | undefined;
-    if (cacheConfig?.enabled !== false) {
-      const cacheDuration = cacheConfig?.durationHours ?? 24;
-      cacheManager = new CacheManager('.cdk-cost-analyzer-cache', cacheDuration);
-    }
+    // Use provided pricing client or create a new one
+    if (pricingClient) {
+      this.pricingClient = pricingClient;
+    } else {
+      // Initialize cache manager if caching is enabled
+      let cacheManager: CacheManager | undefined;
+      if (cacheConfig?.enabled !== false) {
+        const cacheDuration = cacheConfig?.durationHours ?? 24;
+        cacheManager = new CacheManager('.cdk-cost-analyzer-cache', cacheDuration);
+      }
 
-    this.pricingClient = new PricingClient(region, cacheManager);
+      this.pricingClient = new PricingClient(region, cacheManager);
+    }
     this.excludedResourceTypes = new Set(excludedResourceTypes || []);
     this.calculators = [
       new EC2Calculator(),

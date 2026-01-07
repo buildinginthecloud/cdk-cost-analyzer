@@ -8,13 +8,6 @@ import {
   CostAnalysisResult,
 } from '../../src/api';
 
-vi.mock('@aws-sdk/client-pricing', () => ({
-  PricingClient: vi.fn(() => ({
-    send: vi.fn(),
-  })),
-  GetProductsCommand: vi.fn(),
-}));
-
 describe('analyzeCosts API', () => {
   const baseTemplate = JSON.stringify({
     Resources: {
