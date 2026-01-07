@@ -18,8 +18,8 @@ const project = new typescript.TypeScriptProject({
   homepage: 'https://github.com/buildinginthecloud/cdk-cost-analyzer',
   bugsUrl: 'https://github.com/buildinginthecloud/cdk-cost-analyzer/issues',
 
-  // Publishing
-  releaseToNpm: true,
+  // Publishing - disabled for now
+  releaseToNpm: false,
   npmAccess: NpmAccess.PUBLIC,
 
   // CLI binary
@@ -90,28 +90,13 @@ const project = new typescript.TypeScriptProject({
     pullRequestLint: false,
   },
 
-  // Release configuration
-  release: true,
-  releaseWorkflow: true,
+  // Release configuration - disabled for now
+  release: false,
+  releaseWorkflow: false,
   workflowNodeVersion: '20.18.1',
   
-  // Custom build workflow steps
-  buildWorkflow: true,
-  buildWorkflowOptions: {
-    preBuildSteps: [
-      {
-        name: 'Install specific npm version for consistency',
-        run: 'npm install -g npm@10.8.2',
-      },
-      {
-        name: 'Install example project dependencies, needed for testing',
-        run: [
-          'npm ci --prefix examples/single-stack',
-          'npm ci --prefix examples/multi-stack'
-        ].join('\n'),
-      },
-    ],
-  },
+  // Custom build workflow steps - disabled for now
+  buildWorkflow: false,
 
   // Gitignore
   gitignore: [
@@ -155,5 +140,59 @@ project.addTask('lint', {
 
 // Ensure build task compiles TypeScript
 project.compileTask.reset('tsc');
+
+// Add a test-only workflow since we disabled the build workflow
+if (project.github) {
+  const testWorkflow = project.github.addWorkflow('test');
+  testWorkflow.on({
+    pullRequest: {},
+    push: { branches: ['main'] },
+    workflowDispatch: {},
+  });
+
+  testWorkflow.addJob('test', {
+    runsOn: ['ubuntu-latest'],
+    permissions: {},
+    env: {
+      CI: 'true',
+    },
+    steps: [
+      {
+        name: 'Checkout',
+        uses: 'actions/checkout@v5',
+      },
+      {
+        name: 'Setup Node.js',
+        uses: 'actions/setup-node@v5',
+        with: {
+          'node-version': '20.18.1',
+        },
+      },
+      {
+        name: 'Install dependencies',
+        run: 'npm install',
+      },
+      {
+        name: 'Install specific npm version for consistency',
+        run: 'npm install -g npm@10.8.2',
+      },
+      {
+        name: 'Install example project dependencies, needed for testing',
+        run: [
+          'npm ci --prefix examples/single-stack',
+          'npm ci --prefix examples/multi-stack'
+        ].join('\n'),
+      },
+      {
+        name: 'Run linting',
+        run: 'npm run lint',
+      },
+      {
+        name: 'Run tests',
+        run: 'npm test',
+      },
+    ],
+  });
+}
 
 project.synth();

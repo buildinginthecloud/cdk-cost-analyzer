@@ -39,11 +39,7 @@ cdk.out/
 examples/*/cdk.out/
 examples/*/custom.out/
 examples/*/*.out/
-!/.github/workflows/build.yml
-/dist/changelog.md
-/dist/version.txt
-!/.github/workflows/release.yml
-!/.github/workflows/upgrade-main.yml
+!/.github/workflows/upgrade.yml
 !/.github/pull_request_template.md
 !/test/
 !/tsconfig.json
@@ -52,4 +48,5 @@ examples/*/*.out/
 /lib
 /dist/
 !/.eslintrc.json
+!/.github/workflows/test.yml
 !/.projenrc.ts
