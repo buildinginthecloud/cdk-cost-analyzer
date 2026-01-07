@@ -252,6 +252,7 @@ describe('Repository Structure - Property Tests', () => {
       'package-lock.json',
       'tsconfig.json',
       'tsconfig.dev.json', // Projen dev config
+      'tsconfig.tsbuildinfo', // TypeScript build info cache
       '.gitignore',
       '.npmignore',
       '.gitattributes', // Projen generated
