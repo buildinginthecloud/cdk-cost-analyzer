@@ -1,5 +1,5 @@
 import * as fc from 'fast-check';
-import { describe, it, expect, vi } from 'vitest';
+// Jest imports are global
 import { APIGatewayCalculator } from '../../src/pricing/calculators/APIGatewayCalculator';
 import { DynamoDBCalculator } from '../../src/pricing/calculators/DynamoDBCalculator';
 import { ECSCalculator } from '../../src/pricing/calculators/ECSCalculator';
@@ -7,7 +7,7 @@ import { PricingClient } from '../../src/pricing/types';
 
 describe('New Calculators - Property-Based Tests', () => {
   const mockPricingClient: PricingClient = {
-    getPrice: vi.fn().mockResolvedValue(0.5),
+    getPrice: jest.fn().mockResolvedValue(0.5),
   };
 
   describe('DynamoDB Calculator Properties', () => {

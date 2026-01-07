@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// Jest imports are global
 import { ElastiCacheCalculator } from '../../src/pricing/calculators/ElastiCacheCalculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -20,18 +20,18 @@ describe('ElastiCacheCalculator', () => {
 
   describe('calculateCost', () => {
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn(),
+      getPrice: jest.fn(),
     };
 
     beforeEach(() => {
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     // Redis cluster cost calculation tests
     describe('Redis cluster cost calculation', () => {
       it('should calculate cost for single-node Redis cluster', async () => {
         // Mock pricing: $0.034 per hour for cache.t3.micro
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
 
         const resource = {
           logicalId: 'MyRedisCluster',
@@ -65,7 +65,7 @@ describe('ElastiCacheCalculator', () => {
       });
 
       it('should calculate cost for cache.m5.large Redis cluster', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.136);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.136);
 
         const resource = {
           logicalId: 'MyRedisCluster',
@@ -91,7 +91,7 @@ describe('ElastiCacheCalculator', () => {
       });
 
       it('should calculate cost for cache.r5.xlarge Redis cluster', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.252);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.252);
 
         const resource = {
           logicalId: 'MyRedisCluster',
@@ -121,7 +121,7 @@ describe('ElastiCacheCalculator', () => {
     describe('Memcached cluster cost calculation', () => {
       it('should calculate cost for single-node Memcached cluster', async () => {
         // Mock pricing: $0.034 per hour for cache.t3.micro
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
 
         const resource = {
           logicalId: 'MyMemcachedCluster',
@@ -148,7 +148,7 @@ describe('ElastiCacheCalculator', () => {
       });
 
       it('should calculate cost for cache.m5.large Memcached cluster', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.136);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.136);
 
         const resource = {
           logicalId: 'MyMemcachedCluster',
@@ -177,7 +177,7 @@ describe('ElastiCacheCalculator', () => {
     // Multi-node cluster cost tests
     describe('Multi-node cluster costs', () => {
       it('should calculate cost for 3-node Redis cluster', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
 
         const resource = {
           logicalId: 'MyRedisCluster',
@@ -211,7 +211,7 @@ describe('ElastiCacheCalculator', () => {
       });
 
       it('should calculate cost for 5-node Memcached cluster', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.068);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.068);
 
         const resource = {
           logicalId: 'MyMemcachedCluster',
@@ -239,7 +239,7 @@ describe('ElastiCacheCalculator', () => {
       });
 
       it('should default to 1 node when NumCacheNodes is not specified', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
 
         const resource = {
           logicalId: 'MyRedisCluster',
@@ -265,7 +265,7 @@ describe('ElastiCacheCalculator', () => {
     // Multi-AZ replica cost tests
     describe('Multi-AZ replica costs', () => {
       it('should double cost for cross-az deployment', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
 
         const resource = {
           logicalId: 'MyRedisCluster',
@@ -297,7 +297,7 @@ describe('ElastiCacheCalculator', () => {
       });
 
       it('should double cost for multi-node cross-az deployment', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.068);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.068);
 
         const resource = {
           logicalId: 'MyRedisCluster',
@@ -329,7 +329,7 @@ describe('ElastiCacheCalculator', () => {
       });
 
       it('should not double cost for single-az deployment', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
 
         const resource = {
           logicalId: 'MyRedisCluster',
@@ -354,7 +354,7 @@ describe('ElastiCacheCalculator', () => {
       });
 
       it('should default to single-az when AZMode is not specified', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
 
         const resource = {
           logicalId: 'MyRedisCluster',
@@ -455,7 +455,7 @@ describe('ElastiCacheCalculator', () => {
       });
 
       it('should handle pricing data unavailable', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(null);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(null);
 
         const resource = {
           logicalId: 'MyRedisCluster',
@@ -481,7 +481,7 @@ describe('ElastiCacheCalculator', () => {
       });
 
       it('should handle pricing API errors', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockRejectedValue(
+        jest.mocked(mockPricingClient.getPrice).mockRejectedValue(
           new Error('API timeout'),
         );
 
@@ -511,7 +511,7 @@ describe('ElastiCacheCalculator', () => {
     // Engine normalization tests
     describe('Engine normalization', () => {
       it('should normalize lowercase redis engine', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
 
         const resource = {
           logicalId: 'MyRedisCluster',
@@ -540,7 +540,7 @@ describe('ElastiCacheCalculator', () => {
       });
 
       it('should normalize lowercase memcached engine', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
 
         const resource = {
           logicalId: 'MyMemcachedCluster',
@@ -572,7 +572,7 @@ describe('ElastiCacheCalculator', () => {
     // Region normalization tests
     describe('Region normalization', () => {
       it('should normalize us-east-1 region', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.034);
 
         const resource = {
           logicalId: 'MyRedisCluster',
@@ -598,7 +598,7 @@ describe('ElastiCacheCalculator', () => {
       });
 
       it('should normalize eu-central-1 region', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.038);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.038);
 
         const resource = {
           logicalId: 'MyRedisCluster',
@@ -624,7 +624,7 @@ describe('ElastiCacheCalculator', () => {
       });
 
       it('should normalize ap-southeast-1 region', async () => {
-        vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.038);
+        jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.038);
 
         const resource = {
           logicalId: 'MyRedisCluster',

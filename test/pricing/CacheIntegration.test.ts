@@ -1,11 +1,11 @@
 import * as fs from 'fs';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+// Jest imports are global
 import { CacheManager } from '../../src/pricing/CacheManager';
 import { PricingClient } from '../../src/pricing/PricingClient';
 
 describe('Cache Integration with PricingClient', () => {
   const testCacheDir = '.test-cache-integration';
-  let mockSend: ReturnType<typeof vi.fn>;
+  let mockSend: jest.MockedFunction<any>;
   let mockAWSClient: any;
 
   beforeEach(() => {
@@ -14,11 +14,11 @@ describe('Cache Integration with PricingClient', () => {
       fs.rmSync(testCacheDir, { recursive: true, force: true });
     }
 
-    mockSend = vi.fn();
+    mockSend = jest.fn() as jest.MockedFunction<any>;
     mockAWSClient = {
       send: mockSend,
     };
-    
+
     mockSend.mockResolvedValue({
       PriceList: [
         JSON.stringify({
@@ -37,7 +37,7 @@ describe('Cache Integration with PricingClient', () => {
           },
         }),
       ],
-    });
+    } as any);
   });
 
   afterEach(() => {
@@ -122,7 +122,7 @@ describe('Cache Integration with PricingClient', () => {
     expect(firstResult).toBe(0.10);
 
     // Simulate API failure
-    mockSend.mockRejectedValue(new Error('API failure'));
+    mockSend.mockRejectedValue(new Error('API failure') as any);
 
     // Second call should use cached data despite API failure
     const secondResult = await client.getPrice(params);

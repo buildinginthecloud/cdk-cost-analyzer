@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 
 describe('Repository Structure - Property Tests', () => {
   const projectRoot = path.resolve(__dirname, '..');
@@ -94,7 +94,6 @@ describe('Repository Structure - Property Tests', () => {
 
       let match;
       while ((match = relativeLinkRegex.exec(content)) !== null) {
-        const linkText = match[1];
         const linkPath = match[2];
 
         // Skip external URLs
@@ -129,7 +128,7 @@ describe('Repository Structure - Property Tests', () => {
       const errorMessage = brokenLinks
         .map(({ file, link, reason }) => `  ${file}: [${link}] - ${reason}`)
         .join('\n');
-      expect.fail(`Found broken links:\n${errorMessage}`);
+      throw new Error(`Found broken links:\n${errorMessage}`);
     }
 
     expect(brokenLinks).toEqual([]);
@@ -147,7 +146,6 @@ describe('Repository Structure - Property Tests', () => {
     const requiredFiles = [
       'package.json',
       'tsconfig.json',
-      'vitest.config.mts',
       'README.md',
     ];
 
@@ -244,6 +242,8 @@ describe('Repository Structure - Property Tests', () => {
       'docs',
       'examples',
       'test-cdk-project', // Legacy test project, kept for backwards compatibility
+      'coverage', // Jest coverage reports
+      'test-reports', // Test output reports
       '.git',
       '.kiro',
 
@@ -252,7 +252,6 @@ describe('Repository Structure - Property Tests', () => {
       'package-lock.json',
       'tsconfig.json',
       'tsconfig.dev.json', // Projen dev config
-      'vitest.config.mts',
       '.gitignore',
       '.npmignore',
       '.gitattributes', // Projen generated
@@ -290,7 +289,7 @@ describe('Repository Structure - Property Tests', () => {
 
     if (problematicItems.length > 0) {
       const errorMessage = `Unexpected items in root directory:\n  ${problematicItems.join('\n  ')}`;
-      expect.fail(errorMessage);
+      throw new Error(errorMessage);
     }
 
     expect(problematicItems).toEqual([]);

@@ -55,7 +55,7 @@ export class SynthesisOrchestrator {
 
   /**
    * Execute synthesis command
-   * 
+   *
    * Uses shell: false for security to prevent command injection attacks.
    * Arguments are passed as an array to avoid shell interpretation.
    */

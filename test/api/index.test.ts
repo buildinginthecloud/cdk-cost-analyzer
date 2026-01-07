@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+// Jest imports are global
 import {
   analyzeCosts,
   TemplateParseError,

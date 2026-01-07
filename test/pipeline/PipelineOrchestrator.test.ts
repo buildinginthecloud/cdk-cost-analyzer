@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+// Jest imports are global
 import { PipelineOrchestrator } from '../../src/pipeline/PipelineOrchestrator';
 
 describe('PipelineOrchestrator', () => {

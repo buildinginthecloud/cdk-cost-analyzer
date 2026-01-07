@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { TemplateParser, TemplateParseError } from '../../src/parser/TemplateParser';
 
 describe('TemplateParser', () => {

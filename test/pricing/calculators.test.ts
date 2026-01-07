@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { APIGatewayCalculator } from '../../src/pricing/calculators/APIGatewayCalculator';
 import { CloudFrontCalculator } from '../../src/pricing/calculators/CloudFrontCalculator';
 import { DynamoDBCalculator } from '../../src/pricing/calculators/DynamoDBCalculator';

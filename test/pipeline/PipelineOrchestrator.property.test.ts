@@ -1,15 +1,12 @@
 import * as fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { DiffEngine } from '../../src/diff/DiffEngine';
-import { TemplateParser } from '../../src/parser/TemplateParser';
 import { CloudFormationTemplate } from '../../src/parser/types';
-import { PipelineOrchestrator } from '../../src/pipeline/PipelineOrchestrator';
 import { PricingService } from '../../src/pricing/PricingService';
 
 describe('PipelineOrchestrator - Property Tests', () => {
   const pricingService = new PricingService();
   const diffEngine = new DiffEngine();
-  const parser = new TemplateParser();
 
   // Feature: production-readiness, Property 2: Multi-stack cost aggregation equals sum of individual stacks
   // Validates: Requirements 2.4

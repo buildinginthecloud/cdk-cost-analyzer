@@ -13,12 +13,12 @@ const project = new typescript.TypeScriptProject({
   authorEmail: 'yvo@buildinginthecloud.com',
   license: 'MIT',
 
-  // Repository
-  repository: 'https://gitlab.com/buildinginthecloud/cdk-cost-analyzer.git',
+  // Repository - use consistent GitHub URLs
+  repository: 'https://github.com/buildinginthecloud/cdk-cost-analyzer.git',
   homepage: 'https://github.com/buildinginthecloud/cdk-cost-analyzer',
   bugsUrl: 'https://github.com/buildinginthecloud/cdk-cost-analyzer/issues',
 
-  // Publishing - disabled for now
+  // Publishing configuration
   releaseToNpm: false,
   npmAccess: NpmAccess.PUBLIC,
 
@@ -41,7 +41,6 @@ const project = new typescript.TypeScriptProject({
     '@types/js-yaml@^4.0.9',
     '@types/node@^22.10.1',
     'fast-check@^3.23.1',
-    'vitest@^2.1.6',
   ],
 
   // Build configuration
@@ -68,8 +67,9 @@ const project = new typescript.TypeScriptProject({
     },
   },
 
-  // Disable default Jest since we use Vitest
-  jest: false,
+  // Testing configuration
+  jest: true,
+  sampleCode: false,
 
   // Keywords
   keywords: [
@@ -80,7 +80,7 @@ const project = new typescript.TypeScriptProject({
     'cloudformation',
   ],
 
-  // Node version - pin to specific version for consistency
+  // Node version
   minNodeVersion: '20.0.0',
 
   // GitHub configuration
@@ -90,13 +90,16 @@ const project = new typescript.TypeScriptProject({
     pullRequestLint: false,
   },
 
-  // Release configuration - disabled for now
+  // Release configuration
   release: false,
   releaseWorkflow: false,
   workflowNodeVersion: '20.18.1',
-  
-  // Custom build workflow steps - disabled for now
-  buildWorkflow: false,
+
+  // Build workflow
+  buildWorkflow: true,
+
+  // Dependency upgrades
+  depsUpgrade: true,
 
   // Gitignore
   gitignore: [
@@ -113,86 +116,15 @@ const project = new typescript.TypeScriptProject({
     'examples/*/cdk.out/',
     'examples/*/custom.out/',
     'examples/*/*.out/',
+    'test-cdk-project/',
   ],
 
-  // Disable default projen tasks we don't need
+  // Projen configuration
   projenrcTs: true,
 
   // Linting
   eslint: true,
   prettier: false,
-
-  // Additional scripts
-  scripts: {
-    'test:watch': 'vitest',
-    'test:silent': 'vitest run --silent',
-  },
 });
-
-// Override test command to use Vitest instead of Jest
-project.testTask.reset('vitest run --silent');
-
-// Add lint task
-project.addTask('lint', {
-  description: 'Run TypeScript compiler checks',
-  exec: 'tsc --noEmit',
-});
-
-// Ensure build task compiles TypeScript
-project.compileTask.reset('tsc');
-
-// Add a test-only workflow since we disabled the build workflow
-if (project.github) {
-  const testWorkflow = project.github.addWorkflow('test');
-  testWorkflow.on({
-    pullRequest: {},
-    push: { branches: ['main'] },
-    workflowDispatch: {},
-  });
-
-  testWorkflow.addJob('test', {
-    runsOn: ['ubuntu-latest'],
-    permissions: {},
-    env: {
-      CI: 'true',
-    },
-    steps: [
-      {
-        name: 'Checkout',
-        uses: 'actions/checkout@v5',
-      },
-      {
-        name: 'Setup Node.js',
-        uses: 'actions/setup-node@v5',
-        with: {
-          'node-version': '20.18.1',
-        },
-      },
-      {
-        name: 'Install dependencies',
-        run: 'npm install',
-      },
-      {
-        name: 'Install specific npm version for consistency',
-        run: 'npm install -g npm@10.8.2',
-      },
-      {
-        name: 'Install example project dependencies, needed for testing',
-        run: [
-          'npm ci --prefix examples/single-stack',
-          'npm ci --prefix examples/multi-stack'
-        ].join('\n'),
-      },
-      {
-        name: 'Run linting',
-        run: 'npm run lint',
-      },
-      {
-        name: 'Run tests',
-        run: 'npm test',
-      },
-    ],
-  });
-}
 
 project.synth();

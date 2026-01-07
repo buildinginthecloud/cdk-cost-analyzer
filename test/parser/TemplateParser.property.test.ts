@@ -1,7 +1,6 @@
 import * as fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { TemplateParser } from '../../src/parser/TemplateParser';
-import { CloudFormationTemplate } from '../../src/parser/types';
 
 describe('TemplateParser - Property Tests', () => {
   const parser = new TemplateParser();

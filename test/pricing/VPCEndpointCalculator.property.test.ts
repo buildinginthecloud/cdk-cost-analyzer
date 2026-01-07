@@ -1,5 +1,5 @@
 import * as fc from 'fast-check';
-import { describe, it, expect, vi } from 'vitest';
+// Jest imports are global
 import { ResourceWithId } from '../../src/diff/types';
 import { VPCEndpointCalculator } from '../../src/pricing/calculators/VPCEndpointCalculator';
 import { PricingClient } from '../../src/pricing/types';
@@ -14,7 +14,7 @@ describe('VPCEndpointCalculator - Property Tests', () => {
 
     // Mock pricing client (should not be called for Gateway endpoints)
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockResolvedValue(0.01),
+      getPrice: jest.fn().mockResolvedValue(0.01),
     };
 
     // Arbitrary for generating Gateway VPC endpoint resources
@@ -97,13 +97,13 @@ describe('VPCEndpointCalculator - Property Tests', () => {
 
     // Mock pricing client that returns realistic pricing
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockImplementation(async (params) => {
+      getPrice: jest.fn().mockImplementation(async (params) => {
         // Return hourly rate for endpoint hours
-        if (params.filters?.some((f) => f.value?.includes('Hours'))) {
+        if (params.filters?.some((f: any) => f.value?.includes('Hours'))) {
           return 0.01; // $0.01 per hour
         }
         // Return data processing rate
-        if (params.filters?.some((f) => f.value?.includes('Bytes'))) {
+        if (params.filters?.some((f: any) => f.value?.includes('Bytes'))) {
           return 0.01; // $0.01 per GB
         }
         return null;
@@ -179,7 +179,7 @@ describe('VPCEndpointCalculator - Property Tests', () => {
     const calculator = new VPCEndpointCalculator();
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockResolvedValue(0.01),
+      getPrice: jest.fn().mockResolvedValue(0.01),
     };
 
     // Test various ways a Gateway endpoint can be specified
@@ -270,7 +270,7 @@ describe('VPCEndpointCalculator - Property Tests', () => {
 
     // Mock pricing client that returns null (pricing unavailable)
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockResolvedValue(null),
+      getPrice: jest.fn().mockResolvedValue(null),
     };
 
     const interfaceEndpointArb = fc.record({

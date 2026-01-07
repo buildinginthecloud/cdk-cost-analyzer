@@ -1,5 +1,5 @@
 import * as fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { analyzeCosts } from '../../src/api';
 
 describe('analyzeCosts API - Property Tests', () => {

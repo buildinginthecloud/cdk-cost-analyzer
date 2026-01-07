@@ -1,6 +1,5 @@
 import * as fc from 'fast-check';
-import { describe, it, expect, vi } from 'vitest';
-import { ResourceWithId } from '../../src/diff/types';
+// Jest imports are global
 import { PricingService } from '../../src/pricing/PricingService';
 
 describe('PricingService - Property Tests', () => {

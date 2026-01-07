@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { SynthesisOrchestrator } from '../../src/synthesis/SynthesisOrchestrator';
 
 describe('SynthesisOrchestrator', () => {

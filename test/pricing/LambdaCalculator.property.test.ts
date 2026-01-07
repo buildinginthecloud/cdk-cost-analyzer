@@ -1,5 +1,5 @@
 import * as fc from 'fast-check';
-import { describe, it, expect, vi } from 'vitest';
+// Jest imports are global
 import { LambdaCalculator } from '../../src/pricing/calculators/LambdaCalculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -14,8 +14,8 @@ describe('LambdaCalculator - Property Tests', () => {
 
     // Create a mock pricing client that returns realistic Lambda pricing
     const createMockPricingClient = (): PricingClient => ({
-      getPrice: vi.fn().mockImplementation(async (params) => {
-        const group = params.filters?.find(f => f.field === 'group')?.value;
+      getPrice: jest.fn().mockImplementation(async (params) => {
+        const group = params.filters?.find((f: any) => f.field === 'group')?.value;
 
         if (!group) {
           return null;
@@ -94,8 +94,8 @@ describe('LambdaCalculator - Property Tests', () => {
     const largerMemory = [1024, 2048, 3008, 4096];
 
     const createMockPricingClient = (): PricingClient => ({
-      getPrice: vi.fn().mockImplementation(async (params) => {
-        const group = params.filters?.find(f => f.field === 'group')?.value;
+      getPrice: jest.fn().mockImplementation(async (params) => {
+        const group = params.filters?.find((f: any) => f.field === 'group')?.value;
 
         if (group === 'AWS-Lambda-Requests') {
           return 0.20;
@@ -155,8 +155,8 @@ describe('LambdaCalculator - Property Tests', () => {
     const calculator = new LambdaCalculator();
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockImplementation(async (params) => {
-        const group = params.filters?.find(f => f.field === 'group')?.value;
+      getPrice: jest.fn().mockImplementation(async (params) => {
+        const group = params.filters?.find((f: any) => f.field === 'group')?.value;
 
         if (group === 'AWS-Lambda-Requests') {
           return 0.20;
@@ -194,7 +194,7 @@ describe('LambdaCalculator - Property Tests', () => {
     const calculator = new LambdaCalculator();
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockResolvedValue(null),
+      getPrice: jest.fn().mockResolvedValue(null),
     };
 
     void fc.assert(
@@ -226,7 +226,7 @@ describe('LambdaCalculator - Property Tests', () => {
     const calculator = new LambdaCalculator();
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockRejectedValue(new Error('Network timeout')),
+      getPrice: jest.fn().mockRejectedValue(new Error('Network timeout')),
     };
 
     void fc.assert(

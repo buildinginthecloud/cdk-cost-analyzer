@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// Jest imports are global
 import { EC2Calculator } from '../../src/pricing/calculators/EC2Calculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -18,15 +18,15 @@ describe('EC2Calculator', () => {
 
   describe('calculateCost', () => {
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn(),
+      getPrice: jest.fn(),
     };
 
     beforeEach(() => {
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should calculate cost for t3.micro instance', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.0104);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.0104);
 
       const resource = {
         logicalId: 'MyInstance',
@@ -46,7 +46,7 @@ describe('EC2Calculator', () => {
     });
 
     it('should calculate cost for m5.large instance', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.096);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.096);
 
       const resource = {
         logicalId: 'MyInstance',
@@ -65,7 +65,7 @@ describe('EC2Calculator', () => {
     });
 
     it('should calculate cost for us-east-1 region', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.0104);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.0104);
 
       const resource = {
         logicalId: 'MyInstance',
@@ -93,7 +93,7 @@ describe('EC2Calculator', () => {
     });
 
     it('should calculate cost for eu-central-1 region', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.0116);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.0116);
 
       const resource = {
         logicalId: 'MyInstance',
@@ -121,7 +121,7 @@ describe('EC2Calculator', () => {
     });
 
     it('should calculate cost for ap-southeast-1 region', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.0116);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.0116);
 
       const resource = {
         logicalId: 'MyInstance',
@@ -165,7 +165,7 @@ describe('EC2Calculator', () => {
     });
 
     it('should handle pricing data unavailable', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(null);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(null);
 
       const resource = {
         logicalId: 'MyInstance',
@@ -183,7 +183,7 @@ describe('EC2Calculator', () => {
     });
 
     it('should handle pricing API errors', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockRejectedValue(new Error('API Error'));
+      jest.mocked(mockPricingClient.getPrice).mockRejectedValue(new Error('API Error'));
 
       const resource = {
         logicalId: 'MyInstance',

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// Jest imports are global
 import { CloudFrontCalculator } from '../../src/pricing/calculators/CloudFrontCalculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -9,7 +9,7 @@ describe('CloudFrontCalculator', () => {
   beforeEach(() => {
     calculator = new CloudFrontCalculator();
     mockPricingClient = {
-      getPrice: vi.fn(),
+      getPrice: jest.fn(),
     };
   });
 
@@ -26,8 +26,8 @@ describe('CloudFrontCalculator', () => {
 
   describe('calculateCost', () => {
     it('should calculate cost with default assumptions', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.085); // Data transfer price
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.0075); // Request price
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.085); // Data transfer price
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.0075); // Request price
 
       const resource = {
         logicalId: 'MyDistribution',
@@ -46,8 +46,8 @@ describe('CloudFrontCalculator', () => {
 
     it('should use custom data transfer assumption', async () => {
       const customCalculator = new CloudFrontCalculator(500, undefined);
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.085);
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.0075);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.085);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.0075);
 
       const resource = {
         logicalId: 'MyDistribution',
@@ -63,8 +63,8 @@ describe('CloudFrontCalculator', () => {
 
     it('should use custom request assumption', async () => {
       const customCalculator = new CloudFrontCalculator(undefined, 5000000);
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.085);
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.0075);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.085);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.0075);
 
       const resource = {
         logicalId: 'MyDistribution',
@@ -79,7 +79,7 @@ describe('CloudFrontCalculator', () => {
     });
 
     it('should handle missing pricing data', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(null);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(null);
 
       const resource = {
         logicalId: 'MyDistribution',
@@ -95,7 +95,7 @@ describe('CloudFrontCalculator', () => {
     });
 
     it('should handle pricing API errors', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockRejectedValueOnce(new Error('API Error'));
+      jest.mocked(mockPricingClient.getPrice).mockRejectedValueOnce(new Error('API Error'));
 
       const resource = {
         logicalId: 'MyDistribution',
@@ -113,8 +113,8 @@ describe('CloudFrontCalculator', () => {
     it('should calculate separate data transfer and request costs', async () => {
       const dataTransferPrice = 0.085;
       const requestPrice = 0.0075;
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(dataTransferPrice);
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(requestPrice);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(dataTransferPrice);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(requestPrice);
 
       const resource = {
         logicalId: 'MyDistribution',

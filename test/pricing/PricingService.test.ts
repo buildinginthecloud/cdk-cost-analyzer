@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// Jest imports are global
 import { ResourceWithId } from '../../src/diff/types';
 import { PricingClient } from '../../src/pricing/PricingClient';
 import { PricingService } from '../../src/pricing/PricingService';
@@ -10,7 +10,7 @@ describe('PricingService', () => {
   beforeEach(() => {
     // Create a mock pricing client using dependency injection
     mockPricingClient = {
-      getPrice: vi.fn().mockResolvedValue(0.1),
+      getPrice: jest.fn().mockResolvedValue(0.1),
     } as any;
 
     service = new PricingService(

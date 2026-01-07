@@ -1,7 +1,6 @@
 import * as fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { ThresholdConfig } from '../../src/config/types';
-import { ResourceCost, ModifiedResourceCost } from '../../src/pricing/types';
 import { ThresholdEnforcer } from '../../src/threshold/ThresholdEnforcer';
 
 describe('ThresholdEnforcer - Property Tests', () => {

@@ -1,5 +1,5 @@
 import * as fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { ConfigManager } from '../../src/config/ConfigManager';
 import { CostAnalyzerConfig } from '../../src/config/types';
 

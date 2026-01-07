@@ -1,11 +1,27 @@
 import * as fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { NatGatewayCalculator } from '../../src/pricing/calculators/NatGatewayCalculator';
-import { PricingClient } from '../../src/pricing/PricingClient';
 
 describe('NatGatewayCalculator - Property Tests', () => {
   const calculator = new NatGatewayCalculator();
-  const pricingClient = new PricingClient();
+  let mockPricingClient: any;
+
+  beforeEach(() => {
+    mockPricingClient = {
+      getPrice: jest.fn(),
+    };
+
+    // Mock successful pricing responses
+    mockPricingClient.getPrice.mockImplementation(async (params: any) => {
+      if (params.filters.some((f: any) => f.value.includes('Hours'))) {
+        return 0.045; // Hourly rate
+      }
+      if (params.filters.some((f: any) => f.value.includes('Bytes'))) {
+        return 0.045; // Data processing rate per GB
+      }
+      return null;
+    });
+  });
 
   // Feature: production-readiness, Property 8: NAT Gateway costs include all components
   // Validates: Requirements 7.1, 7.2, 7.3
@@ -19,7 +35,7 @@ describe('NatGatewayCalculator - Property Tests', () => {
     void fc.assert(
       fc.asyncProperty(natGatewayResourceArb, async (resource) => {
         const region = 'eu-central-1';
-        const cost = await calculator.calculateCost(resource, region, pricingClient);
+        const cost = await calculator.calculateCost(resource, region, mockPricingClient);
 
         // Should have valid cost structure
         expect(cost.amount).toBeGreaterThanOrEqual(0);
@@ -55,18 +71,20 @@ describe('NatGatewayCalculator - Property Tests', () => {
 
         const region = 'eu-central-1';
 
-        const cost1 = await calculator.calculateCost(
+        // Create calculators with different data processing amounts
+        const calculator1 = new NatGatewayCalculator(dataGB1);
+        const calculator2 = new NatGatewayCalculator(dataGB2);
+
+        const cost1 = await calculator1.calculateCost(
           resource,
           region,
-          pricingClient,
-          { dataProcessedGB: dataGB1 },
+          mockPricingClient,
         );
 
-        const cost2 = await calculator.calculateCost(
+        const cost2 = await calculator2.calculateCost(
           resource,
           region,
-          pricingClient,
-          { dataProcessedGB: dataGB2 },
+          mockPricingClient,
         );
 
         // Higher data processing should result in higher or equal cost
@@ -79,6 +97,8 @@ describe('NatGatewayCalculator - Property Tests', () => {
         // Both should be valid
         expect(cost1.amount).toBeGreaterThanOrEqual(0);
         expect(cost2.amount).toBeGreaterThanOrEqual(0);
+
+        return true;
       }),
       { numRuns: 30 },
     );
@@ -98,11 +118,11 @@ describe('NatGatewayCalculator - Property Tests', () => {
         const region = 'eu-central-1';
 
         // Even with zero data processing, should have hourly cost
-        const cost = await calculator.calculateCost(
+        const zeroDataCalculator = new NatGatewayCalculator(0);
+        const cost = await zeroDataCalculator.calculateCost(
           resource,
           region,
-          pricingClient,
-          { dataProcessedGB: 0 },
+          mockPricingClient,
         );
 
         // Should have some cost from hourly charges
@@ -137,11 +157,11 @@ describe('NatGatewayCalculator - Property Tests', () => {
     void fc.assert(
       fc.asyncProperty(dataProcessingArb, async (dataGB) => {
         const region = 'eu-central-1';
-        const cost = await calculator.calculateCost(
+        const customCalculator = new NatGatewayCalculator(dataGB);
+        const cost = await customCalculator.calculateCost(
           resource,
           region,
-          pricingClient,
-          { dataProcessedGB: dataGB },
+          mockPricingClient,
         );
 
         // Assumptions should mention the data processing amount

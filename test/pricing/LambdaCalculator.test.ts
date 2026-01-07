@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// Jest imports are global
 import { LambdaCalculator } from '../../src/pricing/calculators/LambdaCalculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -18,16 +18,16 @@ describe('LambdaCalculator', () => {
 
   describe('calculateCost', () => {
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn(),
+      getPrice: jest.fn(),
     };
 
     beforeEach(() => {
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should calculate cost for 128MB memory configuration', async () => {
       // Mock pricing: $0.20 per 1M requests, $0.0000166667 per GB-second
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(0.20) // Request pricing
         .mockResolvedValueOnce(0.0000166667); // Compute pricing
 
@@ -55,7 +55,7 @@ describe('LambdaCalculator', () => {
     });
 
     it('should calculate cost for 512MB memory configuration', async () => {
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(0.20)
         .mockResolvedValueOnce(0.0000166667);
 
@@ -81,7 +81,7 @@ describe('LambdaCalculator', () => {
     });
 
     it('should calculate cost for 1024MB memory configuration', async () => {
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(0.20)
         .mockResolvedValueOnce(0.0000166667);
 
@@ -107,7 +107,7 @@ describe('LambdaCalculator', () => {
     });
 
     it('should calculate cost with default assumptions when memory not specified', async () => {
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(0.20)
         .mockResolvedValueOnce(0.0000166667);
 
@@ -129,7 +129,7 @@ describe('LambdaCalculator', () => {
     });
 
     it('should handle missing memory property gracefully', async () => {
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(0.20)
         .mockResolvedValueOnce(0.0000166667);
 
@@ -150,7 +150,7 @@ describe('LambdaCalculator', () => {
     });
 
     it('should handle pricing data unavailable for requests', async () => {
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(null) // Request pricing unavailable
         .mockResolvedValueOnce(0.0000166667);
 
@@ -170,7 +170,7 @@ describe('LambdaCalculator', () => {
     });
 
     it('should handle pricing data unavailable for compute', async () => {
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(0.20)
         .mockResolvedValueOnce(null); // Compute pricing unavailable
 
@@ -190,7 +190,7 @@ describe('LambdaCalculator', () => {
     });
 
     it('should handle pricing API errors', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockRejectedValue(new Error('Network timeout'));
+      jest.mocked(mockPricingClient.getPrice).mockRejectedValue(new Error('Network timeout'));
 
       const resource = {
         logicalId: 'MyFunction',
