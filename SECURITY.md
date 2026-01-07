@@ -56,6 +56,10 @@ When using CDK Cost Analyzer:
    - Store tokens in CI/CD variables (masked and protected)
    - Rotate tokens regularly
 
+5. **Command Execution**: The tool executes CDK synthesis commands securely
+   - Commands are executed without shell interpretation to prevent injection attacks
+   - Arguments are passed as arrays rather than concatenated strings
+
 ## Security Considerations
 
 ### AWS Pricing API
@@ -91,6 +95,7 @@ The tool parses CloudFormation templates but does not execute them or make chang
 - The tool caches AWS Pricing API responses in memory to reduce API calls. Cached data is not persisted to disk.
 - GitLab API tokens are read from environment variables and not logged or stored.
 - CloudFormation templates may contain sensitive information. Ensure proper access controls on repositories containing templates.
+- CDK synthesis commands are executed with `shell: false` to prevent command injection vulnerabilities.
 
 ## Disclosure Policy
 

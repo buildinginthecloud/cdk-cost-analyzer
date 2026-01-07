@@ -1,16 +1,18 @@
-import { GetProductsCommand } from '@aws-sdk/client-pricing';
 import * as fc from 'fast-check';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PricingClient } from '../../src/pricing/PricingClient';
 
-vi.mock('@aws-sdk/client-pricing');
-
 describe('PricingClient - Property Tests', () => {
   let mockSend: ReturnType<typeof vi.fn>;
+  let mockAWSClient: any;
 
-  beforeEach(async () => {
-    vi.clearAllMocks();
-    mockSend = vi.fn().mockResolvedValue({
+  beforeEach(() => {
+    mockSend = vi.fn();
+    mockAWSClient = {
+      send: mockSend,
+    };
+    
+    mockSend.mockResolvedValue({
       PriceList: [
         JSON.stringify({
           terms: {
@@ -29,11 +31,6 @@ describe('PricingClient - Property Tests', () => {
         }),
       ],
     });
-
-    const { PricingClient: MockPricingClient } = await import('@aws-sdk/client-pricing');
-    (MockPricingClient as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
-      send: mockSend,
-    }));
   });
 
   // Feature: cdk-cost-analyzer, Property 17: Pricing queries include region filter
@@ -67,20 +64,13 @@ describe('PricingClient - Property Tests', () => {
 
     void fc.assert(
       fc.asyncProperty(regionArb, serviceCodeArb, filterArb, async (region, serviceCode, filters) => {
-        const client = new PricingClient(region);
+        const client = new PricingClient(region, undefined, mockAWSClient);
 
         await client.getPrice({
           serviceCode,
           region,
           filters,
         });
-
-        // Verify that GetProductsCommand was called
-        expect(GetProductsCommand).toHaveBeenCalled();
-
-        // Verify that the pricing client was created with the correct region
-        const { PricingClient: MockPricingClient } = await import('@aws-sdk/client-pricing');
-        expect(MockPricingClient).toHaveBeenCalledWith({ region });
 
         // Verify that send was called (which means the query was executed)
         expect(mockSend).toHaveBeenCalled();
@@ -143,7 +133,7 @@ describe('PricingClient - Property Tests', () => {
             });
           });
 
-          const client = new PricingClient(region);
+          const client = new PricingClient(region, undefined, mockAWSClient);
 
           const result = await client.getPrice({
             serviceCode,
@@ -194,7 +184,7 @@ describe('PricingClient - Property Tests', () => {
         filterArb,
         cachedPriceArb,
         async (region, serviceCode, filters, cachedPrice) => {
-          const client = new PricingClient(region);
+          const client = new PricingClient(region, undefined, mockAWSClient);
 
           // First call: succeed and populate cache
           mockSend.mockResolvedValueOnce({
@@ -275,7 +265,7 @@ describe('PricingClient - Property Tests', () => {
           // Mock the API to return unavailable pricing data
           mockSend.mockResolvedValue(scenario.response);
 
-          const client = new PricingClient(region);
+          const client = new PricingClient(region, undefined, mockAWSClient);
 
           const params = {
             serviceCode,

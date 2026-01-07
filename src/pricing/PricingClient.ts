@@ -7,8 +7,12 @@ export class PricingClient implements IPricingClient {
   private client: AWSPricingClient;
   private cacheManager?: CacheManager;
 
-  constructor(region: string = 'us-east-1', cacheManager?: CacheManager) {
-    this.client = new AWSPricingClient({ region });
+  constructor(
+    region: string = 'us-east-1', 
+    cacheManager?: CacheManager,
+    awsClient?: AWSPricingClient
+  ) {
+    this.client = awsClient || new AWSPricingClient({ region });
     this.cacheManager = cacheManager;
   }
 

@@ -3,13 +3,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { ResourceWithId } from '../../src/diff/types';
 import { PricingService } from '../../src/pricing/PricingService';
 
-vi.mock('@aws-sdk/client-pricing', () => ({
-  PricingClient: vi.fn(() => ({
-    send: vi.fn(),
-  })),
-  GetProductsCommand: vi.fn(),
-}));
-
 describe('PricingService - Property Tests', () => {
   const service = new PricingService();
 

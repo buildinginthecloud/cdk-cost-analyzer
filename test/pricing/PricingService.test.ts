@@ -3,19 +3,23 @@ import { ResourceWithId } from '../../src/diff/types';
 import { PricingClient } from '../../src/pricing/PricingClient';
 import { PricingService } from '../../src/pricing/PricingService';
 
-// Mock the PricingClient module
-vi.mock('../../src/pricing/PricingClient', () => ({
-  PricingClient: vi.fn().mockImplementation(() => ({
-    getPrice: vi.fn().mockResolvedValue(0.1),
-  })),
-}));
-
 describe('PricingService', () => {
   let service: PricingService;
+  let mockPricingClient: PricingClient;
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    service = new PricingService();
+    // Create a mock pricing client using dependency injection
+    mockPricingClient = {
+      getPrice: vi.fn().mockResolvedValue(0.1),
+    } as any;
+
+    service = new PricingService(
+      'us-east-1',
+      undefined,
+      undefined,
+      undefined,
+      mockPricingClient,
+    );
   });
 
   describe('unsupported resource types', () => {

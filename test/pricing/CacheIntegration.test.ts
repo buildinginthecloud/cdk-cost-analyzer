@@ -1,23 +1,25 @@
 import * as fs from 'fs';
-import { GetProductsCommand } from '@aws-sdk/client-pricing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { CacheManager } from '../../src/pricing/CacheManager';
 import { PricingClient } from '../../src/pricing/PricingClient';
 
-vi.mock('@aws-sdk/client-pricing');
-
 describe('Cache Integration with PricingClient', () => {
   const testCacheDir = '.test-cache-integration';
   let mockSend: ReturnType<typeof vi.fn>;
+  let mockAWSClient: any;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     // Clean up test cache directory
     if (fs.existsSync(testCacheDir)) {
       fs.rmSync(testCacheDir, { recursive: true, force: true });
     }
 
-    vi.clearAllMocks();
-    mockSend = vi.fn().mockResolvedValue({
+    mockSend = vi.fn();
+    mockAWSClient = {
+      send: mockSend,
+    };
+    
+    mockSend.mockResolvedValue({
       PriceList: [
         JSON.stringify({
           terms: {
@@ -36,11 +38,6 @@ describe('Cache Integration with PricingClient', () => {
         }),
       ],
     });
-
-    const { PricingClient: MockPricingClient } = await import('@aws-sdk/client-pricing');
-    (MockPricingClient as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
-      send: mockSend,
-    }));
   });
 
   afterEach(() => {
@@ -52,7 +49,7 @@ describe('Cache Integration with PricingClient', () => {
 
   it('should use cache to reduce API calls', async () => {
     const cacheManager = new CacheManager(testCacheDir, 24);
-    const client = new PricingClient('us-east-1', cacheManager);
+    const client = new PricingClient('us-east-1', cacheManager, mockAWSClient);
 
     const params = {
       serviceCode: 'AmazonEC2',
@@ -89,7 +86,7 @@ describe('Cache Integration with PricingClient', () => {
 
     // First client instance
     const cacheManager1 = new CacheManager(testCacheDir, 24);
-    const client1 = new PricingClient('us-east-1', cacheManager1);
+    const client1 = new PricingClient('us-east-1', cacheManager1, mockAWSClient);
 
     const firstResult = await client1.getPrice(params);
     expect(firstResult).toBe(0.10);
@@ -97,7 +94,7 @@ describe('Cache Integration with PricingClient', () => {
 
     // Second client instance (simulating new pipeline run)
     const cacheManager2 = new CacheManager(testCacheDir, 24);
-    const client2 = new PricingClient('us-east-1', cacheManager2);
+    const client2 = new PricingClient('us-east-1', cacheManager2, mockAWSClient);
 
     const secondResult = await client2.getPrice(params);
     expect(secondResult).toBe(0.10);
@@ -109,7 +106,7 @@ describe('Cache Integration with PricingClient', () => {
 
   it('should fall back to cache when API fails', async () => {
     const cacheManager = new CacheManager(testCacheDir, 24);
-    const client = new PricingClient('us-east-1', cacheManager);
+    const client = new PricingClient('us-east-1', cacheManager, mockAWSClient);
 
     const params = {
       serviceCode: 'AmazonEC2',
@@ -134,7 +131,7 @@ describe('Cache Integration with PricingClient', () => {
 
   it('should work without cache manager (backward compatibility)', async () => {
     // Client without cache manager should still work
-    const client = new PricingClient('us-east-1');
+    const client = new PricingClient('us-east-1', undefined, mockAWSClient);
 
     const params = {
       serviceCode: 'AmazonEC2',
@@ -158,7 +155,7 @@ describe('Cache Integration with PricingClient', () => {
   it('should respect cache duration configuration across client instances', async () => {
     // Create cache manager with very short duration (1ms)
     const cacheManager1 = new CacheManager(testCacheDir, 1 / (60 * 60 * 1000));
-    const client1 = new PricingClient('us-east-1', cacheManager1);
+    const client1 = new PricingClient('us-east-1', cacheManager1, mockAWSClient);
 
     const params = {
       serviceCode: 'AmazonEC2',
@@ -179,7 +176,7 @@ describe('Cache Integration with PricingClient', () => {
     // Create new client instance (simulating new pipeline run)
     // This ensures we're not using in-memory cache
     const cacheManager2 = new CacheManager(testCacheDir, 1 / (60 * 60 * 1000));
-    const client2 = new PricingClient('us-east-1', cacheManager2);
+    const client2 = new PricingClient('us-east-1', cacheManager2, mockAWSClient);
 
     // Second call should hit API again (cache expired)
     await client2.getPrice(params);

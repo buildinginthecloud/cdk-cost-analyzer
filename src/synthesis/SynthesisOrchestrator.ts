@@ -55,6 +55,9 @@ export class SynthesisOrchestrator {
 
   /**
    * Execute synthesis command
+   * 
+   * Uses shell: false for security to prevent command injection attacks.
+   * Arguments are passed as an array to avoid shell interpretation.
    */
   private async executeSynthesis(
     command: string,
@@ -78,9 +81,10 @@ export class SynthesisOrchestrator {
         allArgs.push('--output', outputPath);
       }
 
+      // Use shell: false for security and pass arguments properly
       const proc = spawn(cmd, allArgs, {
         cwd: cdkAppPath,
-        shell: true,
+        shell: false,
         stdio: ['ignore', 'pipe', 'pipe'],
       });
 
