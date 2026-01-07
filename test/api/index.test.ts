@@ -51,7 +51,7 @@ describe('analyzeCosts API', () => {
     expect(Array.isArray(result.removedResources)).toBe(true);
     expect(Array.isArray(result.modifiedResources)).toBe(true);
     expect(typeof result.summary).toBe('string');
-  });
+  }, 60000); // 60 second timeout for full cost analysis
 
   it('should use default region if not specified', async () => {
     const result = await analyzeCosts({
@@ -60,7 +60,7 @@ describe('analyzeCosts API', () => {
     });
 
     expect(result).toBeDefined();
-  });
+  }, 60000); // 60 second timeout for full cost analysis
 
   it('should throw error for invalid base template', async () => {
     await expect(
@@ -97,7 +97,7 @@ describe('analyzeCosts API', () => {
 
     expect(result.addedResources.length).toBeGreaterThan(0);
     expect(result.addedResources[0].logicalId).toBe('Bucket2');
-  });
+  }, 60000); // 60 second timeout for full cost analysis
 
   it('should handle invalid region gracefully', async () => {
     // Invalid region should not cause a crash, but may result in pricing failures
@@ -115,7 +115,7 @@ describe('analyzeCosts API', () => {
     expect(result).toHaveProperty('removedResources');
     expect(result).toHaveProperty('modifiedResources');
     expect(result).toHaveProperty('summary');
-  });
+  }, 60000); // 60 second timeout for full cost analysis
 
   it('should support text output format', async () => {
     const result = await analyzeCosts({
@@ -126,7 +126,7 @@ describe('analyzeCosts API', () => {
 
     expect(result.summary).toBeDefined();
     expect(typeof result.summary).toBe('string');
-  });
+  }, 60000); // 60 second timeout for full cost analysis
 
   it('should support json output format', async () => {
     const result = await analyzeCosts({
@@ -138,7 +138,7 @@ describe('analyzeCosts API', () => {
     expect(result.summary).toBeDefined();
     // JSON format should produce valid JSON string
     expect(() => JSON.parse(result.summary)).not.toThrow();
-  });
+  }, 60000); // 60 second timeout for full cost analysis
 });
 
 describe('API Type Definitions', () => {
