@@ -46,7 +46,7 @@
     "projen": "^0.98.28",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.6"
+    "vitest": "^4.0.16"
   },
   "dependencies": {
     "@aws-sdk/client-pricing": "^3.705.0",
