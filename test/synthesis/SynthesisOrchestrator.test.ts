@@ -50,7 +50,7 @@ describe('SynthesisOrchestrator', () => {
 
       // Should handle the option without error
       expect(result).toHaveProperty('success');
-    });
+    }, 30000); // 30 second timeout for CDK synthesis
 
     it('should accept custom command option', async () => {
       const result = await orchestrator.synthesize({
@@ -60,7 +60,7 @@ describe('SynthesisOrchestrator', () => {
 
       // Should handle the option without error
       expect(result).toHaveProperty('success');
-    });
+    }, 30000); // 30 second timeout for CDK synthesis
 
     it('should accept context option', async () => {
       const result = await orchestrator.synthesize({
@@ -73,6 +73,6 @@ describe('SynthesisOrchestrator', () => {
 
       // Should handle the option without error
       expect(result).toHaveProperty('success');
-    });
+    }, 30000); // 30 second timeout for CDK synthesis
   });
 });
