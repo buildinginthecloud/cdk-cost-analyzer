@@ -16,6 +16,18 @@ export class PricingClient implements IPricingClient {
     this.cacheManager = cacheManager;
   }
 
+  /**
+   * Clean up resources and connections
+   */
+  destroy(): void {
+    this.cache.clear();
+    // AWS SDK v3 clients automatically clean up their connections
+    // but we can help by clearing references
+    if (this.client && typeof (this.client as any).destroy === 'function') {
+      (this.client as any).destroy();
+    }
+  }
+
   async getPrice(params: PriceQueryParams): Promise<number | null> {
     const cacheKey = this.getCacheKey(params);
 

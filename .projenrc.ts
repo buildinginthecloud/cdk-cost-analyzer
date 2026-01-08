@@ -69,6 +69,13 @@ const project = new typescript.TypeScriptProject({
 
   // Testing configuration
   jest: true,
+  jestOptions: {
+    jestConfig: {
+      testTimeout: 30000, // 30 second default timeout
+      forceExit: true, // Force exit to prevent hanging
+      detectOpenHandles: true, // Detect open handles that prevent Jest from exiting
+    },
+  },
   sampleCode: false,
 
   // Keywords

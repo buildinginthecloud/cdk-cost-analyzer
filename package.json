@@ -76,6 +76,9 @@
   },
   "jest": {
     "coverageProvider": "v8",
+    "testTimeout": 30000,
+    "forceExit": true,
+    "detectOpenHandles": true,
     "testMatch": [
       "<rootDir>/@(src|test)/**/*(*.)@(spec|test).ts?(x)",
       "<rootDir>/@(src|test)/**/__tests__/**/*.ts?(x)",

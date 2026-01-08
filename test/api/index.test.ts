@@ -8,6 +8,33 @@ import {
   CostAnalysisResult,
 } from '../../src/api';
 
+// Mock the AWS SDK to prevent real API calls
+jest.mock('@aws-sdk/client-pricing', () => ({
+  PricingClient: jest.fn().mockImplementation(() => ({
+    send: jest.fn().mockResolvedValue({
+      PriceList: [
+        JSON.stringify({
+          terms: {
+            OnDemand: {
+              'test-term': {
+                priceDimensions: {
+                  'test-dimension': {
+                    pricePerUnit: {
+                      USD: '0.023',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }),
+      ],
+    }),
+    destroy: jest.fn(),
+  })),
+  GetProductsCommand: jest.fn(),
+}));
+
 describe('analyzeCosts API', () => {
   const baseTemplate = JSON.stringify({
     Resources: {
@@ -29,6 +56,22 @@ describe('analyzeCosts API', () => {
         Properties: {},
       },
     },
+  });
+
+  // Clear all mocks after each test
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  // Add cleanup after all tests to prevent hanging worker processes
+  afterAll(async () => {
+    // Force garbage collection to clean up any remaining resources
+    if (global.gc) {
+      global.gc();
+    }
+
+    // Give a small delay to allow cleanup
+    await new Promise(resolve => setTimeout(resolve, 100));
   });
 
   it('should return structured results for valid templates', async () => {
@@ -126,7 +169,7 @@ describe('analyzeCosts API', () => {
 
     expect(result.summary).toBeDefined();
     expect(typeof result.summary).toBe('string');
-  }, 60000); // 60 second timeout for full cost analysis
+  }, 30000); // 30 second timeout for full cost analysis
 
   it('should support json output format', async () => {
     const result = await analyzeCosts({

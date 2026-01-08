@@ -180,4 +180,11 @@ export class PricingService implements IPricingService {
       modifiedCosts,
     };
   }
+
+  /**
+   * Clean up resources and connections
+   */
+  destroy(): void {
+    this.pricingClient.destroy();
+  }
 }
