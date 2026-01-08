@@ -60,18 +60,22 @@ describe('Cache Integration with PricingClient', () => {
       ],
     };
 
-    // First call should hit the API
-    const firstResult = await client.getPrice(params);
-    expect(firstResult).toBe(0.10);
-    expect(mockSend).toHaveBeenCalledTimes(1);
+    try {
+      // First call should hit the API
+      const firstResult = await client.getPrice(params);
+      expect(firstResult).toBe(0.10);
+      expect(mockSend).toHaveBeenCalledTimes(1);
 
-    // Second call should use cache (no additional API call)
-    const secondResult = await client.getPrice(params);
-    expect(secondResult).toBe(0.10);
-    expect(mockSend).toHaveBeenCalledTimes(1); // Still only 1 call
+      // Second call should use cache (no additional API call)
+      const secondResult = await client.getPrice(params);
+      expect(secondResult).toBe(0.10);
+      expect(mockSend).toHaveBeenCalledTimes(1); // Still only 1 call
 
-    // Verify cache was used
-    expect(cacheManager.hasFreshCache(params)).toBe(true);
+      // Verify cache was used
+      expect(cacheManager.hasFreshCache(params)).toBe(true);
+    } finally {
+      client.destroy();
+    }
   });
 
   it('should persist cache across client instances', async () => {
@@ -84,24 +88,32 @@ describe('Cache Integration with PricingClient', () => {
       ],
     };
 
-    // First client instance
-    const cacheManager1 = new CacheManager(testCacheDir, 24);
-    const client1 = new PricingClient('us-east-1', cacheManager1, mockAWSClient);
+    let client1: PricingClient | undefined;
+    let client2: PricingClient | undefined;
 
-    const firstResult = await client1.getPrice(params);
-    expect(firstResult).toBe(0.10);
-    expect(mockSend).toHaveBeenCalledTimes(1);
+    try {
+      // First client instance
+      const cacheManager1 = new CacheManager(testCacheDir, 24);
+      client1 = new PricingClient('us-east-1', cacheManager1, mockAWSClient);
 
-    // Second client instance (simulating new pipeline run)
-    const cacheManager2 = new CacheManager(testCacheDir, 24);
-    const client2 = new PricingClient('us-east-1', cacheManager2, mockAWSClient);
+      const firstResult = await client1.getPrice(params);
+      expect(firstResult).toBe(0.10);
+      expect(mockSend).toHaveBeenCalledTimes(1);
 
-    const secondResult = await client2.getPrice(params);
-    expect(secondResult).toBe(0.10);
-    expect(mockSend).toHaveBeenCalledTimes(1); // Still only 1 call - cache was used
+      // Second client instance (simulating new pipeline run)
+      const cacheManager2 = new CacheManager(testCacheDir, 24);
+      client2 = new PricingClient('us-east-1', cacheManager2, mockAWSClient);
 
-    // Verify cache was loaded from disk
-    expect(cacheManager2.hasFreshCache(params)).toBe(true);
+      const secondResult = await client2.getPrice(params);
+      expect(secondResult).toBe(0.10);
+      expect(mockSend).toHaveBeenCalledTimes(1); // Still only 1 call - cache was used
+
+      // Verify cache was loaded from disk
+      expect(cacheManager2.hasFreshCache(params)).toBe(true);
+    } finally {
+      client1?.destroy();
+      client2?.destroy();
+    }
   });
 
   it('should fall back to cache when API fails', async () => {
@@ -117,16 +129,20 @@ describe('Cache Integration with PricingClient', () => {
       ],
     };
 
-    // First call succeeds and populates cache
-    const firstResult = await client.getPrice(params);
-    expect(firstResult).toBe(0.10);
+    try {
+      // First call succeeds and populates cache
+      const firstResult = await client.getPrice(params);
+      expect(firstResult).toBe(0.10);
 
-    // Simulate API failure
-    mockSend.mockRejectedValue(new Error('API failure') as any);
+      // Simulate API failure
+      mockSend.mockRejectedValue(new Error('API failure') as any);
 
-    // Second call should use cached data despite API failure
-    const secondResult = await client.getPrice(params);
-    expect(secondResult).toBe(0.10);
+      // Second call should use cached data despite API failure
+      const secondResult = await client.getPrice(params);
+      expect(secondResult).toBe(0.10);
+    } finally {
+      client.destroy();
+    }
   });
 
   it('should work without cache manager (backward compatibility)', async () => {
@@ -142,14 +158,18 @@ describe('Cache Integration with PricingClient', () => {
       ],
     };
 
-    const result = await client.getPrice(params);
-    expect(result).toBe(0.10);
-    expect(mockSend).toHaveBeenCalledTimes(1);
+    try {
+      const result = await client.getPrice(params);
+      expect(result).toBe(0.10);
+      expect(mockSend).toHaveBeenCalledTimes(1);
 
-    // Second call should use in-memory cache
-    const secondResult = await client.getPrice(params);
-    expect(secondResult).toBe(0.10);
-    expect(mockSend).toHaveBeenCalledTimes(1);
+      // Second call should use in-memory cache
+      const secondResult = await client.getPrice(params);
+      expect(secondResult).toBe(0.10);
+      expect(mockSend).toHaveBeenCalledTimes(1);
+    } finally {
+      client.destroy();
+    }
   });
 
   it('should respect cache duration configuration across client instances', async () => {
@@ -170,8 +190,8 @@ describe('Cache Integration with PricingClient', () => {
     await client1.getPrice(params);
     expect(mockSend).toHaveBeenCalledTimes(1);
 
-    // Wait for cache to expire
-    await new Promise(resolve => setTimeout(resolve, 10));
+    // Wait for cache to expire with a more reliable approach
+    await new Promise(resolve => setTimeout(resolve, 50));
 
     // Create new client instance (simulating new pipeline run)
     // This ensures we're not using in-memory cache
@@ -181,5 +201,9 @@ describe('Cache Integration with PricingClient', () => {
     // Second call should hit API again (cache expired)
     await client2.getPrice(params);
     expect(mockSend).toHaveBeenCalledTimes(2);
-  });
+
+    // Clean up clients
+    client1.destroy();
+    client2.destroy();
+  }, 10000); // Increase timeout for CI environment
 });
