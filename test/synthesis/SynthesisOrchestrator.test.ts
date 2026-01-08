@@ -29,7 +29,7 @@ describe('SynthesisOrchestrator', () => {
       expect(result).toHaveProperty('stackNames');
       expect(result).toHaveProperty('duration');
       expect(result.duration).toBeGreaterThanOrEqual(0);
-    }, 25000); // Increase timeout to 25 seconds for CDK synthesis
+    }, 20000); // Increase timeout to 20 seconds for CDK synthesis
 
     it('should handle non-existent CDK project', async () => {
       const result = await orchestrator.synthesize({
@@ -50,7 +50,7 @@ describe('SynthesisOrchestrator', () => {
 
       // Should handle the option without error
       expect(result).toHaveProperty('success');
-    }, 25000); // 25 second timeout for CDK synthesis
+    }, 20000); // 20 second timeout for CDK synthesis
 
     it('should accept custom command option', async () => {
       const result = await orchestrator.synthesize({
@@ -60,7 +60,7 @@ describe('SynthesisOrchestrator', () => {
 
       // Should handle the option without error
       expect(result).toHaveProperty('success');
-    }, 25000); // 25 second timeout for CDK synthesis
+    }, 20000); // 20 second timeout for CDK synthesis
 
     it('should accept context option', async () => {
       const result = await orchestrator.synthesize({
@@ -73,6 +73,6 @@ describe('SynthesisOrchestrator', () => {
 
       // Should handle the option without error
       expect(result).toHaveProperty('success');
-    }, 25000); // 25 second timeout for CDK synthesis
+    }, 20000); // 20 second timeout for CDK synthesis
   });
 });
