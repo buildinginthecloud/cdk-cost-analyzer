@@ -54,23 +54,38 @@ export class ALBCalculator implements ResourceCostCalculator {
         ],
       });
 
-      if (hourlyRate === null || lcuRate === null) {
-        return {
-          amount: 0,
-          currency: 'USD',
-          confidence: 'unknown',
-          assumptions: [
-            `Pricing data not available for Application Load Balancer in region ${region}`,
-          ],
-        };
-      }
-
       const newConnectionsPerSecond =
         this.customNewConnectionsPerSecond || this.DEFAULT_NEW_CONNECTIONS_PER_SECOND;
       const activeConnectionsPerMinute =
         this.customActiveConnectionsPerMinute || this.DEFAULT_ACTIVE_CONNECTIONS_PER_MINUTE;
       const processedBytesGB =
         this.customProcessedBytesGB || this.DEFAULT_PROCESSED_BYTES_GB;
+
+      if (hourlyRate === null || lcuRate === null) {
+        // Calculate LCU consumption for assumptions even when pricing fails
+        const lcuFromNewConnections = newConnectionsPerSecond / 25;
+        const lcuFromActiveConnections = activeConnectionsPerMinute / 3000;
+        const gbPerHour = processedBytesGB / this.HOURS_PER_MONTH;
+        const lcuFromProcessedBytes = gbPerHour;
+        const lcuPerHour = Math.max(
+          lcuFromNewConnections,
+          lcuFromActiveConnections,
+          lcuFromProcessedBytes,
+        );
+
+        return {
+          amount: 0,
+          currency: 'USD',
+          confidence: 'unknown',
+          assumptions: [
+            `Pricing data not available for Application Load Balancer in region ${region}`,
+            `Would use LCU consumption: ${lcuPerHour.toFixed(2)} LCU/hour based on:`,
+            `  - New connections: ${newConnectionsPerSecond}/sec → ${lcuFromNewConnections.toFixed(2)} LCU`,
+            `  - Active connections: ${activeConnectionsPerMinute}/min → ${lcuFromActiveConnections.toFixed(2)} LCU`,
+            `  - Processed data: ${processedBytesGB} GB/month → ${lcuFromProcessedBytes.toFixed(2)} LCU`,
+          ],
+        };
+      }
 
       // Calculate LCU consumption
       // 1 LCU provides: 25 new connections/sec, 3000 active connections/min, 1 GB processed/hour, 1000 rule evaluations/sec
@@ -105,11 +120,35 @@ export class ALBCalculator implements ResourceCostCalculator {
         ],
       };
     } catch (error) {
+      const newConnectionsPerSecond =
+        this.customNewConnectionsPerSecond || this.DEFAULT_NEW_CONNECTIONS_PER_SECOND;
+      const activeConnectionsPerMinute =
+        this.customActiveConnectionsPerMinute || this.DEFAULT_ACTIVE_CONNECTIONS_PER_MINUTE;
+      const processedBytesGB =
+        this.customProcessedBytesGB || this.DEFAULT_PROCESSED_BYTES_GB;
+
+      // Calculate LCU consumption for assumptions even when error occurs
+      const lcuFromNewConnections = newConnectionsPerSecond / 25;
+      const lcuFromActiveConnections = activeConnectionsPerMinute / 3000;
+      const gbPerHour = processedBytesGB / this.HOURS_PER_MONTH;
+      const lcuFromProcessedBytes = gbPerHour;
+      const lcuPerHour = Math.max(
+        lcuFromNewConnections,
+        lcuFromActiveConnections,
+        lcuFromProcessedBytes,
+      );
+
       return {
         amount: 0,
         currency: 'USD',
         confidence: 'unknown',
-        assumptions: [`Failed to fetch pricing: ${error instanceof Error ? error.message : String(error)}`],
+        assumptions: [
+          `Failed to fetch pricing: ${error instanceof Error ? error.message : String(error)}`,
+          `Would use LCU consumption: ${lcuPerHour.toFixed(2)} LCU/hour based on:`,
+          `  - New connections: ${newConnectionsPerSecond}/sec → ${lcuFromNewConnections.toFixed(2)} LCU`,
+          `  - Active connections: ${activeConnectionsPerMinute}/min → ${lcuFromActiveConnections.toFixed(2)} LCU`,
+          `  - Processed data: ${processedBytesGB} GB/month → ${lcuFromProcessedBytes.toFixed(2)} LCU`,
+        ],
       };
     }
   }
