@@ -227,7 +227,10 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
           expect(assumptionText).toContain(customAssumptions.cloudfront.dataTransferGB.toString());
         }
         if (customAssumptions.cloudfront.requests !== undefined) {
-          expect(assumptionText).toContain(customAssumptions.cloudfront.requests.toString());
+          // Account for locale formatting (e.g., 1000 vs 1,000)
+          const requestValue = customAssumptions.cloudfront.requests;
+          const formattedValue = requestValue.toLocaleString();
+          expect(assumptionText).toContain(formattedValue);
         }
 
         // Should return valid cost structure
