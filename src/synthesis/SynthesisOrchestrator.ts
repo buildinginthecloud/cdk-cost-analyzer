@@ -90,6 +90,27 @@ export class SynthesisOrchestrator {
 
       let stdout = '';
       let stderr = '';
+      let isResolved = false;
+
+      // Set up timeout to prevent hanging processes
+      const timeout = setTimeout(() => {
+        if (!isResolved) {
+          isResolved = true;
+          proc.kill('SIGTERM');
+          // Give process time to terminate gracefully, then force kill
+          setTimeout(() => {
+            if (!proc.killed) {
+              proc.kill('SIGKILL');
+            }
+          }, 5000);
+          reject(
+            new SynthesisError(
+              'CDK synthesis timed out after 25 seconds',
+              stderr || stdout,
+            ),
+          );
+        }
+      }, 25000); // 25 second timeout
 
       proc.stdout?.on('data', (data: Buffer) => {
         stdout += data.toString();
@@ -100,24 +121,32 @@ export class SynthesisOrchestrator {
       });
 
       proc.on('error', (error: Error) => {
-        reject(
-          new SynthesisError(
-            `Failed to execute synthesis command: ${error.message}`,
-            stderr,
-          ),
-        );
+        if (!isResolved) {
+          isResolved = true;
+          clearTimeout(timeout);
+          reject(
+            new SynthesisError(
+              `Failed to execute synthesis command: ${error.message}`,
+              stderr,
+            ),
+          );
+        }
       });
 
       proc.on('close', (code: number | null) => {
-        if (code !== 0) {
-          reject(
-            new SynthesisError(
-              `CDK synthesis failed with exit code ${code}`,
-              stderr || stdout,
-            ),
-          );
-        } else {
-          resolve();
+        if (!isResolved) {
+          isResolved = true;
+          clearTimeout(timeout);
+          if (code !== 0) {
+            reject(
+              new SynthesisError(
+                `CDK synthesis failed with exit code ${code}`,
+                stderr || stdout,
+              ),
+            );
+          } else {
+            resolve();
+          }
         }
       });
     });
