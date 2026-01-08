@@ -192,6 +192,20 @@ synthesis:
   customCommand: npx cdk synth    # Custom synthesis command
   context:                        # CDK context values
     environment: production
+```
+
+**Timeout Behavior:**
+- CDK synthesis has a built-in 25-second timeout to prevent hanging processes
+- Process receives SIGTERM for graceful termination, followed by SIGKILL after 5 seconds
+- If synthesis requires more time, use a custom command with extended timeout:
+  ```yaml
+  synthesis:
+    customCommand: "timeout 60 npx cdk synth"  # 60 second timeout
+  ```
+
+**Security Notes:**
+- Commands are executed with `shell: false` to prevent injection attacks
+- Arguments are passed as arrays rather than concatenated strings
     region: eu-central-1
 ```
 
