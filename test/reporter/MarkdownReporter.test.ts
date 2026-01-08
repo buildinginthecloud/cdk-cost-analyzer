@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { CostDelta } from '../../src/pricing/types';
 import { Reporter } from '../../src/reporter/Reporter';
 

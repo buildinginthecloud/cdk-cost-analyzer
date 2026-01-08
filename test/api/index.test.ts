@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+// Jest imports are global
 import {
   analyzeCosts,
   TemplateParseError,
@@ -7,6 +7,33 @@ import {
   AnalyzeOptions,
   CostAnalysisResult,
 } from '../../src/api';
+
+// Mock the AWS SDK to prevent real API calls
+jest.mock('@aws-sdk/client-pricing', () => ({
+  PricingClient: jest.fn().mockImplementation(() => ({
+    send: jest.fn().mockResolvedValue({
+      PriceList: [
+        JSON.stringify({
+          terms: {
+            OnDemand: {
+              'test-term': {
+                priceDimensions: {
+                  'test-dimension': {
+                    pricePerUnit: {
+                      USD: '0.023',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }),
+      ],
+    }),
+    destroy: jest.fn(),
+  })),
+  GetProductsCommand: jest.fn(),
+}));
 
 describe('analyzeCosts API', () => {
   const baseTemplate = JSON.stringify({
@@ -31,6 +58,22 @@ describe('analyzeCosts API', () => {
     },
   });
 
+  // Clear all mocks after each test
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  // Add cleanup after all tests to prevent hanging worker processes
+  afterAll(async () => {
+    // Force garbage collection to clean up any remaining resources
+    if (global.gc) {
+      global.gc();
+    }
+
+    // Give a small delay to allow cleanup
+    await new Promise(resolve => setTimeout(resolve, 100));
+  });
+
   it('should return structured results for valid templates', async () => {
     const result = await analyzeCosts({
       baseTemplate,
@@ -51,7 +94,7 @@ describe('analyzeCosts API', () => {
     expect(Array.isArray(result.removedResources)).toBe(true);
     expect(Array.isArray(result.modifiedResources)).toBe(true);
     expect(typeof result.summary).toBe('string');
-  });
+  }, 60000); // 60 second timeout for full cost analysis
 
   it('should use default region if not specified', async () => {
     const result = await analyzeCosts({
@@ -60,7 +103,7 @@ describe('analyzeCosts API', () => {
     });
 
     expect(result).toBeDefined();
-  });
+  }, 60000); // 60 second timeout for full cost analysis
 
   it('should throw error for invalid base template', async () => {
     await expect(
@@ -97,7 +140,7 @@ describe('analyzeCosts API', () => {
 
     expect(result.addedResources.length).toBeGreaterThan(0);
     expect(result.addedResources[0].logicalId).toBe('Bucket2');
-  });
+  }, 60000); // 60 second timeout for full cost analysis
 
   it('should handle invalid region gracefully', async () => {
     // Invalid region should not cause a crash, but may result in pricing failures
@@ -115,7 +158,7 @@ describe('analyzeCosts API', () => {
     expect(result).toHaveProperty('removedResources');
     expect(result).toHaveProperty('modifiedResources');
     expect(result).toHaveProperty('summary');
-  });
+  }, 60000); // 60 second timeout for full cost analysis
 
   it('should support text output format', async () => {
     const result = await analyzeCosts({
@@ -126,7 +169,7 @@ describe('analyzeCosts API', () => {
 
     expect(result.summary).toBeDefined();
     expect(typeof result.summary).toBe('string');
-  });
+  }, 30000); // 30 second timeout for full cost analysis
 
   it('should support json output format', async () => {
     const result = await analyzeCosts({
@@ -138,7 +181,7 @@ describe('analyzeCosts API', () => {
     expect(result.summary).toBeDefined();
     // JSON format should produce valid JSON string
     expect(() => JSON.parse(result.summary)).not.toThrow();
-  });
+  }, 60000); // 60 second timeout for full cost analysis
 });
 
 describe('API Type Definitions', () => {

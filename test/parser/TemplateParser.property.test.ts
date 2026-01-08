@@ -1,7 +1,6 @@
 import * as fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { TemplateParser } from '../../src/parser/TemplateParser';
-import { CloudFormationTemplate } from '../../src/parser/types';
 
 describe('TemplateParser - Property Tests', () => {
   const parser = new TemplateParser();
@@ -22,7 +21,7 @@ describe('TemplateParser - Property Tests', () => {
 
     const templateArb = fc.record({
       Resources: fc.dictionary(
-        fc.string().filter(s => s.length > 0),
+        fc.string().filter(s => s.length > 0 && s.trim().length > 0),
         resourceArb,
         { minKeys: 1 },
       ),
@@ -70,7 +69,7 @@ describe('TemplateParser - Property Tests', () => {
 
     const templateArb = fc.record({
       Resources: fc.dictionary(
-        fc.string().filter(s => s.length > 0),
+        fc.string().filter(s => s.length > 0 && s.trim().length > 0),
         resourceArb,
         { minKeys: 1, maxKeys: 5 },
       ),

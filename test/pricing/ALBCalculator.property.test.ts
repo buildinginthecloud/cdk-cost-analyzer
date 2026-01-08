@@ -1,5 +1,5 @@
 import * as fc from 'fast-check';
-import { describe, it, expect, vi } from 'vitest';
+// Jest imports are global
 import { ALBCalculator } from '../../src/pricing/calculators/ALBCalculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -23,8 +23,8 @@ describe('ALBCalculator - Property Tests', () => {
 
     // Create a mock pricing client that returns realistic ALB pricing
     const createMockPricingClient = (): PricingClient => ({
-      getPrice: vi.fn().mockImplementation(async (params) => {
-        const usageType = params.filters?.find((f) => f.field === 'usagetype')
+      getPrice: jest.fn().mockImplementation(async (params) => {
+        const usageType = params.filters?.find((f: any) => f.field === 'usagetype')
           ?.value as string;
 
         if (!usageType) {
@@ -146,8 +146,8 @@ describe('ALBCalculator - Property Tests', () => {
     ];
 
     const createMockPricingClient = (): PricingClient => ({
-      getPrice: vi.fn().mockImplementation(async (params) => {
-        const usageType = params.filters?.find((f) => f.field === 'usagetype')
+      getPrice: jest.fn().mockImplementation(async (params) => {
+        const usageType = params.filters?.find((f: any) => f.field === 'usagetype')
           ?.value as string;
 
         if (usageType?.includes('LoadBalancerUsage')) {
@@ -221,8 +221,8 @@ describe('ALBCalculator - Property Tests', () => {
     const calculator = new ALBCalculator();
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockImplementation(async (params) => {
-        const usageType = params.filters?.find((f) => f.field === 'usagetype')
+      getPrice: jest.fn().mockImplementation(async (params) => {
+        const usageType = params.filters?.find((f: any) => f.field === 'usagetype')
           ?.value as string;
 
         if (usageType?.includes('LoadBalancerUsage')) {
@@ -275,7 +275,7 @@ describe('ALBCalculator - Property Tests', () => {
     const calculator = new ALBCalculator();
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockResolvedValue(0.0225),
+      getPrice: jest.fn().mockResolvedValue(0.0225),
     };
 
     void fc.assert(
@@ -312,7 +312,7 @@ describe('ALBCalculator - Property Tests', () => {
     const calculator = new ALBCalculator(50, 5000, 500);
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockResolvedValue(null),
+      getPrice: jest.fn().mockResolvedValue(null),
     };
 
     void fc.assert(
@@ -347,7 +347,7 @@ describe('ALBCalculator - Property Tests', () => {
     const calculator = new ALBCalculator(100, 10000, 1000);
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockRejectedValue(new Error('Network timeout')),
+      getPrice: jest.fn().mockRejectedValue(new Error('Network timeout')),
     };
 
     void fc.assert(

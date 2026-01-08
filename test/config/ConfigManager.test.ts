@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
-import { describe, it, expect, beforeEach } from 'vitest';
+// Jest imports are global
 import { ConfigManager } from '../../src/config/ConfigManager';
 import { CostAnalyzerConfig } from '../../src/config/types';
 

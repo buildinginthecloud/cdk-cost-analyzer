@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// Jest imports are global
 import { CloudFrontCalculator } from '../../src/pricing/calculators/CloudFrontCalculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -9,7 +9,7 @@ describe('CloudFrontCalculator', () => {
   beforeEach(() => {
     calculator = new CloudFrontCalculator();
     mockPricingClient = {
-      getPrice: vi.fn(),
+      getPrice: jest.fn(),
     };
   });
 
@@ -26,8 +26,8 @@ describe('CloudFrontCalculator', () => {
 
   describe('calculateCost', () => {
     it('should calculate cost with default assumptions', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.085); // Data transfer price
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.0075); // Request price
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.085); // Data transfer price
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.0075); // Request price
 
       const resource = {
         logicalId: 'MyDistribution',
@@ -46,8 +46,8 @@ describe('CloudFrontCalculator', () => {
 
     it('should use custom data transfer assumption', async () => {
       const customCalculator = new CloudFrontCalculator(500, undefined);
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.085);
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.0075);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.085);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.0075);
 
       const resource = {
         logicalId: 'MyDistribution',
@@ -58,13 +58,13 @@ describe('CloudFrontCalculator', () => {
       const result = await customCalculator.calculateCost(resource, 'us-east-1', mockPricingClient);
 
       expect(result.assumptions).toContain('Assumes 500 GB of data transfer out to internet');
-      expect(result.assumptions).toContain('Using custom data transfer assumption from configuration');
+      expect(result.assumptions).toContain('Using custom data transfer assumption: 500 GB from configuration');
     });
 
     it('should use custom request assumption', async () => {
       const customCalculator = new CloudFrontCalculator(undefined, 5000000);
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.085);
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.0075);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.085);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(0.0075);
 
       const resource = {
         logicalId: 'MyDistribution',
@@ -75,11 +75,11 @@ describe('CloudFrontCalculator', () => {
       const result = await customCalculator.calculateCost(resource, 'us-east-1', mockPricingClient);
 
       expect(result.assumptions).toContain('Assumes 5,000,000 HTTP/HTTPS requests per month');
-      expect(result.assumptions).toContain('Using custom request count assumption from configuration');
+      expect(result.assumptions).toContain('Using custom request count assumption: 5,000,000 requests from configuration');
     });
 
     it('should handle missing pricing data', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(null);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(null);
 
       const resource = {
         logicalId: 'MyDistribution',
@@ -92,10 +92,33 @@ describe('CloudFrontCalculator', () => {
       expect(result.amount).toBe(0);
       expect(result.confidence).toBe('unknown');
       expect(result.assumptions[0]).toContain('Pricing data not available');
+      expect(result.assumptions).toContain('Would assume 100 GB of data transfer out to internet');
+      expect(result.assumptions).toContain('Would assume 1,000,000 HTTP/HTTPS requests per month');
+    });
+
+    it('should handle missing pricing data with custom assumptions', async () => {
+      const customCalculator = new CloudFrontCalculator(500, 2000000);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(null);
+
+      const resource = {
+        logicalId: 'MyDistribution',
+        type: 'AWS::CloudFront::Distribution',
+        properties: {},
+      };
+
+      const result = await customCalculator.calculateCost(resource, 'us-east-1', mockPricingClient);
+
+      expect(result.amount).toBe(0);
+      expect(result.confidence).toBe('unknown');
+      expect(result.assumptions[0]).toContain('Pricing data not available');
+      expect(result.assumptions).toContain('Would assume 500 GB of data transfer out to internet');
+      expect(result.assumptions).toContain('Would assume 2,000,000 HTTP/HTTPS requests per month');
+      expect(result.assumptions).toContain('Using custom data transfer assumption: 500 GB from configuration');
+      expect(result.assumptions).toContain('Using custom request count assumption: 2,000,000 requests from configuration');
     });
 
     it('should handle pricing API errors', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockRejectedValueOnce(new Error('API Error'));
+      jest.mocked(mockPricingClient.getPrice).mockRejectedValueOnce(new Error('API Error'));
 
       const resource = {
         logicalId: 'MyDistribution',
@@ -113,8 +136,8 @@ describe('CloudFrontCalculator', () => {
     it('should calculate separate data transfer and request costs', async () => {
       const dataTransferPrice = 0.085;
       const requestPrice = 0.0075;
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(dataTransferPrice);
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(requestPrice);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(dataTransferPrice);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(requestPrice);
 
       const resource = {
         logicalId: 'MyDistribution',

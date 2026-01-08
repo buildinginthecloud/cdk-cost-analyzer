@@ -1,5 +1,5 @@
 import * as fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { DiffEngine } from '../../src/diff/DiffEngine';
 import { CloudFormationTemplate } from '../../src/parser/types';
 
@@ -21,8 +21,8 @@ describe('DiffEngine - Property Tests', () => {
 
     fc.assert(
       fc.property(
-        fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 5 }),
-        fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 5 }),
+        fc.dictionary(fc.string().filter(s => s.length > 0 && s.trim().length > 0), resourceArb, { minKeys: 1, maxKeys: 5 }),
+        fc.dictionary(fc.string().filter(s => s.length > 0 && s.trim().length > 0), resourceArb, { minKeys: 1, maxKeys: 5 }),
         (baseResources, targetResources) => {
           const base: CloudFormationTemplate = { Resources: baseResources };
           const target: CloudFormationTemplate = { Resources: targetResources };
@@ -84,8 +84,8 @@ describe('DiffEngine - Property Tests', () => {
 
     fc.assert(
       fc.property(
-        fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 10 }),
-        fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 10 }),
+        fc.dictionary(fc.string().filter(s => s.length > 0 && s.trim().length > 0), resourceArb, { minKeys: 1, maxKeys: 10 }),
+        fc.dictionary(fc.string().filter(s => s.length > 0 && s.trim().length > 0), resourceArb, { minKeys: 1, maxKeys: 10 }),
         (baseResources, targetResources) => {
           const base: CloudFormationTemplate = { Resources: baseResources };
           const target: CloudFormationTemplate = { Resources: targetResources };

@@ -55,9 +55,16 @@ export class SynthesisOrchestrator {
 
   /**
    * Execute synthesis command
-   * 
+   *
    * Uses shell: false for security to prevent command injection attacks.
    * Arguments are passed as an array to avoid shell interpretation.
+   * 
+   * Implements a 15-second timeout to prevent hanging processes in CI:
+   * - Sends SIGTERM for graceful termination
+   * - Follows up with SIGKILL after 1 second if process doesn't exit
+   * - Prevents duplicate resolution using isResolved flag
+   * - Ensures all event listeners are cleaned up
+   * - Uses process.kill as fallback for stubborn processes
    */
   private async executeSynthesis(
     command: string,
@@ -86,10 +93,64 @@ export class SynthesisOrchestrator {
         cwd: cdkAppPath,
         shell: false,
         stdio: ['ignore', 'pipe', 'pipe'],
+        detached: false, // Ensure process is part of the same process group
       });
 
       let stdout = '';
       let stderr = '';
+      let isResolved = false;
+      let killTimeout: NodeJS.Timeout | null = null;
+
+      const cleanup = (): void => {
+        if (killTimeout) {
+          clearTimeout(killTimeout);
+          killTimeout = null;
+        }
+        // Remove all listeners to prevent memory leaks
+        proc.removeAllListeners();
+        proc.stdout?.removeAllListeners();
+        proc.stderr?.removeAllListeners();
+      };
+
+      const forceKill = (): void => {
+        try {
+          // Try multiple kill methods for stubborn processes
+          if (proc.pid && !proc.killed) {
+            proc.kill('SIGKILL');
+            // Also try process.kill as fallback
+            try {
+              process.kill(proc.pid, 'SIGKILL');
+            } catch (killError) {
+              // Ignore kill errors - process might already be dead
+            }
+          }
+        } catch (error) {
+          // Ignore errors during force kill
+        }
+      };
+
+      // Set up timeout to prevent hanging processes
+      const timeout = setTimeout(() => {
+        if (!isResolved) {
+          isResolved = true;
+          
+          // First try graceful termination
+          proc.kill('SIGTERM');
+          
+          // Force kill after 1 second if still running
+          killTimeout = setTimeout(() => {
+            forceKill();
+          }, 1000);
+          
+          cleanup();
+          reject(
+            new SynthesisError(
+              'CDK synthesis timed out after 15 seconds',
+              stderr || stdout || 'No output captured',
+            ),
+          );
+        }
+      }, 15000); // Reduced to 15 second timeout
 
       proc.stdout?.on('data', (data: Buffer) => {
         stdout += data.toString();
@@ -100,24 +161,60 @@ export class SynthesisOrchestrator {
       });
 
       proc.on('error', (error: Error) => {
-        reject(
-          new SynthesisError(
-            `Failed to execute synthesis command: ${error.message}`,
-            stderr,
-          ),
-        );
+        if (!isResolved) {
+          isResolved = true;
+          clearTimeout(timeout);
+          cleanup();
+          reject(
+            new SynthesisError(
+              `Failed to execute synthesis command: ${error.message}`,
+              stderr || 'No error output captured',
+            ),
+          );
+        }
       });
 
       proc.on('close', (code: number | null) => {
-        if (code !== 0) {
-          reject(
-            new SynthesisError(
-              `CDK synthesis failed with exit code ${code}`,
-              stderr || stdout,
-            ),
-          );
-        } else {
-          resolve();
+        if (!isResolved) {
+          isResolved = true;
+          clearTimeout(timeout);
+          cleanup();
+          if (code !== 0) {
+            reject(
+              new SynthesisError(
+                `CDK synthesis failed with exit code ${code}`,
+                stderr || stdout || 'No output captured',
+              ),
+            );
+          } else {
+            resolve();
+          }
+        }
+      });
+
+      // Additional safety: handle process exit
+      proc.on('exit', (code: number | null, signal: string | null) => {
+        if (!isResolved) {
+          isResolved = true;
+          clearTimeout(timeout);
+          cleanup();
+          if (signal) {
+            reject(
+              new SynthesisError(
+                `CDK synthesis terminated by signal ${signal}`,
+                stderr || stdout || 'No output captured',
+              ),
+            );
+          } else if (code !== 0) {
+            reject(
+              new SynthesisError(
+                `CDK synthesis failed with exit code ${code}`,
+                stderr || stdout || 'No output captured',
+              ),
+            );
+          } else {
+            resolve();
+          }
         }
       });
     });

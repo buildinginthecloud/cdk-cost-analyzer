@@ -1,12 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Command } from 'commander';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+// Jest imports are global
 import { analyzeCosts } from '../../src/api';
 
 // Mock the API module
-vi.mock('../../src/api', () => ({
-  analyzeCosts: vi.fn(),
+jest.mock('../../src/api', () => ({
+  analyzeCosts: jest.fn(),
 }));
 
 describe('CLI Unit Tests', () => {
@@ -47,7 +47,7 @@ describe('CLI Unit Tests', () => {
     fs.writeFileSync(invalidTemplatePath, 'invalid json content');
 
     // Reset mocks
-    vi.clearAllMocks();
+    jest.clearAllMocks();
 
     // Setup default mock implementation
     (analyzeCosts as any).mockResolvedValue({
@@ -80,11 +80,11 @@ describe('CLI Unit Tests', () => {
       }
     }
 
-    console.log = vi.fn((message: string) => {
+    console.log = jest.fn((message: string) => {
       stdoutOutput += message + '\n';
     });
 
-    (process.exit as any) = vi.fn((code?: number) => {
+    (process.exit as any) = jest.fn((code?: number) => {
       exitCode = code || 0;
       throw new ExitError(code || 0);
     });
@@ -161,11 +161,11 @@ describe('CLI Unit Tests', () => {
     let stderrOutput = '';
     let exitCode: number | undefined;
 
-    console.error = vi.fn((...args: any[]) => {
+    console.error = jest.fn((...args: any[]) => {
       stderrOutput += args.join(' ') + '\n';
     });
 
-    (process.exit as any) = vi.fn((code?: number) => {
+    (process.exit as any) = jest.fn((code?: number) => {
       exitCode = code || 0;
       throw new Error('EXIT_CALLED');
     });
@@ -238,11 +238,11 @@ describe('CLI Unit Tests', () => {
     let stderrOutput = '';
     let exitCode: number | undefined;
 
-    console.error = vi.fn((...args: any[]) => {
+    console.error = jest.fn((...args: any[]) => {
       stderrOutput += args.join(' ') + '\n';
     });
 
-    (process.exit as any) = vi.fn((code?: number) => {
+    (process.exit as any) = jest.fn((code?: number) => {
       exitCode = code || 0;
       throw new Error('EXIT_CALLED');
     });
@@ -316,11 +316,11 @@ describe('CLI Unit Tests', () => {
     let stderrOutput = '';
     let exitCode: number | undefined;
 
-    console.error = vi.fn((...args: any[]) => {
+    console.error = jest.fn((...args: any[]) => {
       stderrOutput += args.join(' ') + '\n';
     });
 
-    (process.exit as any) = vi.fn((code?: number) => {
+    (process.exit as any) = jest.fn((code?: number) => {
       exitCode = code || 0;
       throw new Error('EXIT_CALLED');
     });
@@ -437,11 +437,11 @@ describe('CLI Unit Tests', () => {
       }
     }
 
-    console.log = vi.fn((message: string) => {
+    console.log = jest.fn((message: string) => {
       stdoutOutput += message + '\n';
     });
 
-    (process.exit as any) = vi.fn((code?: number) => {
+    (process.exit as any) = jest.fn((code?: number) => {
       exitCode = code || 0;
       throw new ExitError(code || 0);
     });
@@ -525,11 +525,11 @@ describe('CLI Unit Tests', () => {
       }
     }
 
-    console.log = vi.fn((message: string) => {
+    console.log = jest.fn((message: string) => {
       stdoutOutput += message + '\n';
     });
 
-    (process.exit as any) = vi.fn((code?: number) => {
+    (process.exit as any) = jest.fn((code?: number) => {
       exitCode = code || 0;
       throw new ExitError(code || 0);
     });
@@ -612,11 +612,11 @@ describe('CLI Unit Tests', () => {
     let stderrOutput = '';
     let exitCode: number | undefined;
 
-    console.error = vi.fn((...args: any[]) => {
+    console.error = jest.fn((...args: any[]) => {
       stderrOutput += args.join(' ') + '\n';
     });
 
-    (process.exit as any) = vi.fn((code?: number) => {
+    (process.exit as any) = jest.fn((code?: number) => {
       exitCode = code || 0;
       throw new Error('EXIT_CALLED');
     });
@@ -699,9 +699,9 @@ describe('CLI Unit Tests', () => {
       }
     }
 
-    console.log = vi.fn();
+    console.log = jest.fn();
 
-    (process.exit as any) = vi.fn((code?: number) => {
+    (process.exit as any) = jest.fn((code?: number) => {
       exitCode = code || 0;
       throw new ExitError(code || 0);
     });
@@ -775,9 +775,9 @@ describe('CLI Unit Tests', () => {
     const originalExit = process.exit;
     let exitCode: number | undefined;
 
-    console.error = vi.fn();
+    console.error = jest.fn();
 
-    (process.exit as any) = vi.fn((code?: number) => {
+    (process.exit as any) = jest.fn((code?: number) => {
       exitCode = code || 0;
       throw new Error('EXIT_CALLED');
     });
@@ -847,9 +847,9 @@ describe('CLI Unit Tests', () => {
     const originalLog = console.log;
     const originalExit = process.exit;
 
-    console.log = vi.fn();
+    console.log = jest.fn();
 
-    (process.exit as any) = vi.fn((code?: number) => {
+    (process.exit as any) = jest.fn((_code?: number) => {
       throw new Error('EXIT_CALLED');
     });
 
@@ -920,9 +920,9 @@ describe('CLI Unit Tests', () => {
     const originalLog = console.log;
     const originalExit = process.exit;
 
-    console.log = vi.fn();
+    console.log = jest.fn();
 
-    (process.exit as any) = vi.fn((code?: number) => {
+    (process.exit as any) = jest.fn((_code?: number) => {
       throw new Error('EXIT_CALLED');
     });
 

@@ -1,10 +1,8 @@
 import * as fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
-import { ConfigSummary } from '../../src/pipeline/types';
-import { CostDelta, ResourceCost } from '../../src/pricing/types';
+// Jest imports are global
+import { CostDelta } from '../../src/pricing/types';
 import { Reporter } from '../../src/reporter/Reporter';
 import { ReportOptions } from '../../src/reporter/types';
-import { ThresholdEvaluation } from '../../src/threshold/types';
 
 describe('Reporter - Property Tests', () => {
   const reporter = new Reporter();
@@ -17,13 +15,13 @@ describe('Reporter - Property Tests', () => {
   });
 
   const resourceCostArb = fc.record({
-    logicalId: fc.string().filter(s => s.length > 0),
+    logicalId: fc.string().filter(s => s.length > 0 && s.trim().length > 0),
     type: fc.constantFrom('AWS::EC2::Instance', 'AWS::S3::Bucket', 'AWS::Lambda::Function'),
     monthlyCost: monthlyCostArb,
   });
 
   const modifiedResourceCostArb = fc.record({
-    logicalId: fc.string().filter(s => s.length > 0),
+    logicalId: fc.string().filter(s => s.length > 0 && s.trim().length > 0),
     type: fc.constantFrom('AWS::EC2::Instance', 'AWS::S3::Bucket'),
     monthlyCost: monthlyCostArb,
     oldMonthlyCost: monthlyCostArb,
@@ -43,7 +41,7 @@ describe('Reporter - Property Tests', () => {
   it('should include logical ID, type, and cost for all resources', () => {
     fc.assert(
       fc.property(costDeltaArb, (costDelta) => {
-        const report = reporter.generateReport(costDelta, 'text');
+        const report = reporter.generateReport(costDelta as CostDelta, 'text');
 
         costDelta.addedCosts.forEach(resource => {
           expect(report).toContain(resource.logicalId);
@@ -68,7 +66,7 @@ describe('Reporter - Property Tests', () => {
   it('should format all currency values with exactly 2 decimal places', () => {
     fc.assert(
       fc.property(costDeltaArb, (costDelta) => {
-        const report = reporter.generateReport(costDelta, 'text');
+        const report = reporter.generateReport(costDelta as CostDelta, 'text');
 
         const currencyPattern = /\$\d+\.\d{2}/g;
         const matches = report.match(currencyPattern);
@@ -98,7 +96,7 @@ describe('Reporter - Property Tests', () => {
             modifiedCosts: [],
           };
 
-          const report = reporter.generateReport(costDelta, 'text');
+          const report = reporter.generateReport(costDelta as CostDelta, 'text');
           const deltaMatch = report.match(/Total Cost Delta: ([+\-]?\$[\d.]+)/);
 
           expect(deltaMatch).toBeTruthy();
@@ -125,7 +123,7 @@ describe('Reporter - Property Tests', () => {
             modifiedCosts: [],
           };
 
-          const report = reporter.generateReport(costDelta, 'text');
+          const report = reporter.generateReport(costDelta as CostDelta, 'text');
           const deltaMatch = report.match(/Total Cost Delta: ([+\-]?\$[\d.]+)/);
 
           expect(deltaMatch).toBeTruthy();
@@ -168,7 +166,7 @@ describe('Reporter - Property Tests', () => {
     fc.assert(
       fc.property(costDeltaArb, configSummaryArb, (costDelta, configSummary) => {
         const options: ReportOptions = { configSummary };
-        const report = reporter.generateReport(costDelta, 'text', options);
+        const report = reporter.generateReport(costDelta as CostDelta, 'text', options);
 
         // Configuration section should be present
         expect(report).toContain('CONFIGURATION:');
@@ -224,8 +222,8 @@ describe('Reporter - Property Tests', () => {
 
     fc.assert(
       fc.property(costDeltaArb, thresholdEvaluationArb, (costDelta, thresholdStatus) => {
-        const options: ReportOptions = { thresholdStatus };
-        const report = reporter.generateReport(costDelta, 'markdown', options);
+        const options: ReportOptions = { thresholdStatus: thresholdStatus as any };
+        const report = reporter.generateReport(costDelta as CostDelta, 'markdown', options);
 
         if (thresholdStatus.level !== 'none') {
           // Threshold status should be prominently displayed

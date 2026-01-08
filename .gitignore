@@ -39,6 +39,10 @@ cdk.out/
 examples/*/cdk.out/
 examples/*/custom.out/
 examples/*/*.out/
+test-cdk-project/
+/test-reports/
+junit.xml
+/coverage/
 !/.github/workflows/upgrade.yml
 !/.github/pull_request_template.md
 !/test/

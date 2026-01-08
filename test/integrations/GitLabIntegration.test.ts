@@ -1,13 +1,13 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+// Jest imports are global
 import { GitLabIntegration, GitLabAPIError } from '../../src/integrations';
 
 // Mock fetch globally
-const mockFetch = vi.fn();
+const mockFetch = jest.fn();
 global.fetch = mockFetch as any;
 
 describe('GitLabIntegration', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -82,7 +82,7 @@ describe('GitLabIntegration', () => {
         ok: false,
         status: 401,
         statusText: 'Unauthorized',
-        text: vi.fn().mockResolvedValue('Invalid token'),
+        text: jest.fn().mockResolvedValue('Invalid token'),
       });
 
       const integration = new GitLabIntegration({
@@ -122,7 +122,7 @@ describe('GitLabIntegration', () => {
         ok: false,
         status: 404,
         statusText: 'Not Found',
-        text: vi.fn().mockResolvedValue('Merge request not found'),
+        text: jest.fn().mockResolvedValue('Merge request not found'),
       });
 
       const integration = new GitLabIntegration({
@@ -132,7 +132,7 @@ describe('GitLabIntegration', () => {
 
       try {
         await integration.postMergeRequestComment('123', '999', 'Test comment');
-        expect.fail('Should have thrown error');
+        fail('Should have thrown error');
       } catch (error) {
         expect(error).toBeInstanceOf(GitLabAPIError);
         expect((error as GitLabAPIError).statusCode).toBe(404);

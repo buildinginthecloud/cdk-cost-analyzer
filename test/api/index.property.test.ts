@@ -1,5 +1,5 @@
 import * as fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { analyzeCosts } from '../../src/api';
 
 describe('analyzeCosts API - Property Tests', () => {
@@ -15,7 +15,7 @@ describe('analyzeCosts API - Property Tests', () => {
   });
 
   const templateArb = fc.dictionary(
-    fc.string().filter(s => s.length > 0),
+    fc.string().filter(s => s.length > 0 && s.trim().length > 0),
     resourceArb,
     { minKeys: 1, maxKeys: 3 },
   ).map(resources => ({

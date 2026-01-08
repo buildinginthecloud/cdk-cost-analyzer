@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 import * as fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { TemplateParser } from '../../src/parser/TemplateParser';
 import { SynthesisOrchestrator } from '../../src/synthesis/SynthesisOrchestrator';
 

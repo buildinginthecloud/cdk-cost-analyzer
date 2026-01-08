@@ -14,6 +14,58 @@ This guide covers common issues and solutions when using CDK Cost Analyzer.
 
 ## CDK Synthesis Errors
 
+### Error: CDK synthesis timed out after 20 seconds
+
+**Symptoms:**
+```
+Error: CDK synthesis timed out after 20 seconds
+```
+
+**Causes:**
+- CDK synthesis process hanging or taking too long
+- Complex CDK application with many resources
+- Network issues during synthesis (e.g., VPC lookups)
+- Infinite loops or deadlocks in CDK code
+
+**Solutions:**
+
+1. **Optimize CDK application:**
+```typescript
+// Avoid expensive lookups in synthesis
+// Use context values instead of runtime lookups
+const vpc = Vpc.fromLookup(this, 'Vpc', {
+  vpcId: this.node.tryGetContext('vpc-id') // Use context
+});
+```
+
+2. **Reduce synthesis complexity:**
+```typescript
+// Split large stacks into smaller ones
+// Avoid complex computations during synthesis
+// Use lazy evaluation where possible
+```
+
+3. **Check for infinite loops:**
+```typescript
+// Review custom constructs for potential infinite recursion
+// Check for circular dependencies between constructs
+```
+
+4. **Use custom synthesis command with timeout:**
+```yaml
+# .cdk-cost-analyzer.yml
+synthesis:
+  customCommand: "timeout 60 npx cdk synth"  # 60 second timeout
+```
+
+5. **Debug synthesis locally:**
+```bash
+cd infrastructure
+time npx cdk synth --all  # Measure synthesis time
+```
+
+**Note:** The 20-second timeout is designed to prevent hanging processes in CI/CD environments while providing faster feedback. The timeout includes improved process cleanup with graceful termination (SIGTERM) followed by force termination (SIGKILL) after 2 seconds if needed. If your CDK application legitimately requires more time, consider optimizing the synthesis process or using a custom command with extended timeout.
+
 ### Error: CDK synthesis failed with exit code 1
 
 **Symptoms:**

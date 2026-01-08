@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+// Jest imports are global
 import { APIGatewayCalculator } from '../../src/pricing/calculators/APIGatewayCalculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -22,11 +22,11 @@ describe('APIGatewayCalculator', () => {
 
   describe('calculateCost', () => {
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn(),
+      getPrice: jest.fn(),
     };
 
     it('should calculate cost for REST API', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(3.5);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(3.5);
 
       const resource = {
         logicalId: 'MyRestApi',
@@ -43,7 +43,7 @@ describe('APIGatewayCalculator', () => {
     });
 
     it('should calculate cost for HTTP API', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(1.0);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(1.0);
 
       const resource = {
         logicalId: 'MyHttpApi',
@@ -62,7 +62,7 @@ describe('APIGatewayCalculator', () => {
     });
 
     it('should calculate cost for WebSocket API', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(1.0);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(1.0);
 
       const resource = {
         logicalId: 'MyWebSocketApi',
@@ -81,7 +81,7 @@ describe('APIGatewayCalculator', () => {
     });
 
     it('should default to REST API for v1 APIs', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(3.5);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(3.5);
 
       const resource = {
         logicalId: 'MyApi',
@@ -95,7 +95,7 @@ describe('APIGatewayCalculator', () => {
     });
 
     it('should handle pricing data unavailable', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(null);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(null);
 
       const resource = {
         logicalId: 'MyApi',
@@ -110,7 +110,7 @@ describe('APIGatewayCalculator', () => {
     });
 
     it('should handle pricing API errors', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockRejectedValue(new Error('API Error'));
+      jest.mocked(mockPricingClient.getPrice).mockRejectedValue(new Error('API Error'));
 
       const resource = {
         logicalId: 'MyApi',

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+// Jest imports are global
 import { DynamoDBCalculator } from '../../src/pricing/calculators/DynamoDBCalculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -18,11 +18,11 @@ describe('DynamoDBCalculator', () => {
 
   describe('calculateCost', () => {
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn(),
+      getPrice: jest.fn(),
     };
 
     it('should calculate cost for on-demand billing mode', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.25);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.25);
 
       const resource = {
         logicalId: 'MyTable',
@@ -41,7 +41,7 @@ describe('DynamoDBCalculator', () => {
     });
 
     it('should calculate cost for provisioned billing mode', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.00013);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.00013);
 
       const resource = {
         logicalId: 'MyTable',
@@ -65,7 +65,7 @@ describe('DynamoDBCalculator', () => {
     });
 
     it('should use default provisioned capacity when not specified', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.00013);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.00013);
 
       const resource = {
         logicalId: 'MyTable',
@@ -81,7 +81,7 @@ describe('DynamoDBCalculator', () => {
     });
 
     it('should handle pricing data unavailable', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(null);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(null);
 
       const resource = {
         logicalId: 'MyTable',
@@ -98,7 +98,7 @@ describe('DynamoDBCalculator', () => {
     });
 
     it('should handle pricing API errors', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockRejectedValue(new Error('API Error'));
+      jest.mocked(mockPricingClient.getPrice).mockRejectedValue(new Error('API Error'));
 
       const resource = {
         logicalId: 'MyTable',

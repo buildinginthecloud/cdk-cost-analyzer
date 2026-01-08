@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+// Jest imports are global
 import { CacheManager } from '../../src/pricing/CacheManager';
 
 describe('CacheManager', () => {

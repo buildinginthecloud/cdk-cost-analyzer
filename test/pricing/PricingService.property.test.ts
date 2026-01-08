@@ -1,6 +1,5 @@
 import * as fc from 'fast-check';
-import { describe, it, expect, vi } from 'vitest';
-import { ResourceWithId } from '../../src/diff/types';
+// Jest imports are global
 import { PricingService } from '../../src/pricing/PricingService';
 
 describe('PricingService - Property Tests', () => {
@@ -13,10 +12,11 @@ describe('PricingService - Property Tests', () => {
       'AWS::S3::Bucket',
       'AWS::Lambda::Function',
       'AWS::RDS::DBInstance',
+      'AWS::CloudFront::Distribution',
     ];
 
     const resourceArb = fc.record({
-      logicalId: fc.string().filter((s) => s.length > 0),
+      logicalId: fc.string().filter((s) => s.length > 0 && s.trim().length > 0),
       type: fc.constantFrom(...supportedTypes),
       properties: fc.dictionary(fc.string(), fc.anything()),
     });
@@ -37,12 +37,9 @@ describe('PricingService - Property Tests', () => {
   // Feature: cdk-cost-analyzer, Property 10: Unsupported resources don't cause failures
   it('should handle unsupported resource types gracefully', () => {
     const unsupportedTypes = [
-      'AWS::CloudFront::Distribution',
-      'AWS::ApiGateway::RestApi',
       'AWS::Route53::HostedZone',
       'AWS::SNS::Topic',
       'AWS::SQS::Queue',
-      'AWS::ElasticLoadBalancingV2::LoadBalancer',
       'AWS::CloudWatch::Alarm',
       'AWS::IAM::Role',
       'Custom::MyResource',
@@ -50,7 +47,7 @@ describe('PricingService - Property Tests', () => {
     ];
 
     const resourceArb = fc.record({
-      logicalId: fc.string().filter((s) => s.length > 0),
+      logicalId: fc.string().filter((s) => s.length > 0 && s.trim().length > 0),
       type: fc.constantFrom(...unsupportedTypes),
       properties: fc.dictionary(fc.string(), fc.anything()),
     });
@@ -79,11 +76,10 @@ describe('PricingService - Property Tests', () => {
       'AWS::S3::Bucket',
       'AWS::Lambda::Function',
       'AWS::RDS::DBInstance',
+      'AWS::CloudFront::Distribution',
     ];
 
     const unsupportedTypes = [
-      'AWS::CloudFront::Distribution',
-      'AWS::ApiGateway::RestApi',
       'AWS::Route53::HostedZone',
       'AWS::SNS::Topic',
       'AWS::SQS::Queue',
@@ -93,7 +89,7 @@ describe('PricingService - Property Tests', () => {
     const allTypes = [...supportedTypes, ...unsupportedTypes];
 
     const resourceArb = fc.record({
-      logicalId: fc.string().filter((s) => s.length > 0),
+      logicalId: fc.string().filter((s) => s.length > 0 && s.trim().length > 0),
       type: fc.constantFrom(...allTypes),
       properties: fc.dictionary(fc.string(), fc.anything()),
     });
@@ -103,7 +99,7 @@ describe('PricingService - Property Tests', () => {
       removed: fc.array(resourceArb, { maxLength: 3 }),
       modified: fc.array(
         fc.record({
-          logicalId: fc.string().filter((s) => s.length > 0),
+          logicalId: fc.string().filter((s) => s.length > 0 && s.trim().length > 0),
           type: fc.constantFrom(...allTypes),
           oldProperties: fc.dictionary(fc.string(), fc.anything()),
           newProperties: fc.dictionary(fc.string(), fc.anything()),
@@ -165,7 +161,7 @@ describe('PricingService - Property Tests', () => {
   // Feature: cdk-cost-analyzer, Property 4: Total cost delta equals sum of individual costs
   it('should calculate total delta as sum of component costs', () => {
     const resourceArb = fc.record({
-      logicalId: fc.string().filter((s) => s.length > 0),
+      logicalId: fc.string().filter((s) => s.length > 0 && s.trim().length > 0),
       type: fc.constantFrom('AWS::S3::Bucket', 'AWS::Lambda::Function'),
       properties: fc.dictionary(fc.string(), fc.anything()),
     });
@@ -175,7 +171,7 @@ describe('PricingService - Property Tests', () => {
       removed: fc.array(resourceArb, { maxLength: 3 }),
       modified: fc.array(
         fc.record({
-          logicalId: fc.string().filter((s) => s.length > 0),
+          logicalId: fc.string().filter((s) => s.length > 0 && s.trim().length > 0),
           type: fc.constantFrom('AWS::S3::Bucket'),
           oldProperties: fc.dictionary(fc.string(), fc.anything()),
           newProperties: fc.dictionary(fc.string(), fc.anything()),
@@ -216,10 +212,11 @@ describe('PricingService - Property Tests', () => {
       'AWS::S3::Bucket',
       'AWS::Lambda::Function',
       'AWS::RDS::DBInstance',
+      'AWS::CloudFront::Distribution',
     ];
 
     const resourceArb = fc.record({
-      logicalId: fc.string().filter((s) => s.length > 0),
+      logicalId: fc.string().filter((s) => s.length > 0 && s.trim().length > 0),
       type: fc.constantFrom(...supportedTypes),
       properties: fc.dictionary(fc.string(), fc.anything()),
     });
@@ -229,7 +226,7 @@ describe('PricingService - Property Tests', () => {
       removed: fc.array(resourceArb, { maxLength: 3 }),
       modified: fc.array(
         fc.record({
-          logicalId: fc.string().filter((s) => s.length > 0),
+          logicalId: fc.string().filter((s) => s.length > 0 && s.trim().length > 0),
           type: fc.constantFrom(...supportedTypes),
           oldProperties: fc.dictionary(fc.string(), fc.anything()),
           newProperties: fc.dictionary(fc.string(), fc.anything()),

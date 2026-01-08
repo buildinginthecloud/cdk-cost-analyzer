@@ -8,12 +8,24 @@ export class PricingClient implements IPricingClient {
   private cacheManager?: CacheManager;
 
   constructor(
-    region: string = 'us-east-1', 
+    region: string = 'us-east-1',
     cacheManager?: CacheManager,
-    awsClient?: AWSPricingClient
+    awsClient?: AWSPricingClient,
   ) {
     this.client = awsClient || new AWSPricingClient({ region });
     this.cacheManager = cacheManager;
+  }
+
+  /**
+   * Clean up resources and connections
+   */
+  destroy(): void {
+    this.cache.clear();
+    // AWS SDK v3 clients automatically clean up their connections
+    // but we can help by clearing references
+    if (this.client && typeof (this.client as any).destroy === 'function') {
+      (this.client as any).destroy();
+    }
   }
 
   async getPrice(params: PriceQueryParams): Promise<number | null> {

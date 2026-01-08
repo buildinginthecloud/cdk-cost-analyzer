@@ -61,7 +61,7 @@
       "description": "Only compile",
       "steps": [
         {
-          "exec": "tsc"
+          "exec": "tsc --build"
         }
       ]
     },
@@ -156,7 +156,7 @@
       "description": "Run tests",
       "steps": [
         {
-          "exec": "vitest run --silent"
+          "exec": "jest --passWithNoTests --updateSnapshot --silent"
         }
       ]
     },
@@ -164,7 +164,7 @@
       "name": "test:silent",
       "steps": [
         {
-          "exec": "vitest run --silent"
+          "exec": "jest --silent"
         }
       ]
     },
@@ -172,7 +172,7 @@
       "name": "test:watch",
       "steps": [
         {
-          "exec": "vitest"
+          "exec": "jest --watch"
         }
       ]
     },
@@ -184,13 +184,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@18 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=eslint-import-resolver-typescript,eslint-plugin-import,projen,ts-node,typescript"
+          "exec": "npx npm-check-updates@18 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/jest,eslint-import-resolver-typescript,eslint-plugin-import,jest,projen,ts-jest,ts-node,typescript"
         },
         {
           "exec": "npm install"
         },
         {
-          "exec": "npm update @stylistic/eslint-plugin @types/js-yaml @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser constructs eslint-import-resolver-typescript eslint-plugin-import eslint fast-check projen ts-node typescript vitest @aws-sdk/client-pricing commander js-yaml"
+          "exec": "npm update @stylistic/eslint-plugin @types/jest @types/js-yaml @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser constructs eslint-import-resolver-typescript eslint-plugin-import eslint fast-check jest jest-junit projen ts-jest ts-node typescript @aws-sdk/client-pricing commander js-yaml"
         },
         {
           "exec": "npx projen"

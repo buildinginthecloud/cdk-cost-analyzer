@@ -27,21 +27,26 @@ export async function analyzeCosts(options: AnalyzeOptions): Promise<CostAnalysi
   const pricingService = new PricingService();
   const reporter = new Reporter();
 
-  const baseTemplateObj = parser.parse(options.baseTemplate);
-  const targetTemplateObj = parser.parse(options.targetTemplate);
+  try {
+    const baseTemplateObj = parser.parse(options.baseTemplate);
+    const targetTemplateObj = parser.parse(options.targetTemplate);
 
-  const diff = diffEngine.diff(baseTemplateObj, targetTemplateObj);
+    const diff = diffEngine.diff(baseTemplateObj, targetTemplateObj);
 
-  const costDelta = await pricingService.getCostDelta(diff, region);
+    const costDelta = await pricingService.getCostDelta(diff, region);
 
-  const summary = reporter.generateReport(costDelta, format);
+    const summary = reporter.generateReport(costDelta, format);
 
-  return {
-    totalDelta: costDelta.totalDelta,
-    currency: costDelta.currency,
-    addedResources: costDelta.addedCosts,
-    removedResources: costDelta.removedCosts,
-    modifiedResources: costDelta.modifiedCosts,
-    summary,
-  };
+    return {
+      totalDelta: costDelta.totalDelta,
+      currency: costDelta.currency,
+      addedResources: costDelta.addedCosts,
+      removedResources: costDelta.removedCosts,
+      modifiedResources: costDelta.modifiedCosts,
+      summary,
+    };
+  } finally {
+    // Clean up resources to prevent hanging connections
+    pricingService.destroy();
+  }
 }

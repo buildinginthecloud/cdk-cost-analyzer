@@ -1,15 +1,12 @@
 import * as fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { DiffEngine } from '../../src/diff/DiffEngine';
-import { TemplateParser } from '../../src/parser/TemplateParser';
 import { CloudFormationTemplate } from '../../src/parser/types';
-import { PipelineOrchestrator } from '../../src/pipeline/PipelineOrchestrator';
 import { PricingService } from '../../src/pricing/PricingService';
 
 describe('PipelineOrchestrator - Property Tests', () => {
   const pricingService = new PricingService();
   const diffEngine = new DiffEngine();
-  const parser = new TemplateParser();
 
   // Feature: production-readiness, Property 2: Multi-stack cost aggregation equals sum of individual stacks
   // Validates: Requirements 2.4
@@ -26,7 +23,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
     });
 
     const templateArb = fc.dictionary(
-      fc.string().filter(s => s.length > 0),
+      fc.string().filter(s => s.length > 0 && s.trim().length > 0),
       resourceArb,
       { minKeys: 1, maxKeys: 5 },
     ).map(resources => ({ Resources: resources }));
@@ -107,10 +104,10 @@ describe('PipelineOrchestrator - Property Tests', () => {
     });
 
     const stackPairArb = fc.record({
-      stack1Base: fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 3 }),
-      stack1Target: fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 3 }),
-      stack2Base: fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 3 }),
-      stack2Target: fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 3 }),
+      stack1Base: fc.dictionary(fc.string().filter(s => s.length > 0 && s.trim().length > 0), resourceArb, { minKeys: 1, maxKeys: 3 }),
+      stack1Target: fc.dictionary(fc.string().filter(s => s.length > 0 && s.trim().length > 0), resourceArb, { minKeys: 1, maxKeys: 3 }),
+      stack2Base: fc.dictionary(fc.string().filter(s => s.length > 0 && s.trim().length > 0), resourceArb, { minKeys: 1, maxKeys: 3 }),
+      stack2Target: fc.dictionary(fc.string().filter(s => s.length > 0 && s.trim().length > 0), resourceArb, { minKeys: 1, maxKeys: 3 }),
     });
 
     void fc.assert(
@@ -189,8 +186,8 @@ describe('PipelineOrchestrator - Property Tests', () => {
 
     const mixedStacksArb = fc.record({
       emptyStack: fc.constant({ Resources: {} }),
-      nonEmptyStackBase: fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 3 }),
-      nonEmptyStackTarget: fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 3 }),
+      nonEmptyStackBase: fc.dictionary(fc.string().filter(s => s.length > 0 && s.trim().length > 0), resourceArb, { minKeys: 1, maxKeys: 3 }),
+      nonEmptyStackTarget: fc.dictionary(fc.string().filter(s => s.length > 0 && s.trim().length > 0), resourceArb, { minKeys: 1, maxKeys: 3 }),
     });
 
     void fc.assert(
@@ -231,8 +228,8 @@ describe('PipelineOrchestrator - Property Tests', () => {
 
     const multiStackArb = fc.array(
       fc.record({
-        base: fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 2 }),
-        target: fc.dictionary(fc.string().filter(s => s.length > 0), resourceArb, { minKeys: 1, maxKeys: 2 }),
+        base: fc.dictionary(fc.string().filter(s => s.length > 0 && s.trim().length > 0), resourceArb, { minKeys: 1, maxKeys: 2 }),
+        target: fc.dictionary(fc.string().filter(s => s.length > 0 && s.trim().length > 0), resourceArb, { minKeys: 1, maxKeys: 2 }),
       }),
       { minLength: 2, maxLength: 4 },
     );

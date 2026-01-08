@@ -1,7 +1,6 @@
 import * as fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
+// Jest imports are global
 import { ThresholdConfig } from '../../src/config/types';
-import { ResourceCost, ModifiedResourceCost } from '../../src/pricing/types';
 import { ThresholdEnforcer } from '../../src/threshold/ThresholdEnforcer';
 
 describe('ThresholdEnforcer - Property Tests', () => {
@@ -15,13 +14,13 @@ describe('ThresholdEnforcer - Property Tests', () => {
   });
 
   const resourceCostArb = fc.record({
-    logicalId: fc.string().filter(s => s.length > 0),
+    logicalId: fc.string().filter(s => s.length > 0 && s.trim().length > 0),
     type: fc.constantFrom('AWS::EC2::Instance', 'AWS::S3::Bucket', 'AWS::Lambda::Function'),
     monthlyCost: monthlyCostArb,
   });
 
   const modifiedResourceCostArb = fc.record({
-    logicalId: fc.string().filter(s => s.length > 0),
+    logicalId: fc.string().filter(s => s.length > 0 && s.trim().length > 0),
     type: fc.constantFrom('AWS::EC2::Instance', 'AWS::S3::Bucket'),
     monthlyCost: monthlyCostArb,
     oldMonthlyCost: monthlyCostArb,

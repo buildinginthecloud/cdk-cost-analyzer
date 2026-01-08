@@ -76,13 +76,28 @@ export class CloudFrontCalculator implements ResourceCostCalculator {
       });
 
       if (dataTransferPrice === null || requestPrice === null) {
+        const assumptions = [
+          `Pricing data not available for CloudFront in region ${region}`,
+          `Would assume ${dataTransfer} GB of data transfer out to internet`,
+          `Would assume ${requestCount.toLocaleString()} HTTP/HTTPS requests per month`,
+        ];
+
+        if (this.dataTransferGB !== undefined) {
+          assumptions.push(
+            `Using custom data transfer assumption: ${dataTransfer} GB from configuration`,
+          );
+        }
+        if (this.requests !== undefined) {
+          assumptions.push(
+            `Using custom request count assumption: ${requestCount.toLocaleString()} requests from configuration`,
+          );
+        }
+
         return {
           amount: 0,
           currency: 'USD',
           confidence: 'unknown',
-          assumptions: [
-            `Pricing data not available for CloudFront in region ${region}`,
-          ],
+          assumptions,
         };
       }
 
@@ -99,12 +114,12 @@ export class CloudFrontCalculator implements ResourceCostCalculator {
 
       if (this.dataTransferGB !== undefined) {
         assumptions.push(
-          'Using custom data transfer assumption from configuration',
+          `Using custom data transfer assumption: ${dataTransfer} GB from configuration`,
         );
       }
       if (this.requests !== undefined) {
         assumptions.push(
-          'Using custom request count assumption from configuration',
+          `Using custom request count assumption: ${requestCount.toLocaleString()} requests from configuration`,
         );
       }
 

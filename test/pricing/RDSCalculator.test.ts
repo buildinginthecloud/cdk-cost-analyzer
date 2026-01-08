@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// Jest imports are global
 import { RDSCalculator } from '../../src/pricing/calculators/RDSCalculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -19,16 +19,16 @@ describe('RDSCalculator', () => {
 
   describe('calculateCost', () => {
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn(),
+      getPrice: jest.fn(),
     };
 
     beforeEach(() => {
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should calculate cost for db.t3.micro instance class', async () => {
       // Mock pricing: $0.017 per hour for instance, $0.115 per GB-month for storage
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(0.017) // Instance pricing
         .mockResolvedValueOnce(0.115); // Storage pricing
 
@@ -56,7 +56,7 @@ describe('RDSCalculator', () => {
     });
 
     it('should calculate cost for db.m5.large instance class', async () => {
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(0.192)
         .mockResolvedValueOnce(0.115);
 
@@ -81,7 +81,7 @@ describe('RDSCalculator', () => {
     });
 
     it('should calculate cost for db.r5.xlarge instance class', async () => {
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(0.336)
         .mockResolvedValueOnce(0.115);
 
@@ -106,7 +106,7 @@ describe('RDSCalculator', () => {
     });
 
     it('should calculate cost for MySQL engine', async () => {
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(0.017)
         .mockResolvedValueOnce(0.115);
 
@@ -135,7 +135,7 @@ describe('RDSCalculator', () => {
     });
 
     it('should calculate cost for PostgreSQL engine', async () => {
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(0.017)
         .mockResolvedValueOnce(0.115);
 
@@ -164,7 +164,7 @@ describe('RDSCalculator', () => {
     });
 
     it('should calculate cost for MariaDB engine', async () => {
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(0.017)
         .mockResolvedValueOnce(0.115);
 
@@ -245,7 +245,7 @@ describe('RDSCalculator', () => {
     });
 
     it('should handle pricing data unavailable for instance', async () => {
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(null) // Instance pricing unavailable
         .mockResolvedValueOnce(0.115);
 
@@ -266,7 +266,7 @@ describe('RDSCalculator', () => {
     });
 
     it('should handle pricing data unavailable for storage', async () => {
-      vi.mocked(mockPricingClient.getPrice)
+      jest.mocked(mockPricingClient.getPrice)
         .mockResolvedValueOnce(0.017)
         .mockResolvedValueOnce(null); // Storage pricing unavailable
 
@@ -288,7 +288,7 @@ describe('RDSCalculator', () => {
     });
 
     it('should handle pricing API errors', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockRejectedValue(new Error('API timeout'));
+      jest.mocked(mockPricingClient.getPrice).mockRejectedValue(new Error('API timeout'));
 
       const resource = {
         logicalId: 'MyDatabase',

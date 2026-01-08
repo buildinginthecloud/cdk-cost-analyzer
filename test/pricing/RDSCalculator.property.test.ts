@@ -1,5 +1,5 @@
 import * as fc from 'fast-check';
-import { describe, it, expect, vi } from 'vitest';
+// Jest imports are global
 import { RDSCalculator } from '../../src/pricing/calculators/RDSCalculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -33,10 +33,10 @@ describe('RDSCalculator - Property Tests', () => {
 
     // Create a mock pricing client that returns realistic RDS pricing
     const createMockPricingClient = (): PricingClient => ({
-      getPrice: vi.fn().mockImplementation(async (params) => {
+      getPrice: jest.fn().mockImplementation(async (params) => {
         const filters = params.filters || [];
-        const instanceTypeFilter = filters.find(f => f.field === 'instanceType');
-        const volumeTypeFilter = filters.find(f => f.field === 'volumeType');
+        const instanceTypeFilter = filters.find((f: any) => f.field === 'instanceType');
+        const volumeTypeFilter = filters.find((f: any) => f.field === 'volumeType');
 
         // Return instance pricing
         if (instanceTypeFilter) {
@@ -109,10 +109,10 @@ describe('RDSCalculator - Property Tests', () => {
     const engines = ['mysql', 'postgres'];
 
     const createMockPricingClient = (): PricingClient => ({
-      getPrice: vi.fn().mockImplementation(async (params) => {
+      getPrice: jest.fn().mockImplementation(async (params) => {
         const filters = params.filters || [];
-        const instanceTypeFilter = filters.find(f => f.field === 'instanceType');
-        const volumeTypeFilter = filters.find(f => f.field === 'volumeType');
+        const instanceTypeFilter = filters.find((f: any) => f.field === 'instanceType');
+        const volumeTypeFilter = filters.find((f: any) => f.field === 'volumeType');
 
         if (instanceTypeFilter) {
           const instanceType = instanceTypeFilter.value as string;
@@ -181,7 +181,7 @@ describe('RDSCalculator - Property Tests', () => {
     const calculator = new RDSCalculator();
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockResolvedValue(0.1),
+      getPrice: jest.fn().mockResolvedValue(0.1),
     };
 
     void fc.assert(
@@ -235,7 +235,7 @@ describe('RDSCalculator - Property Tests', () => {
     const calculator = new RDSCalculator();
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockResolvedValue(null),
+      getPrice: jest.fn().mockResolvedValue(null),
     };
 
     void fc.assert(
@@ -269,7 +269,7 @@ describe('RDSCalculator - Property Tests', () => {
     const calculator = new RDSCalculator();
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockRejectedValue(new Error('API timeout')),
+      getPrice: jest.fn().mockRejectedValue(new Error('API timeout')),
     };
 
     void fc.assert(
@@ -314,10 +314,10 @@ describe('RDSCalculator - Property Tests', () => {
     ];
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockImplementation(async (params) => {
+      getPrice: jest.fn().mockImplementation(async (params) => {
         const filters = params.filters || [];
-        const engineFilter = filters.find(f => f.field === 'databaseEngine');
-        const volumeTypeFilter = filters.find(f => f.field === 'volumeType');
+        const engineFilter = filters.find((f: any) => f.field === 'databaseEngine');
+        const volumeTypeFilter = filters.find((f: any) => f.field === 'volumeType');
 
         // Verify engine is normalized
         if (engineFilter) {

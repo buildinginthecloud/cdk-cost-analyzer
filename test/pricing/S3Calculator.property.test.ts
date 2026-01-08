@@ -1,5 +1,5 @@
 import * as fc from 'fast-check';
-import { describe, it, expect, vi } from 'vitest';
+// Jest imports are global
 import { S3Calculator } from '../../src/pricing/calculators/S3Calculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -13,7 +13,7 @@ describe('S3Calculator - Property Tests', () => {
 
     // Create a mock pricing client that returns realistic S3 pricing
     const createMockPricingClient = (): PricingClient => ({
-      getPrice: vi.fn().mockImplementation(async (params) => {
+      getPrice: jest.fn().mockImplementation(async (params) => {
         const region = params.region;
 
         // Return null for invalid combinations
@@ -72,7 +72,7 @@ describe('S3Calculator - Property Tests', () => {
     const calculator = new S3Calculator();
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockResolvedValue(0.023),
+      getPrice: jest.fn().mockResolvedValue(0.023),
     };
 
     void fc.assert(
@@ -107,7 +107,7 @@ describe('S3Calculator - Property Tests', () => {
     const calculator = new S3Calculator();
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockResolvedValue(null),
+      getPrice: jest.fn().mockResolvedValue(null),
     };
 
     void fc.assert(
@@ -137,7 +137,7 @@ describe('S3Calculator - Property Tests', () => {
     const calculator = new S3Calculator();
 
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn().mockRejectedValue(new Error('Network timeout')),
+      getPrice: jest.fn().mockRejectedValue(new Error('Network timeout')),
     };
 
     void fc.assert(

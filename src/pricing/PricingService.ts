@@ -51,7 +51,10 @@ export class PricingService implements IPricingService {
     this.calculators = [
       new EC2Calculator(),
       new S3Calculator(),
-      new LambdaCalculator(),
+      new LambdaCalculator(
+        usageAssumptions?.lambda?.invocationsPerMonth,
+        usageAssumptions?.lambda?.averageDurationMs,
+      ),
       new RDSCalculator(),
       new DynamoDBCalculator(),
       new ECSCalculator(),
@@ -179,5 +182,12 @@ export class PricingService implements IPricingService {
       removedCosts,
       modifiedCosts,
     };
+  }
+
+  /**
+   * Clean up resources and connections
+   */
+  destroy(): void {
+    this.pricingClient.destroy();
   }
 }

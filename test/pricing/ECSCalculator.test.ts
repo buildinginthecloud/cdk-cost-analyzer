@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+// Jest imports are global
 import { ECSCalculator } from '../../src/pricing/calculators/ECSCalculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -18,11 +18,11 @@ describe('ECSCalculator', () => {
 
   describe('calculateCost', () => {
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn(),
+      getPrice: jest.fn(),
     };
 
     it('should calculate cost for Fargate launch type', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.04);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.04);
 
       const resource = {
         logicalId: 'MyService',
@@ -43,7 +43,7 @@ describe('ECSCalculator', () => {
     });
 
     it('should use default desired count when not specified', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.04);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.04);
 
       const resource = {
         logicalId: 'MyService',
@@ -79,7 +79,7 @@ describe('ECSCalculator', () => {
     });
 
     it('should default to Fargate when launch type not specified', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.04);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.04);
 
       const resource = {
         logicalId: 'MyService',
@@ -110,7 +110,7 @@ describe('ECSCalculator', () => {
     });
 
     it('should handle pricing data unavailable', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(null);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(null);
 
       const resource = {
         logicalId: 'MyService',
@@ -127,7 +127,7 @@ describe('ECSCalculator', () => {
     });
 
     it('should handle pricing API errors', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockRejectedValue(new Error('API Error'));
+      jest.mocked(mockPricingClient.getPrice).mockRejectedValue(new Error('API Error'));
 
       const resource = {
         logicalId: 'MyService',

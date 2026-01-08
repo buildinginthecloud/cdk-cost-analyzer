@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// Jest imports are global
 import { S3Calculator } from '../../src/pricing/calculators/S3Calculator';
 import { PricingClient } from '../../src/pricing/types';
 
@@ -18,15 +18,15 @@ describe('S3Calculator', () => {
 
   describe('calculateCost', () => {
     const mockPricingClient: PricingClient = {
-      getPrice: vi.fn(),
+      getPrice: jest.fn(),
     };
 
     beforeEach(() => {
-      vi.clearAllMocks();
+      jest.clearAllMocks();
     });
 
     it('should calculate cost with default assumptions', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.023);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.023);
 
       const resource = {
         logicalId: 'MyBucket',
@@ -46,7 +46,7 @@ describe('S3Calculator', () => {
     });
 
     it('should calculate cost for us-east-1 region', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.023);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.023);
 
       const resource = {
         logicalId: 'MyBucket',
@@ -69,7 +69,7 @@ describe('S3Calculator', () => {
     });
 
     it('should calculate cost for eu-central-1 region', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.0245);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.0245);
 
       const resource = {
         logicalId: 'MyBucket',
@@ -92,7 +92,7 @@ describe('S3Calculator', () => {
     });
 
     it('should calculate cost for eu-west-1 region', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.0235);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.0235);
 
       const resource = {
         logicalId: 'MyBucket',
@@ -115,7 +115,7 @@ describe('S3Calculator', () => {
     });
 
     it('should calculate cost for ap-southeast-1 region', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(0.025);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(0.025);
 
       const resource = {
         logicalId: 'MyBucket',
@@ -138,7 +138,7 @@ describe('S3Calculator', () => {
     });
 
     it('should handle pricing data unavailable', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockResolvedValue(null);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(null);
 
       const resource = {
         logicalId: 'MyBucket',
@@ -154,7 +154,7 @@ describe('S3Calculator', () => {
     });
 
     it('should handle pricing API errors', async () => {
-      vi.mocked(mockPricingClient.getPrice).mockRejectedValue(new Error('Network timeout'));
+      jest.mocked(mockPricingClient.getPrice).mockRejectedValue(new Error('Network timeout'));
 
       const resource = {
         logicalId: 'MyBucket',

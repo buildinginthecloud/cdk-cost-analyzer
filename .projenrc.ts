@@ -41,7 +41,6 @@ const project = new typescript.TypeScriptProject({
     '@types/js-yaml@^4.0.9',
     '@types/node@^22.10.1',
     'fast-check@^3.23.1',
-    'vitest@^2.1.6',
   ],
 
   // Build configuration
@@ -68,8 +67,16 @@ const project = new typescript.TypeScriptProject({
     },
   },
 
-  // Disable default Jest since we use Vitest
-  jest: false,
+  // Testing configuration
+  jest: true,
+  jestOptions: {
+    jestConfig: {
+      testTimeout: 30000, // 30 second default timeout
+      forceExit: true, // Force exit to prevent hanging
+      detectOpenHandles: true, // Detect open handles that prevent Jest from exiting
+    },
+  },
+  sampleCode: false,
 
   // Keywords
   keywords: [
@@ -80,7 +87,7 @@ const project = new typescript.TypeScriptProject({
     'cloudformation',
   ],
 
-  // Node version - pin to specific version for consistency
+  // Node version
   minNodeVersion: '20.0.0',
 
   // GitHub configuration
@@ -90,13 +97,16 @@ const project = new typescript.TypeScriptProject({
     pullRequestLint: false,
   },
 
-  // Release configuration - disabled for now
+  // Release configuration
   release: false,
   releaseWorkflow: false,
   workflowNodeVersion: '20.18.1',
-  
+
   // Custom build workflow steps - disabled for now
   buildWorkflow: false,
+
+  // Dependency upgrades
+  depsUpgrade: true,
 
   // Gitignore
   gitignore: [
@@ -113,6 +123,7 @@ const project = new typescript.TypeScriptProject({
     'examples/*/cdk.out/',
     'examples/*/custom.out/',
     'examples/*/*.out/',
+    'test-cdk-project/',
   ],
 
   // Disable default projen tasks we don't need
@@ -124,13 +135,13 @@ const project = new typescript.TypeScriptProject({
 
   // Additional scripts
   scripts: {
-    'test:watch': 'vitest',
-    'test:silent': 'vitest run --silent',
+    'test:watch': 'jest --watch',
+    'test:silent': 'jest --silent',
   },
 });
 
-// Override test command to use Vitest instead of Jest
-project.testTask.reset('vitest run --silent');
+// Override test command to use Jest with silent flag
+project.testTask.reset('jest --passWithNoTests --updateSnapshot --silent');
 
 // Add lint task
 project.addTask('lint', {
@@ -139,11 +150,12 @@ project.addTask('lint', {
 });
 
 // Ensure build task compiles TypeScript
-project.compileTask.reset('tsc');
+project.compileTask.reset('tsc --build');
 
 // Add a test-only workflow since we disabled the build workflow
 if (project.github) {
   const testWorkflow = project.github.addWorkflow('test');
+  
   testWorkflow.on({
     pullRequest: {},
     push: { branches: ['main'] },
