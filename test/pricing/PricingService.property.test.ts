@@ -37,11 +37,9 @@ describe('PricingService - Property Tests', () => {
   // Feature: cdk-cost-analyzer, Property 10: Unsupported resources don't cause failures
   it('should handle unsupported resource types gracefully', () => {
     const unsupportedTypes = [
-      'AWS::ApiGateway::RestApi',
       'AWS::Route53::HostedZone',
       'AWS::SNS::Topic',
       'AWS::SQS::Queue',
-      'AWS::ElasticLoadBalancingV2::LoadBalancer',
       'AWS::CloudWatch::Alarm',
       'AWS::IAM::Role',
       'Custom::MyResource',
@@ -82,7 +80,6 @@ describe('PricingService - Property Tests', () => {
     ];
 
     const unsupportedTypes = [
-      'AWS::ApiGateway::RestApi',
       'AWS::Route53::HostedZone',
       'AWS::SNS::Topic',
       'AWS::SQS::Queue',
