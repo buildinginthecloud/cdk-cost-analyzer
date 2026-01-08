@@ -38,11 +38,22 @@ export class NatGatewayCalculator implements ResourceCostCalculator {
       });
 
       if (hourlyRate === null || dataProcessingRate === null) {
+        const dataProcessedGB = this.customDataProcessedGB || this.DEFAULT_DATA_PROCESSED_GB;
+        const assumptions = [
+          `Pricing data not available for NAT Gateway in region ${region}`,
+          `Would assume ${dataProcessedGB} GB of data processing per month`,
+          `Would assume ${this.HOURS_PER_MONTH} hours per month`,
+        ];
+
+        if (this.customDataProcessedGB !== undefined) {
+          assumptions.push('Using custom data processing assumption from configuration');
+        }
+
         return {
           amount: 0,
           currency: 'USD',
           confidence: 'unknown',
-          assumptions: [`Pricing data not available for NAT Gateway in region ${region}`],
+          assumptions,
         };
       }
 

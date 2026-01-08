@@ -58,7 +58,7 @@ describe('CloudFrontCalculator', () => {
       const result = await customCalculator.calculateCost(resource, 'us-east-1', mockPricingClient);
 
       expect(result.assumptions).toContain('Assumes 500 GB of data transfer out to internet');
-      expect(result.assumptions).toContain('Using custom data transfer assumption from configuration');
+      expect(result.assumptions).toContain('Using custom data transfer assumption: 500 GB from configuration');
     });
 
     it('should use custom request assumption', async () => {
@@ -75,7 +75,7 @@ describe('CloudFrontCalculator', () => {
       const result = await customCalculator.calculateCost(resource, 'us-east-1', mockPricingClient);
 
       expect(result.assumptions).toContain('Assumes 5,000,000 HTTP/HTTPS requests per month');
-      expect(result.assumptions).toContain('Using custom request count assumption from configuration');
+      expect(result.assumptions).toContain('Using custom request count assumption: 5,000,000 requests from configuration');
     });
 
     it('should handle missing pricing data', async () => {
@@ -92,6 +92,29 @@ describe('CloudFrontCalculator', () => {
       expect(result.amount).toBe(0);
       expect(result.confidence).toBe('unknown');
       expect(result.assumptions[0]).toContain('Pricing data not available');
+      expect(result.assumptions).toContain('Would assume 100 GB of data transfer out to internet');
+      expect(result.assumptions).toContain('Would assume 1,000,000 HTTP/HTTPS requests per month');
+    });
+
+    it('should handle missing pricing data with custom assumptions', async () => {
+      const customCalculator = new CloudFrontCalculator(500, 2000000);
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValueOnce(null);
+
+      const resource = {
+        logicalId: 'MyDistribution',
+        type: 'AWS::CloudFront::Distribution',
+        properties: {},
+      };
+
+      const result = await customCalculator.calculateCost(resource, 'us-east-1', mockPricingClient);
+
+      expect(result.amount).toBe(0);
+      expect(result.confidence).toBe('unknown');
+      expect(result.assumptions[0]).toContain('Pricing data not available');
+      expect(result.assumptions).toContain('Would assume 500 GB of data transfer out to internet');
+      expect(result.assumptions).toContain('Would assume 2,000,000 HTTP/HTTPS requests per month');
+      expect(result.assumptions).toContain('Using custom data transfer assumption: 500 GB from configuration');
+      expect(result.assumptions).toContain('Using custom request count assumption: 2,000,000 requests from configuration');
     });
 
     it('should handle pricing API errors', async () => {
