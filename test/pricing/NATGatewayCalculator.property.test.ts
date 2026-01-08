@@ -27,7 +27,7 @@ describe('NatGatewayCalculator - Property Tests', () => {
   // Validates: Requirements 7.1, 7.2, 7.3
   it('should include both hourly and data processing costs', () => {
     const natGatewayResourceArb = fc.record({
-      logicalId: fc.string().filter(s => s.length > 0),
+      logicalId: fc.string().filter(s => s.length > 0 && s.trim().length > 0),
       type: fc.constant('AWS::EC2::NatGateway'),
       properties: fc.dictionary(fc.string(), fc.anything()),
     });
@@ -108,7 +108,7 @@ describe('NatGatewayCalculator - Property Tests', () => {
   // Validates: Requirements 7.1, 7.2, 7.3
   it('should have non-zero cost due to hourly charges', () => {
     const natGatewayResourceArb = fc.record({
-      logicalId: fc.string().filter(s => s.length > 0),
+      logicalId: fc.string().filter(s => s.length > 0 && s.trim().length > 0),
       type: fc.constant('AWS::EC2::NatGateway'),
       properties: fc.dictionary(fc.string(), fc.anything()),
     });

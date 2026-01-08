@@ -3,7 +3,7 @@
     ".eslintrc.json",
     ".gitattributes",
     ".github/pull_request_template.md",
-    ".github/workflows/build.yml",
+    ".github/workflows/test.yml",
     ".github/workflows/upgrade.yml",
     ".gitignore",
     ".npmignore",

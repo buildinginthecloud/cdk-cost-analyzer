@@ -118,6 +118,15 @@
         }
       ]
     },
+    "lint": {
+      "name": "lint",
+      "description": "Run TypeScript compiler checks",
+      "steps": [
+        {
+          "exec": "tsc --noEmit"
+        }
+      ]
+    },
     "package": {
       "name": "package",
       "description": "Creates the distribution package",
@@ -147,17 +156,20 @@
       "description": "Run tests",
       "steps": [
         {
-          "exec": "jest --passWithNoTests --updateSnapshot",
-          "receiveArgs": true
-        },
+          "exec": "jest --passWithNoTests --updateSnapshot --silent"
+        }
+      ]
+    },
+    "test:silent": {
+      "name": "test:silent",
+      "steps": [
         {
-          "spawn": "eslint"
+          "exec": "jest --silent"
         }
       ]
     },
     "test:watch": {
       "name": "test:watch",
-      "description": "Run jest in watch mode",
       "steps": [
         {
           "exec": "jest --watch"

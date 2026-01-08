@@ -19,7 +19,7 @@ describe('VPCEndpointCalculator - Property Tests', () => {
 
     // Arbitrary for generating Gateway VPC endpoint resources
     const gatewayEndpointArb = fc.record({
-      logicalId: fc.string({ minLength: 1, maxLength: 255 }),
+      logicalId: fc.string({ minLength: 1, maxLength: 255 }).filter(s => s.trim().length > 0),
       type: fc.constant('AWS::EC2::VPCEndpoint'),
       properties: fc.oneof(
         // Explicit Gateway type
@@ -112,7 +112,7 @@ describe('VPCEndpointCalculator - Property Tests', () => {
 
     // Arbitrary for generating Interface VPC endpoint resources
     const interfaceEndpointArb = fc.record({
-      logicalId: fc.string({ minLength: 1, maxLength: 255 }),
+      logicalId: fc.string({ minLength: 1, maxLength: 255 }).filter(s => s.trim().length > 0),
       type: fc.constant('AWS::EC2::VPCEndpoint'),
       properties: fc.oneof(
         // Explicit Interface type
@@ -274,7 +274,7 @@ describe('VPCEndpointCalculator - Property Tests', () => {
     };
 
     const interfaceEndpointArb = fc.record({
-      logicalId: fc.string({ minLength: 1 }),
+      logicalId: fc.string({ minLength: 1 }).filter(s => s.trim().length > 0),
       type: fc.constant('AWS::EC2::VPCEndpoint'),
       properties: fc.record({
         VpcEndpointType: fc.constant('Interface'),

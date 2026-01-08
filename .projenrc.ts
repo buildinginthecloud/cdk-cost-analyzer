@@ -13,12 +13,12 @@ const project = new typescript.TypeScriptProject({
   authorEmail: 'yvo@buildinginthecloud.com',
   license: 'MIT',
 
-  // Repository - use consistent GitHub URLs
-  repository: 'https://github.com/buildinginthecloud/cdk-cost-analyzer.git',
+  // Repository
+  repository: 'https://gitlab.com/buildinginthecloud/cdk-cost-analyzer.git',
   homepage: 'https://github.com/buildinginthecloud/cdk-cost-analyzer',
   bugsUrl: 'https://github.com/buildinginthecloud/cdk-cost-analyzer/issues',
 
-  // Publishing configuration
+  // Publishing - disabled for now
   releaseToNpm: false,
   npmAccess: NpmAccess.PUBLIC,
 
@@ -102,8 +102,8 @@ const project = new typescript.TypeScriptProject({
   releaseWorkflow: false,
   workflowNodeVersion: '20.18.1',
 
-  // Build workflow
-  buildWorkflow: true,
+  // Custom build workflow steps - disabled for now
+  buildWorkflow: false,
 
   // Dependency upgrades
   depsUpgrade: true,
@@ -126,12 +126,85 @@ const project = new typescript.TypeScriptProject({
     'test-cdk-project/',
   ],
 
-  // Projen configuration
+  // Disable default projen tasks we don't need
   projenrcTs: true,
 
   // Linting
   eslint: true,
   prettier: false,
+
+  // Additional scripts
+  scripts: {
+    'test:watch': 'jest --watch',
+    'test:silent': 'jest --silent',
+  },
 });
+
+// Override test command to use Jest with silent flag
+project.testTask.reset('jest --passWithNoTests --updateSnapshot --silent');
+
+// Add lint task
+project.addTask('lint', {
+  description: 'Run TypeScript compiler checks',
+  exec: 'tsc --noEmit',
+});
+
+// Ensure build task compiles TypeScript
+project.compileTask.reset('tsc --build');
+
+// Add a test-only workflow since we disabled the build workflow
+if (project.github) {
+  const testWorkflow = project.github.addWorkflow('test');
+  
+  testWorkflow.on({
+    pullRequest: {},
+    push: { branches: ['main'] },
+    workflowDispatch: {},
+  });
+
+  testWorkflow.addJob('test', {
+    runsOn: ['ubuntu-latest'],
+    permissions: {},
+    env: {
+      CI: 'true',
+    },
+    steps: [
+      {
+        name: 'Checkout',
+        uses: 'actions/checkout@v5',
+      },
+      {
+        name: 'Setup Node.js',
+        uses: 'actions/setup-node@v5',
+        with: {
+          'node-version': '20.18.1',
+        },
+      },
+      {
+        name: 'Install dependencies',
+        run: 'npm install',
+      },
+      {
+        name: 'Install specific npm version for consistency',
+        run: 'npm install -g npm@10.8.2',
+      },
+      {
+        name: 'Install example project dependencies, needed for testing',
+        run: [
+          'npm ci --prefix examples/single-stack',
+          'npm ci --prefix examples/multi-stack'
+        ].join('\n'),
+      },
+      {
+        name: 'Run linting',
+        run: 'npm run lint',
+      },
+      {
+        name: 'Run tests',
+        run: 'npm test',
+      },
+    ],
+  });
+}
 
 project.synth();

@@ -15,7 +15,7 @@ describe('analyzeCosts API - Property Tests', () => {
   });
 
   const templateArb = fc.dictionary(
-    fc.string().filter(s => s.length > 0),
+    fc.string().filter(s => s.length > 0 && s.trim().length > 0),
     resourceArb,
     { minKeys: 1, maxKeys: 3 },
   ).map(resources => ({

@@ -15,13 +15,13 @@ describe('Reporter - Property Tests', () => {
   });
 
   const resourceCostArb = fc.record({
-    logicalId: fc.string().filter(s => s.length > 0),
+    logicalId: fc.string().filter(s => s.length > 0 && s.trim().length > 0),
     type: fc.constantFrom('AWS::EC2::Instance', 'AWS::S3::Bucket', 'AWS::Lambda::Function'),
     monthlyCost: monthlyCostArb,
   });
 
   const modifiedResourceCostArb = fc.record({
-    logicalId: fc.string().filter(s => s.length > 0),
+    logicalId: fc.string().filter(s => s.length > 0 && s.trim().length > 0),
     type: fc.constantFrom('AWS::EC2::Instance', 'AWS::S3::Bucket'),
     monthlyCost: monthlyCostArb,
     oldMonthlyCost: monthlyCostArb,

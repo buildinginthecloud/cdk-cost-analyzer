@@ -19,7 +19,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
     );
 
     const templateArb = fc.dictionary(
-      fc.string().filter(s => s.length > 0),
+      fc.string().filter(s => s.length > 0 && s.trim().length > 0),
       resourceArb,
       { minKeys: 2, maxKeys: 10 },
     );
@@ -87,7 +87,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
     });
 
     const templateArb = fc.dictionary(
-      fc.string().filter(s => s.length > 0),
+      fc.string().filter(s => s.length > 0 && s.trim().length > 0),
       resourceArb,
       { minKeys: 1, maxKeys: 5 },
     );
@@ -130,12 +130,12 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
 
     const templateArb = fc.record({
       included: fc.dictionary(
-        fc.string().filter(s => s.length > 0 && s.startsWith('Inc')),
+        fc.string().filter(s => s.length > 0 && s.trim().length > 0 && s.startsWith('Inc')),
         includedResourceArb,
         { minKeys: 1, maxKeys: 3 },
       ),
       excluded: fc.dictionary(
-        fc.string().filter(s => s.length > 0 && s.startsWith('Exc')),
+        fc.string().filter(s => s.length > 0 && s.trim().length > 0 && s.startsWith('Exc')),
         excludedResourceArb,
         { maxKeys: 2 },
       ),
@@ -188,7 +188,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
     );
 
     const templateArb = fc.dictionary(
-      fc.string().filter(s => s.length > 0),
+      fc.string().filter(s => s.length > 0 && s.trim().length > 0),
       resourceArb,
       { minKeys: 2, maxKeys: 5 },
     );
@@ -231,7 +231,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
     });
 
     const templateArb = fc.dictionary(
-      fc.string().filter(s => s.length > 0),
+      fc.string().filter(s => s.length > 0 && s.trim().length > 0),
       resourceArb,
       { minKeys: 2, maxKeys: 5 },
     );

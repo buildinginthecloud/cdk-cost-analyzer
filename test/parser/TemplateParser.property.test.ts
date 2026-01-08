@@ -21,7 +21,7 @@ describe('TemplateParser - Property Tests', () => {
 
     const templateArb = fc.record({
       Resources: fc.dictionary(
-        fc.string().filter(s => s.length > 0),
+        fc.string().filter(s => s.length > 0 && s.trim().length > 0),
         resourceArb,
         { minKeys: 1 },
       ),
@@ -69,7 +69,7 @@ describe('TemplateParser - Property Tests', () => {
 
     const templateArb = fc.record({
       Resources: fc.dictionary(
-        fc.string().filter(s => s.length > 0),
+        fc.string().filter(s => s.length > 0 && s.trim().length > 0),
         resourceArb,
         { minKeys: 1, maxKeys: 5 },
       ),

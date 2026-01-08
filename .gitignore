@@ -43,7 +43,6 @@ test-cdk-project/
 /test-reports/
 junit.xml
 /coverage/
-!/.github/workflows/build.yml
 !/.github/workflows/upgrade.yml
 !/.github/pull_request_template.md
 !/test/
@@ -53,4 +52,5 @@ junit.xml
 /lib
 /dist/
 !/.eslintrc.json
+!/.github/workflows/test.yml
 !/.projenrc.ts
