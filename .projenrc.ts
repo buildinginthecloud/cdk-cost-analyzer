@@ -106,6 +106,7 @@ const project = new typescript.TypeScriptProject({
 
   // Custom build workflow steps
   buildWorkflow: true,
+  mutableBuild: true, // Enable self-mutation for PR builds
 
   // Dependency upgrades
   depsUpgrade: true,
