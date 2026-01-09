@@ -14,7 +14,7 @@ const project = new typescript.TypeScriptProject({
   license: 'MIT',
 
   // Repository
-  repository: 'https://gitlab.com/buildinginthecloud/cdk-cost-analyzer.git',
+  repository: 'https://github.com/buildinginthecloud/cdk-cost-analyzer.git',
   homepage: 'https://github.com/buildinginthecloud/cdk-cost-analyzer',
   bugsUrl: 'https://github.com/buildinginthecloud/cdk-cost-analyzer/issues',
 
