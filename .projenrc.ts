@@ -18,8 +18,8 @@ const project = new typescript.TypeScriptProject({
   homepage: 'https://github.com/buildinginthecloud/cdk-cost-analyzer',
   bugsUrl: 'https://github.com/buildinginthecloud/cdk-cost-analyzer/issues',
 
-  // Publishing - disabled for now
-  releaseToNpm: false,
+  // Publishing
+  releaseToNpm: true,
   npmAccess: NpmAccess.PUBLIC,
 
   // CLI binary
@@ -100,12 +100,12 @@ const project = new typescript.TypeScriptProject({
   },
 
   // Release configuration
-  release: false,
-  releaseWorkflow: false,
+  release: true,
+  releaseWorkflow: true,
   workflowNodeVersion: '20.18.1',
 
-  // Custom build workflow steps - disabled for now
-  buildWorkflow: false,
+  // Custom build workflow steps
+  buildWorkflow: true,
 
   // Dependency upgrades
   depsUpgrade: true,
