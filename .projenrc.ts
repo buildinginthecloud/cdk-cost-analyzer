@@ -41,6 +41,8 @@ const project = new typescript.TypeScriptProject({
     '@types/js-yaml@^4.0.9',
     '@types/node@^22.10.1',
     'fast-check@^3.23.1',
+    'husky@^9.0.0',
+    'lint-staged@^15.0.0',
   ],
 
   // Build configuration
@@ -137,6 +139,8 @@ const project = new typescript.TypeScriptProject({
   scripts: {
     'test:watch': 'jest --watch',
     'test:silent': 'jest --silent',
+    'ci:local': 'npm ci --prefix examples/single-stack && npm ci --prefix examples/multi-stack && npm run lint && npm run test:silent',
+    'validate:workflows': 'node tools/workflows/validate-workflows.js',
   },
 });
 
@@ -206,5 +210,17 @@ if (project.github) {
     ],
   });
 }
+
+// Add a task for installing act (optional)
+project.addTask('install:act', {
+  description: 'Install act for local GitHub Actions testing',
+  exec: 'brew install act || echo "Please install act manually: https://github.com/nektos/act#installation"',
+});
+
+// Add husky setup task
+project.addTask('prepare', {
+  description: 'Setup git hooks',
+  exec: 'husky install',
+});
 
 project.synth();

@@ -10,7 +10,27 @@ describe('CacheManager', () => {
   beforeEach(() => {
     // Clean up test cache directory before each test
     if (fs.existsSync(testCacheDir)) {
-      fs.rmSync(testCacheDir, { recursive: true, force: true });
+      try {
+        fs.rmSync(testCacheDir, { recursive: true, force: true });
+      } catch (error) {
+        // If rmSync fails, try alternative cleanup
+        console.warn('Failed to clean cache directory, trying alternative method');
+        try {
+          const files = fs.readdirSync(testCacheDir);
+          for (const file of files) {
+            const filePath = path.join(testCacheDir, file);
+            const stat = fs.statSync(filePath);
+            if (stat.isDirectory()) {
+              fs.rmSync(filePath, { recursive: true, force: true });
+            } else {
+              fs.unlinkSync(filePath);
+            }
+          }
+          fs.rmdirSync(testCacheDir);
+        } catch (altError) {
+          console.warn('Alternative cleanup also failed, continuing with test');
+        }
+      }
     }
     cacheManager = new CacheManager(testCacheDir, 24);
   });

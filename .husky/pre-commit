@@ -1,0 +1,12 @@
+# Run linting and tests
+npm run lint
+npm run test:silent
+
+# Validate GitHub Actions workflows if act is available
+if command -v act >/dev/null 2>&1; then
+  echo "🔍 Validating GitHub Actions workflows..."
+  npm run validate:workflows
+else
+  echo "⚠️  act not found - skipping workflow validation"
+  echo "   Install with: brew install act"
+fi
