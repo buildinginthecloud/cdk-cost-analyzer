@@ -53,12 +53,22 @@
       "type": "build"
     },
     {
+      "name": "husky",
+      "version": "^9.0.0",
+      "type": "build"
+    },
+    {
       "name": "jest",
       "type": "build"
     },
     {
       "name": "jest-junit",
       "version": "^16",
+      "type": "build"
+    },
+    {
+      "name": "lint-staged",
+      "version": "^15.0.0",
       "type": "build"
     },
     {

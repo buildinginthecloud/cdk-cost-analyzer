@@ -272,6 +272,8 @@ describe('Repository Structure - Property Tests', () => {
       // CI/CD
       '.gitlab-ci.yml', // GitLab CI configuration
       '.github', // GitHub Actions workflows
+      '.husky', // Git hooks
+      'tools', // Development tools and utilities
     ]);
 
     const rootEntries = fs.readdirSync(projectRoot);
