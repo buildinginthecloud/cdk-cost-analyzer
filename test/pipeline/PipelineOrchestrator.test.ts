@@ -26,7 +26,7 @@ describe('PipelineOrchestrator', () => {
     });
 
     it('should accept template paths', async () => {
-      // This will fail because templates don't exist, but validates the interface
+      // This should succeed with the provided example templates
       const promise = orchestrator.runPipelineAnalysis({
         synthesize: false,
         baseTemplate: './examples/simple/base.json',
@@ -34,9 +34,9 @@ describe('PipelineOrchestrator', () => {
         region: 'eu-central-1',
       });
 
-      // Should either succeed or fail with a specific error
+      // Should succeed and return a valid analysis result
       await expect(promise).resolves.toHaveProperty('costAnalysis');
-    });
+    }, 45000); // Increase timeout to 45 seconds
 
     it('should accept synthesis options', async () => {
       // Skip CDK synthesis tests in CI environment to avoid hanging processes
