@@ -104,8 +104,8 @@ const project = new typescript.TypeScriptProject({
   releaseWorkflow: true,
   workflowNodeVersion: '20.18.1',
 
-  // Custom build workflow steps - temporarily disabled for release setup
-  buildWorkflow: false,
+  // Custom build workflow steps
+  buildWorkflow: true,
 
   // Dependency upgrades
   depsUpgrade: true,
