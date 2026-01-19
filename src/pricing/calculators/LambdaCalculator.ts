@@ -1,5 +1,6 @@
 import { ResourceWithId } from '../../diff/types';
 import { ResourceCostCalculator, MonthlyCost, PricingClient } from '../types';
+import { normalizeRegion } from '../RegionMapper';
 
 export class LambdaCalculator implements ResourceCostCalculator {
   private readonly DEFAULT_INVOCATIONS = 1000000;
@@ -27,7 +28,7 @@ export class LambdaCalculator implements ResourceCostCalculator {
     try {
       const requestPrice = await pricingClient.getPrice({
         serviceCode: 'AWSLambda',
-        region: this.normalizeRegion(region),
+        region: normalizeRegion(region),
         filters: [
           { field: 'group', value: 'AWS-Lambda-Requests' },
         ],
@@ -35,7 +36,7 @@ export class LambdaCalculator implements ResourceCostCalculator {
 
       const computePrice = await pricingClient.getPrice({
         serviceCode: 'AWSLambda',
-        region: this.normalizeRegion(region),
+        region: normalizeRegion(region),
         filters: [
           { field: 'group', value: 'AWS-Lambda-Duration' },
         ],
@@ -101,26 +102,5 @@ export class LambdaCalculator implements ResourceCostCalculator {
         assumptions,
       };
     }
-  }
-
-  private normalizeRegion(region: string): string {
-    const regionMap: Record<string, string> = {
-      'us-east-1': 'US East (N. Virginia)',
-      'us-east-2': 'US East (Ohio)',
-      'us-west-1': 'US West (N. California)',
-      'us-west-2': 'US West (Oregon)',
-      'eu-west-1': 'EU (Ireland)',
-      'eu-west-2': 'EU (London)',
-      'eu-west-3': 'EU (Paris)',
-      'eu-central-1': 'EU (Frankfurt)',
-      'eu-north-1': 'EU (Stockholm)',
-      'ap-south-1': 'Asia Pacific (Mumbai)',
-      'ap-southeast-1': 'Asia Pacific (Singapore)',
-      'ap-southeast-2': 'Asia Pacific (Sydney)',
-      'ap-northeast-1': 'Asia Pacific (Tokyo)',
-      'ap-northeast-2': 'Asia Pacific (Seoul)',
-    };
-
-    return regionMap[region] || region;
   }
 }

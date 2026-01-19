@@ -1,6 +1,7 @@
 import { PricingClient as AWSPricingClient, GetProductsCommand } from '@aws-sdk/client-pricing';
 import { CacheManager } from './CacheManager';
 import { PricingClient as IPricingClient, PriceQueryParams, PricingAPIError } from './types';
+import { Logger } from '../utils/Logger';
 
 export class PricingClient implements IPricingClient {
   private cache: Map<string, number> = new Map();
@@ -33,6 +34,7 @@ export class PricingClient implements IPricingClient {
 
     // Check in-memory cache first
     if (this.cache.has(cacheKey)) {
+      Logger.logCacheStatus(cacheKey, true, 'memory');
       return this.cache.get(cacheKey)!;
     }
 
@@ -40,11 +42,14 @@ export class PricingClient implements IPricingClient {
     if (this.cacheManager) {
       const cachedPrice = this.cacheManager.getCachedPrice(params);
       if (cachedPrice !== null) {
+        Logger.logCacheStatus(cacheKey, true, 'persistent');
         // Store in memory cache for faster subsequent access
         this.cache.set(cacheKey, cachedPrice);
         return cachedPrice;
       }
     }
+
+    Logger.logCacheStatus(cacheKey, false);
 
     try {
       const price = await this.fetchPriceWithRetry(params);
@@ -57,6 +62,11 @@ export class PricingClient implements IPricingClient {
       }
       return price;
     } catch (error) {
+      Logger.logPricingFailure(
+        params.serviceCode,
+        params.region,
+        error instanceof Error ? error.message : String(error),
+      );
       // On API failure, try to use cached data even if stale
       if (this.cache.has(cacheKey)) {
         return this.cache.get(cacheKey)!;
@@ -99,6 +109,9 @@ export class PricingClient implements IPricingClient {
       Value: f.value,
     }));
 
+    // Log the pricing query before execution
+    Logger.logPricingQuery(params.serviceCode, params.region, params.filters);
+
     const command = new GetProductsCommand({
       ServiceCode: params.serviceCode,
       Filters: filters,
@@ -108,6 +121,12 @@ export class PricingClient implements IPricingClient {
     const response = await this.client.send(command);
 
     if (!response.PriceList || response.PriceList.length === 0) {
+      Logger.logPricingResponse(params.serviceCode, params.region, null);
+      Logger.logPricingFailure(
+        params.serviceCode,
+        params.region,
+        'No products found matching the specified filters',
+      );
       return null;
     }
 
@@ -115,6 +134,7 @@ export class PricingClient implements IPricingClient {
     const onDemand = priceItem?.terms?.OnDemand;
 
     if (!onDemand) {
+      Logger.logPricingResponse(params.serviceCode, params.region, null, { reason: 'No OnDemand terms found' });
       return null;
     }
 
@@ -122,6 +142,7 @@ export class PricingClient implements IPricingClient {
     const priceDimensions = onDemand[termKey]?.priceDimensions;
 
     if (!priceDimensions) {
+      Logger.logPricingResponse(params.serviceCode, params.region, null, { reason: 'No price dimensions found' });
       return null;
     }
 
@@ -129,10 +150,22 @@ export class PricingClient implements IPricingClient {
     const pricePerUnit = priceDimensions[dimensionKey]?.pricePerUnit?.USD;
 
     if (!pricePerUnit) {
+      Logger.logPricingResponse(params.serviceCode, params.region, null, { reason: 'No USD price found' });
       return null;
     }
 
-    return parseFloat(pricePerUnit);
+    const price = parseFloat(pricePerUnit);
+
+    // Log the successful pricing response
+    Logger.logPricingResponse(params.serviceCode, params.region, price, {
+      product: priceItem?.product,
+      termKey,
+      dimensionKey,
+      unit: priceDimensions[dimensionKey]?.unit,
+      description: priceDimensions[dimensionKey]?.description,
+    });
+
+    return price;
   }
 
   private getCacheKey(params: PriceQueryParams): string {

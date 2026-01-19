@@ -58,9 +58,61 @@ cdk-cost-analyzer pipeline \
 # Generate Markdown output
 cdk-cost-analyzer compare base.yaml target.yaml --region us-east-1 --format markdown
 
+# Enable debug logging to troubleshoot pricing issues
+cdk-cost-analyzer compare base.yaml target.yaml --debug
+
 # Show help
 cdk-cost-analyzer --help
 ```
+
+### Debug Logging
+
+Use the `--debug` flag to enable verbose logging for pricing API calls. This helps troubleshoot why pricing lookups might return $0.00 for resources:
+
+```bash
+cdk-cost-analyzer compare base.yaml target.yaml --debug
+```
+
+Debug mode logs the following information to stderr:
+- **Pricing API queries** - Service type, filters, and region used in each query
+- **Pricing API responses** - Product details, pricing information, and response metadata
+- **Filter values** - Exact filter parameters sent to the AWS Pricing API
+- **Region normalization** - Conversion from AWS region codes (e.g., `us-east-1`) to Pricing API region names (e.g., `US East (N. Virginia)`)
+- **Cache status** - Whether pricing data was retrieved from memory cache, persistent cache, or API
+- **Pricing failures** - Detailed error messages when pricing lookups fail
+
+Example debug output:
+```
+[DEBUG 2024-01-15T10:30:00.000Z] Region Normalization
+{
+  "originalRegion": "us-east-1",
+  "normalizedRegion": "US East (N. Virginia)",
+  "wasNormalized": true
+}
+
+[DEBUG 2024-01-15T10:30:00.100Z] Pricing API Query
+{
+  "serviceCode": "AWSLambda",
+  "region": "US East (N. Virginia)",
+  "filters": [
+    {
+      "field": "group",
+      "value": "AWS-Lambda-Requests",
+      "type": "TERM_MATCH"
+    }
+  ]
+}
+
+[DEBUG 2024-01-15T10:30:00.500Z] Pricing API Response
+{
+  "serviceCode": "AWSLambda",
+  "region": "US East (N. Virginia)",
+  "price": 0.0000002,
+  "productDetails": { ... }
+}
+```
+
+Debug logging is disabled by default and does not interfere with normal output formats (text, JSON, or Markdown).
 
 ### Configuration File
 
