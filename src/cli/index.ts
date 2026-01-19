@@ -92,7 +92,6 @@ program
     config?: string;
     environment?: string;
     format: string;
-    format: string;
     postToGitlab?: boolean;
     debug?: boolean;
   }) => {
