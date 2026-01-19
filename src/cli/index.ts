@@ -5,6 +5,7 @@ import { Command } from 'commander';
 import { analyzeCosts } from '../api';
 import { GitLabIntegration } from '../integrations/GitLabIntegration';
 import { PipelineOrchestrator } from '../pipeline/PipelineOrchestrator';
+import { Logger } from '../utils/Logger';
 
 const program = new Command();
 
@@ -22,8 +23,15 @@ program
   .option('--region <region>', 'AWS region', 'eu-central-1')
   .option('--format <format>', 'Output format: text|json|markdown', 'text')
   .option('--config <path>', 'Path to configuration file')
-  .action(async (basePath: string, targetPath: string, options: { region: string; format: string; config?: string }) => {
+  .option('--debug', 'Enable verbose debug logging for pricing API calls')
+  .action(async (basePath: string, targetPath: string, options: { region: string; format: string; config?: string; debug?: boolean }) => {
     try {
+      // Enable debug logging if flag is set
+      if (options.debug) {
+        Logger.setDebugEnabled(true);
+        Logger.debug('Debug logging enabled');
+      }
+
       if (!fs.existsSync(basePath)) {
         console.error(`Error: Base template file not found: ${basePath}`);
         process.exit(1);
@@ -74,6 +82,7 @@ program
   .option('--environment <env>', 'Environment name for threshold selection')
   .option('--format <format>', 'Output format: text|json|markdown', 'text')
   .option('--post-to-gitlab', 'Post results to GitLab merge request')
+  .option('--debug', 'Enable verbose debug logging for pricing API calls')
   .action(async (options: {
     base?: string;
     target?: string;
@@ -83,9 +92,17 @@ program
     config?: string;
     environment?: string;
     format: string;
+    format: string;
     postToGitlab?: boolean;
+    debug?: boolean;
   }) => {
     try {
+      // Enable debug logging if flag is set
+      if (options.debug) {
+        Logger.setDebugEnabled(true);
+        Logger.debug('Debug logging enabled');
+      }
+
       // Check AWS credentials
       if (!process.env.AWS_ACCESS_KEY_ID && !process.env.AWS_PROFILE) {
         console.error('Error: AWS credentials not configured');
@@ -210,13 +227,20 @@ program
   .option('--region <region>', 'AWS region', 'eu-central-1')
   .option('--format <format>', 'Output format: text|json|markdown', 'text')
   .option('--config <path>', 'Path to configuration file')
-  .action(async (basePath?: string, targetPath?: string, options?: { region: string; format: string; config?: string }) => {
+  .option('--debug', 'Enable verbose debug logging for pricing API calls')
+  .action(async (basePath?: string, targetPath?: string, options?: { region: string; format: string; config?: string; debug?: boolean }) => {
     if (!basePath || !targetPath) {
       program.help();
       return;
     }
 
     try {
+      // Enable debug logging if flag is set
+      if (options?.debug) {
+        Logger.setDebugEnabled(true);
+        Logger.debug('Debug logging enabled');
+      }
+
       if (!fs.existsSync(basePath)) {
         console.error(`Error: Base template file not found: ${basePath}`);
         process.exit(1);

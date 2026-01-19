@@ -1,5 +1,6 @@
 import { ResourceWithId } from '../../diff/types';
 import { ResourceCostCalculator, MonthlyCost, PricingClient } from '../types';
+import { normalizeRegion } from '../RegionMapper';
 
 /**
  * Calculator for AWS CloudFront distribution costs.
@@ -64,14 +65,14 @@ export class CloudFrontCalculator implements ResourceCostCalculator {
       // Query pricing for data transfer out to internet
       const dataTransferPrice = await pricingClient.getPrice({
         serviceCode: 'AmazonCloudFront',
-        region: this.normalizeRegion(region),
+        region: normalizeRegion(region),
         filters: [{ field: 'transferType', value: 'CloudFront to Internet' }],
       });
 
       // Query pricing for HTTP/HTTPS requests
       const requestPrice = await pricingClient.getPrice({
         serviceCode: 'AmazonCloudFront',
-        region: this.normalizeRegion(region),
+        region: normalizeRegion(region),
         filters: [{ field: 'requestType', value: 'HTTP-Requests' }],
       });
 
@@ -150,24 +151,4 @@ export class CloudFrontCalculator implements ResourceCostCalculator {
    * @param region - AWS region code (e.g., 'us-east-1')
    * @returns AWS Pricing API region name (e.g., 'US East (N. Virginia)')
    */
-  private normalizeRegion(region: string): string {
-    const regionMap: Record<string, string> = {
-      'us-east-1': 'US East (N. Virginia)',
-      'us-east-2': 'US East (Ohio)',
-      'us-west-1': 'US West (N. California)',
-      'us-west-2': 'US West (Oregon)',
-      'eu-west-1': 'EU (Ireland)',
-      'eu-west-2': 'EU (London)',
-      'eu-west-3': 'EU (Paris)',
-      'eu-central-1': 'EU (Frankfurt)',
-      'eu-north-1': 'EU (Stockholm)',
-      'ap-south-1': 'Asia Pacific (Mumbai)',
-      'ap-southeast-1': 'Asia Pacific (Singapore)',
-      'ap-southeast-2': 'Asia Pacific (Sydney)',
-      'ap-northeast-1': 'Asia Pacific (Tokyo)',
-      'ap-northeast-2': 'Asia Pacific (Seoul)',
-    };
-
-    return regionMap[region] || region;
-  }
 }

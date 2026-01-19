@@ -323,8 +323,8 @@ js-yaml .cdk-cost-analyzer.yml
 ```yaml
 # Wrong
 thresholds:
-	default:  # Tab character
-		warning: 50
+        default:  # Tab character
+                warning: 50
 
 # Correct
 thresholds:
@@ -411,6 +411,85 @@ thresholds:
 ```
 
 ## Pricing API Failures
+
+### Resources showing $0.00 cost
+
+**Symptoms:**
+```
+Resource costs showing as $0.00 even though they should have costs
+Analysis returns zero or low costs for infrastructure
+```
+
+**Causes:**
+- Incorrect region name passed to Pricing API
+- Filter values don't match AWS Pricing API product attributes
+- Resource properties not matching pricing filters
+- Regional pricing not available
+
+**Solutions:**
+
+1. **Enable debug logging to diagnose the issue:**
+```bash
+cdk-cost-analyzer compare base.yaml target.yaml --debug
+```
+
+Debug logging will show:
+- Exact filters being sent to the Pricing API
+- Region normalization steps (e.g., `us-east-1` → `US East (N. Virginia)`)
+- Pricing API responses or failure reasons
+- Cache hits/misses
+
+2. **Review debug output for common issues:**
+
+**Example: Region mismatch**
+```
+[DEBUG] Region Normalization
+{
+  "originalRegion": "us-east-1",
+  "normalizedRegion": "US East (N. Virginia)",
+  "wasNormalized": true
+}
+```
+
+**Example: No products found**
+```
+[DEBUG] Pricing Lookup Failed
+{
+  "serviceCode": "AWSLambda",
+  "region": "US East (N. Virginia)",
+  "reason": "No products found matching the specified filters"
+}
+```
+
+3. **Verify filter values manually:**
+```bash
+# Query AWS Pricing API directly
+aws pricing get-products \
+  --service-code AWSLambda \
+  --filters Type=TERM_MATCH,Field=group,Value=AWS-Lambda-Requests \
+  --region us-east-1 \
+  --no-cli-pager
+```
+
+4. **Check resource properties:**
+```yaml
+# Ensure resource properties match what calculators expect
+Resources:
+  MyFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      MemorySize: 128  # Required for cost calculation
+      Runtime: nodejs18.x
+```
+
+5. **Review assumptions in configuration:**
+```yaml
+# .cdk-cost-analyzer.yml
+usageAssumptions:
+  lambda:
+    invocationsPerMonth: 1000000
+    averageDurationMs: 1000
+```
 
 ### Error: Too many requests (throttling)
 
