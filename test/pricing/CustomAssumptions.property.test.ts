@@ -293,7 +293,10 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
             region,
           );
           const assumptionText = lambdaCost.assumptions.join(' ');
-          expect(assumptionText).toContain(customAssumptions.lambda.invocationsPerMonth.toString());
+          // Account for locale formatting (e.g., 1001 vs 1,001)
+          const invocationValue = customAssumptions.lambda.invocationsPerMonth;
+          const formattedValue = invocationValue.toLocaleString();
+          expect(assumptionText).toContain(formattedValue);
         }
 
         // Test NAT Gateway if custom assumptions provided

@@ -241,6 +241,7 @@ describe('Repository Structure - Property Tests', () => {
       'node_modules',
       'docs',
       'examples',
+      'demo', // Demo CDK project showcasing cdk-cost-analyzer usage
       'test-cdk-project', // Legacy test project, kept for backwards compatibility
       'coverage', // Jest coverage reports
       'test-reports', // Test output reports
