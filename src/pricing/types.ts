@@ -34,6 +34,7 @@ export interface ModifiedResourceCost extends ResourceCost {
 
 export interface ResourceCostCalculator {
   supports(resourceType: string): boolean;
+  canCalculate?(resource: ResourceWithId): boolean;
   calculateCost(
     resource: ResourceWithId,
     region: string,

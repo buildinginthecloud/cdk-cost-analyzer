@@ -18,6 +18,12 @@ export class ALBCalculator implements ResourceCostCalculator {
     return resourceType === 'AWS::ElasticLoadBalancingV2::LoadBalancer';
   }
 
+  canCalculate(resource: ResourceWithId): boolean {
+    // Only handle Application Load Balancers
+    const loadBalancerType = resource.properties?.Type;
+    return this.supports(resource.type) && loadBalancerType === 'application';
+  }
+
   async calculateCost(
     resource: ResourceWithId,
     region: string,
@@ -41,7 +47,7 @@ export class ALBCalculator implements ResourceCostCalculator {
         region: normalizeRegion(region),
         filters: [
           { field: 'productFamily', value: 'Load Balancer-Application' },
-          { field: 'usagetype', value: `${this.getRegionPrefix(region)}LoadBalancerUsage` },
+          { field: 'usagetype', value: `${this.getRegionPrefix(region)}-LoadBalancerUsage` },
         ],
       });
 
@@ -51,7 +57,7 @@ export class ALBCalculator implements ResourceCostCalculator {
         region: normalizeRegion(region),
         filters: [
           { field: 'productFamily', value: 'Load Balancer-Application' },
-          { field: 'usagetype', value: `${this.getRegionPrefix(region)}LCUUsage` },
+          { field: 'usagetype', value: `${this.getRegionPrefix(region)}-LCUUsage` },
         ],
       });
 

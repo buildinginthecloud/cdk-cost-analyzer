@@ -90,7 +90,13 @@ export class PricingService implements IPricingService {
       };
     }
 
-    const calculator = this.calculators.find(calc => calc.supports(resource.type));
+    // Find calculator using canCalculate if available, otherwise fall back to supports
+    const calculator = this.calculators.find(calc => {
+      if (calc.canCalculate) {
+        return calc.canCalculate(resource);
+      }
+      return calc.supports(resource.type);
+    });
 
     if (!calculator) {
       return {
