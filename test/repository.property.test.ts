@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+// Jest imports are global
 
 describe('Repository Structure - Property Tests', () => {
   const projectRoot = path.resolve(__dirname, '..');
