@@ -128,6 +128,7 @@ const project = new typescript.TypeScriptProject({
     'examples/*/custom.out/',
     'examples/*/*.out/',
     'test-cdk-project/',
+    'CHANGELOG.md', // Generated locally, not tracked in git - see GitHub releases for changelog
   ],
 
   // Release configuration
@@ -262,10 +263,8 @@ project.addTask('prepare', {
   exec: 'husky install',
 });
 
-// Note: CHANGELOG.md is generated in dist/changelog.md during release
-// and used for GitHub release notes. Due to branch protection rules,
-// we cannot automatically update CHANGELOG.md in the repository.
-// The changelog can be manually updated by copying dist/changelog.md
-// from the release artifacts if needed.
+// Note: CHANGELOG.md is generated during releases and published to GitHub Releases.
+// The repository does not track CHANGELOG.md - refer to GitHub Releases for version history:
+// https://github.com/buildinginthecloud/cdk-cost-analyzer/releases
 
 project.synth();
