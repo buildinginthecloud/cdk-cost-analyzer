@@ -3,6 +3,7 @@
 !/.projen/tasks.json
 !/.projen/deps.json
 !/.projen/files.json
+!/.mergify.yml
 !/package.json
 !/LICENSE
 !/.npmignore

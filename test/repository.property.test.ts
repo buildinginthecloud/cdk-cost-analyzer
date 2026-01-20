@@ -274,6 +274,7 @@ describe('Repository Structure - Property Tests', () => {
       '.gitlab-ci.yml', // GitLab CI configuration
       '.github', // GitHub Actions workflows
       '.husky', // Git hooks
+      '.mergify.yml', // Mergify configuration
       'tools', // Development tools and utilities
     ]);
 

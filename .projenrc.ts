@@ -96,7 +96,45 @@ const project = new typescript.TypeScriptProject({
   // GitHub configuration
   github: true,
   githubOptions: {
-    mergify: false,
+    mergify: true,
+    mergifyOptions: {
+      rules: [
+        {
+          name: 'Automatically merge projen updates',
+          conditions: [
+            'author=github-actions[bot]',
+            'title~=^chore\\(deps\\): upgrade dependencies',
+            'status-success=build',
+            'status-success=test',
+          ],
+          actions: {
+            merge: {
+              method: 'squash',
+              commitMessage: 'title+body',
+            },
+          },
+        },
+        {
+          name: 'Automatically approve and merge PRs from trusted sources',
+          conditions: [
+            'author~=^(github-actions\\[bot\\]|dependabot\\[bot\\])$',
+            'status-success=build',
+            'status-success=test',
+            '-title~=^(breaking|BREAKING)',
+          ],
+          actions: {
+            review: {
+              type: 'APPROVE',
+              message: 'Automatically approved by Mergify',
+            },
+            merge: {
+              method: 'squash',
+              commitMessage: 'title+body',
+            },
+          },
+        },
+      ],
+    },
     pullRequestLint: false,
   },
 
