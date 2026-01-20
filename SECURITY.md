@@ -111,7 +111,7 @@ We follow coordinated vulnerability disclosure:
 
 Security updates are released as patch versions and announced through:
 - GitHub Security Advisories
-- Release notes in CHANGELOG.md
+- Release notes on [GitHub Releases](https://github.com/buildinginthecloud/cdk-cost-analyzer/releases)
 - NPM package updates
 
 Subscribe to repository notifications to stay informed about security updates.
