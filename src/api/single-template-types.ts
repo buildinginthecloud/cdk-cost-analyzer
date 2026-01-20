@@ -1,4 +1,4 @@
-import { ResourceCost, MonthlyCost } from '../pricing/types';
+import { ResourceCost } from '../pricing/types';
 import { UsageAssumptionsConfig, CacheConfig } from '../config/types';
 
 /**

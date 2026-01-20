@@ -1,7 +1,6 @@
 import {
   SingleTemplateCostResult,
   SingleTemplateReportOptions,
-  EnhancedResourceCost,
 } from '../api/single-template-types';
 
 /**
