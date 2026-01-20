@@ -65,7 +65,7 @@ The GitHub Actions release workflow automatically:
    - `feat!:` or `BREAKING CHANGE:` → Major version (1.0.0 → 2.0.0)
    - `feat:` → Minor version (1.0.0 → 1.1.0)
    - `fix:` → Patch version (1.0.0 → 1.0.1)
-3. **Updates CHANGELOG.md** with categorized changes:
+3. **Generates changelog** with categorized changes:
    - Features
    - Bug Fixes
    - Documentation
@@ -89,7 +89,7 @@ gh run list --workflow=release
 
 ## Changelog Management
 
-The CHANGELOG.md is automatically updated by the release workflow using conventional commits.
+The changelog is automatically generated during releases and published to [GitHub Releases](https://github.com/buildinginthecloud/cdk-cost-analyzer/releases).
 
 ### Commit Type Mapping
 
@@ -102,13 +102,15 @@ Commits are categorized in the changelog as follows:
 - `perf:` → **Performance Improvements** section
 - `chore:`, `style:`, `test:` → Hidden (not in changelog)
 
-### Manual Changelog Updates
+### Viewing Changelog
 
-For special cases, you can manually update CHANGELOG.md:
+View the complete changelog at: https://github.com/buildinginthecloud/cdk-cost-analyzer/releases
 
-1. Add entries under the `[Unreleased]` section
-2. Commit with `docs: update changelog`
-3. The release workflow will preserve manual entries
+Each release includes:
+- Version number and release date
+- Categorized list of changes
+- Links to commits and pull requests
+- Breaking changes (if any)
 
 ## Manual Release Process
 
@@ -132,7 +134,7 @@ npm publish --access public
 1. Verify the package is available on NPM: https://www.npmjs.com/package/cdk-cost-analyzer
 2. Verify the GitHub release was created: https://github.com/buildinginthecloud/cdk-cost-analyzer/releases
 3. Test installation: `npm install -g cdk-cost-analyzer@X.Y.Z`
-4. Verify CHANGELOG.md was updated correctly
+4. Verify changelog was published to GitHub Releases
 5. Announce the release in relevant channels
 
 ## Rollback
@@ -169,11 +171,12 @@ If a release has critical issues:
 - Verify package name is not already taken
 - Check for version conflicts
 
-### CHANGELOG Not Updated
+### Changelog Not Published
 
-- Verify `.versionrc.json` configuration exists
-- Check conventional commit format is correct
+- Verify release workflow completed successfully
+- Check GitHub Releases page for the version
 - Review release workflow logs for errors
+- Ensure conventional commit format is correct
 
 ## Configuration
 
@@ -226,7 +229,7 @@ The `.versionrc.json` file configures how commits are categorized:
 - [ ] Commits follow conventional commit format
 - [ ] PR merged to main branch
 - [ ] Release workflow completed successfully
-- [ ] CHANGELOG.md automatically updated
+- [ ] Changelog published to GitHub Releases
 - [ ] Package published to NPM
 - [ ] GitHub release created
 - [ ] Installation tested: `npm install -g cdk-cost-analyzer@latest`
