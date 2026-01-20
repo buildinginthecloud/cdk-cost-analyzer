@@ -34,13 +34,13 @@ export class NatGatewayCalculator implements ResourceCostCalculator {
         region: normalizeRegion(region),
         filters: [
           { field: 'productFamily', value: 'NAT Gateway' },
-          { field: 'usagetype', value: `${regionPrefix}NatGateway-Hours` },
+          { field: 'usagetype', value: `${regionPrefix}-RegionalNatGateway-Hours` },
         ],
       });
 
       Logger.debug('NAT Gateway hourly rate retrieved', {
         hourlyRate,
-        usageType: `${regionPrefix}NatGateway-Hours`,
+        usageType: `${regionPrefix}-RegionalNatGateway-Hours`,
       });
 
       // Get data processing rate
@@ -49,13 +49,13 @@ export class NatGatewayCalculator implements ResourceCostCalculator {
         region: normalizeRegion(region),
         filters: [
           { field: 'productFamily', value: 'NAT Gateway' },
-          { field: 'usagetype', value: `${regionPrefix}NatGateway-Bytes` },
+          { field: 'usagetype', value: `${regionPrefix}-RegionalNatGateway-Bytes` },
         ],
       });
 
       Logger.debug('NAT Gateway data processing rate retrieved', {
         dataProcessingRate,
-        usageType: `${regionPrefix}NatGateway-Bytes`,
+        usageType: `${regionPrefix}-RegionalNatGateway-Bytes`,
       });
 
       if (hourlyRate === null || dataProcessingRate === null) {
