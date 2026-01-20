@@ -453,13 +453,16 @@ describe('ALBCalculator', () => {
         mockPricingClient.setHourlyRate(0.0225);
         mockPricingClient.setLCURate(0.008);
 
+        // Spy on the getPrice method to track calls
+        const getPriceSpy = jest.spyOn(mockPricingClient, 'getPrice');
+
         const resource = createApplicationLoadBalancer();
         
         // Test eu-central-1 which should use EUC1-LoadBalancerUsage format
         await calculator.calculateCost(resource, 'eu-central-1', mockPricingClient);
 
         // Verify the pricing client was called with the correct format
-        expect(mockPricingClient.getPrice).toHaveBeenCalledWith(
+        expect(getPriceSpy).toHaveBeenCalledWith(
           expect.objectContaining({
             filters: expect.arrayContaining([
               expect.objectContaining({
