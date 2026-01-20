@@ -1,6 +1,8 @@
 # CDK Cost Analyzer
 
-[![CI](https://github.com/buildinginthecloud/cdk-cost-analyzer/actions/workflows/test.yml/badge.svg)](https://github.com/buildinginthecloud/cdk-cost-analyzer/actions/workflows/test.yml)
+[![Test](https://github.com/buildinginthecloud/cdk-cost-analyzer/actions/workflows/test.yml/badge.svg)](https://github.com/buildinginthecloud/cdk-cost-analyzer/actions/workflows/test.yml)
+[![Build](https://github.com/buildinginthecloud/cdk-cost-analyzer/actions/workflows/build.yml/badge.svg)](https://github.com/buildinginthecloud/cdk-cost-analyzer/actions/workflows/build.yml)
+[![Release](https://github.com/buildinginthecloud/cdk-cost-analyzer/actions/workflows/release.yml/badge.svg)](https://github.com/buildinginthecloud/cdk-cost-analyzer/actions/workflows/release.yml)
 
 A TypeScript package that analyzes AWS CDK infrastructure changes and provides cost impact summaries. Compare CloudFormation templates to understand the financial implications of your infrastructure changes before deployment.
 

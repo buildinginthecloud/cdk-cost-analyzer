@@ -56,5 +56,6 @@ junit.xml
 /lib
 /dist/
 !/.eslintrc.json
+!/.mergify.yml
 !/.github/workflows/test.yml
 !/.projenrc.ts

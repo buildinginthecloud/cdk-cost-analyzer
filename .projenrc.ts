@@ -1,5 +1,7 @@
 import { typescript } from 'projen';
+import * as projen from 'projen';
 import { NodePackageManager, NpmAccess } from 'projen/lib/javascript';
+import { JobPermission } from 'projen/lib/github/workflows-model';
 
 const project = new typescript.TypeScriptProject({
   name: 'cdk-cost-analyzer',
@@ -95,7 +97,7 @@ const project = new typescript.TypeScriptProject({
   // GitHub configuration
   github: true,
   githubOptions: {
-    mergify: false,
+    mergify: false, // Disable default mergify to avoid conflicts
     pullRequestLint: false,
   },
 
@@ -158,6 +160,29 @@ const project = new typescript.TypeScriptProject({
     'validate:workflows': 'node tools/workflows/validate-workflows.js',
   },
 });
+
+// Add custom Mergify configuration
+if (project.github) {
+  new projen.github.Mergify(project.github, {
+    rules: [
+      {
+        name: 'Automatic merge on approval and successful build',
+        conditions: [
+          '#approved-reviews-by>=1',
+          '-label~=(do-not-merge)',
+          'status-success=build',
+          'status-success=test',
+        ],
+        actions: {
+          merge: {
+            method: 'squash',
+          },
+          delete_head_branch: {},
+        },
+      },
+    ],
+  });
+}
 
 // Override test command to use Jest with silent flag
 project.testTask.reset('jest --passWithNoTests --updateSnapshot --silent');
@@ -237,5 +262,66 @@ project.addTask('prepare', {
   description: 'Setup git hooks',
   exec: 'husky install',
 });
+
+// Add post-release task to update CHANGELOG.md in repository
+const postRelease = project.addTask('post-release', {
+  description: 'Update CHANGELOG.md after release',
+});
+
+postRelease.exec('cp dist/changelog.md CHANGELOG.md');
+postRelease.exec('git add CHANGELOG.md');
+postRelease.exec('git diff --staged --quiet || git commit -m "chore: update CHANGELOG.md [skip ci]"');
+postRelease.exec('git push');
+
+// Add the post-release task to the release workflow
+if (project.release) {
+  project.release.addJobs({
+    update_changelog: {
+      name: 'Update CHANGELOG',
+      needs: ['release_github'],
+      runsOn: ['ubuntu-latest'],
+      permissions: {
+        contents: JobPermission.WRITE,
+      },
+      if: "needs.release.outputs.tag_exists != 'true' && needs.release.outputs.latest_commit == github.sha",
+      steps: [
+        {
+          name: 'Checkout',
+          uses: 'actions/checkout@v5',
+          with: {
+            ref: 'main',
+            'fetch-depth': 0,
+          },
+        },
+        {
+          name: 'Set git identity',
+          run: [
+            'git config user.name "github-actions[bot]"',
+            'git config user.email "41898282+github-actions[bot]@users.noreply.github.com"',
+          ].join('\n'),
+        },
+        {
+          name: 'Setup Node.js',
+          uses: 'actions/setup-node@v5',
+          with: {
+            'node-version': '20.18.1',
+          },
+        },
+        {
+          name: 'Download build artifacts',
+          uses: 'actions/download-artifact@v5',
+          with: {
+            name: 'build-artifact',
+            path: 'dist',
+          },
+        },
+        {
+          name: 'Update CHANGELOG.md',
+          run: 'npx projen post-release',
+        },
+      ],
+    },
+  });
+}
 
 project.synth();

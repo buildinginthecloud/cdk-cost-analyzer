@@ -21,6 +21,7 @@
     "lint": "npx projen lint",
     "package": "npx projen package",
     "post-compile": "npx projen post-compile",
+    "post-release": "npx projen post-release",
     "post-upgrade": "npx projen post-upgrade",
     "pre-compile": "npx projen pre-compile",
     "prepare": "npx projen prepare",
