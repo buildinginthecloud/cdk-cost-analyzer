@@ -4,13 +4,13 @@ This document describes the release process for the CDK Cost Analyzer package.
 
 ## Overview
 
-The project uses Projen for package management and GitLab CI/CD for automated releases. Releases are triggered by pushing version tags to the repository.
+The project uses Projen for package management and GitHub Actions for automated releases. Releases are automatically triggered when changes are pushed to the main branch.
 
 ## Prerequisites
 
-- Maintainer access to the GitLab repository
+- Maintainer access to the GitHub repository
 - NPM account with publish permissions (for NPM releases)
-- NPM_TOKEN configured in GitLab CI/CD variables
+- NPM_TOKEN configured in GitHub repository secrets
 
 ## Release Types
 
@@ -22,92 +22,93 @@ Following [Semantic Versioning](https://semver.org/):
 
 ## Automated Release Process
 
-### 1. Prepare the Release
+The release process is fully automated using GitHub Actions and conventional commits.
 
-Ensure all changes are merged to the main branch and all tests pass:
+### 1. Use Conventional Commits
 
-```bash
-# Pull latest changes
-git checkout main
-git pull origin main
-
-# Verify tests pass
-npm run test
-
-# Verify build succeeds
-npm run build
-```
-
-### 2. Update CHANGELOG.md
-
-Update the CHANGELOG.md file with release notes:
-
-```markdown
-## [X.Y.Z] - YYYY-MM-DD
-
-### Added
-- New feature descriptions
-
-### Changed
-- Modified functionality descriptions
-
-### Fixed
-- Bug fix descriptions
-
-### Breaking Changes
-- Breaking change descriptions (for major versions)
-```
-
-Commit the changelog:
+All commits to the main branch should follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
 
 ```bash
-git add CHANGELOG.md
-git commit -m "docs: update changelog for vX.Y.Z"
-git push origin main
+# Features (triggers minor version bump)
+git commit -m "feat: add support for EKS pricing"
+git commit -m "feat(calculator): add RDS Aurora calculator"
+
+# Bug fixes (triggers patch version bump)
+git commit -m "fix: correct DynamoDB pricing filters"
+git commit -m "fix(api-gateway): resolve pricing lookup failures"
+
+# Breaking changes (triggers major version bump)
+git commit -m "feat!: change CLI argument structure"
+git commit -m "feat(api)!: remove deprecated methods"
+
+# Other types (no version bump)
+git commit -m "docs: update README with examples"
+git commit -m "chore: update dependencies"
+git commit -m "refactor: simplify pricing logic"
+git commit -m "test: add integration tests"
 ```
 
-### 3. Create Version Tag
+### 2. Merge to Main Branch
 
-Use Projen to bump the version and create a tag:
+When a pull request is merged to main:
+
+1. Ensure all tests pass
+2. Merge the PR
+3. The release workflow automatically triggers
+
+### 3. Automatic Release Workflow
+
+The GitHub Actions release workflow automatically:
+
+1. **Analyzes commits** since the last release
+2. **Determines version bump** based on conventional commits:
+   - `feat!:` or `BREAKING CHANGE:` → Major version (1.0.0 → 2.0.0)
+   - `feat:` → Minor version (1.0.0 → 1.1.0)
+   - `fix:` → Patch version (1.0.0 → 1.0.1)
+3. **Updates CHANGELOG.md** with categorized changes:
+   - Features
+   - Bug Fixes
+   - Documentation
+   - Code Refactoring
+   - Performance Improvements
+4. **Creates version tag** (e.g., v1.2.3)
+5. **Publishes to NPM** with the new version
+6. **Creates GitHub Release** with changelog notes
+
+### 4. Monitor Release
+
+Check the GitHub Actions workflow:
 
 ```bash
-# For patch version (1.0.0 -> 1.0.1)
-npm version patch -m "chore: release v%s"
+# View in browser
+gh workflow view release
 
-# For minor version (1.0.0 -> 1.1.0)
-npm version minor -m "feat: release v%s"
-
-# For major version (1.0.0 -> 2.0.0)
-npm version major -m "feat!: release v%s"
+# Or check latest run
+gh run list --workflow=release
 ```
 
-This will:
-- Update the version in package.json
-- Create a git commit
-- Create a git tag
+## Changelog Management
 
-### 4. Push Tag to Trigger Release
+The CHANGELOG.md is automatically updated by the release workflow using conventional commits.
 
-Push the tag to GitLab to trigger the release pipeline:
+### Commit Type Mapping
 
-```bash
-git push --follow-tags
-```
+Commits are categorized in the changelog as follows:
 
-### 5. Monitor Release Pipeline
+- `feat:` → **Features** section
+- `fix:` → **Bug Fixes** section
+- `docs:` → **Documentation** section
+- `refactor:` → **Code Refactoring** section
+- `perf:` → **Performance Improvements** section
+- `chore:`, `style:`, `test:` → Hidden (not in changelog)
 
-The GitLab CI/CD pipeline will automatically:
+### Manual Changelog Updates
 
-1. **Test Stage**: Run all tests and quality gates
-2. **Build Stage**: Compile and package the application
-3. **Release Stage**:
-   - Publish to GitLab Package Registry (automatic)
-   - Create GitLab Release with release notes (automatic)
-   - Publish to NPM (manual approval required)
+For special cases, you can manually update CHANGELOG.md:
 
-### 6. Approve NPM Publication
-
-Navigate to the GitLab pipeline and manually approve the `publish:npm` job to publish to the NPM registry.
+1. Add entries under the `[Unreleased]` section
+2. Commit with `docs: update changelog`
+3. The release workflow will preserve manual entries
 
 ## Manual Release Process
 
@@ -126,22 +127,13 @@ npm login
 npm publish --access public
 ```
 
-### Publish to GitLab Package Registry
-
-```bash
-# Configure GitLab Package Registry
-echo "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}" > .npmrc
-
-# Publish
-npm publish
-```
-
 ## Post-Release Tasks
 
 1. Verify the package is available on NPM: https://www.npmjs.com/package/cdk-cost-analyzer
-2. Verify the GitLab release was created: Project → Releases
+2. Verify the GitHub release was created: https://github.com/buildinginthecloud/cdk-cost-analyzer/releases
 3. Test installation: `npm install -g cdk-cost-analyzer@X.Y.Z`
-4. Announce the release in relevant channels
+4. Verify CHANGELOG.md was updated correctly
+5. Announce the release in relevant channels
 
 ## Rollback
 
@@ -158,48 +150,67 @@ If a release has critical issues:
 
 ## Troubleshooting
 
-### Pipeline Fails at Test Stage
+### Release Workflow Not Triggering
 
-- Review test failures in the pipeline logs
-- Fix issues locally and push fixes
-- Create a new tag after fixes are merged
+- Verify commits follow conventional commit format
+- Check that commits are pushed to main branch
+- Review GitHub Actions workflow logs
 
-### Pipeline Fails at Build Stage
+### No Version Bump
 
-- Check compilation errors in the pipeline logs
-- Verify TypeScript configuration
-- Ensure all dependencies are correctly specified
+- Ensure commits use `feat:` or `fix:` prefixes
+- Commits with `chore:`, `docs:`, `test:` don't trigger releases
+- Check that previous release tag exists
 
 ### NPM Publish Fails
 
-- Verify NPM_TOKEN is configured in GitLab CI/CD variables
+- Verify NPM_TOKEN is configured in GitHub repository secrets
 - Check NPM account has publish permissions
 - Verify package name is not already taken
 - Check for version conflicts
 
-### GitLab Package Registry Publish Fails
+### CHANGELOG Not Updated
 
-- Verify CI_JOB_TOKEN has correct permissions
-- Check GitLab Package Registry is enabled for the project
-- Verify package name follows GitLab naming conventions
+- Verify `.versionrc.json` configuration exists
+- Check conventional commit format is correct
+- Review release workflow logs for errors
 
 ## Configuration
 
-### GitLab CI/CD Variables
+### GitHub Repository Secrets
 
-Required variables for automated releases:
+Required secrets for automated releases:
 
 - `NPM_TOKEN`: NPM authentication token for publishing
-  - Scope: Protected
-  - Masked: Yes
-  - Environment: All
+  - Type: Repository secret
+  - Access: Actions
 
 ### NPM Token Setup
 
 1. Login to NPM: https://www.npmjs.com/
 2. Navigate to Access Tokens
 3. Generate new token with "Automation" type
-4. Add token to GitLab CI/CD variables as `NPM_TOKEN`
+4. Add token to GitHub repository secrets as `NPM_TOKEN`:
+   - Go to repository Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `NPM_TOKEN`
+   - Value: Your NPM token
+
+### Conventional Commits Configuration
+
+The `.versionrc.json` file configures how commits are categorized:
+
+```json
+{
+  "types": [
+    { "type": "feat", "section": "Features" },
+    { "type": "fix", "section": "Bug Fixes" },
+    { "type": "docs", "section": "Documentation" },
+    { "type": "refactor", "section": "Code Refactoring" },
+    { "type": "perf", "section": "Performance Improvements" }
+  ]
+}
+```
 
 ## Version Numbering Guidelines
 
@@ -211,13 +222,47 @@ Required variables for automated releases:
 
 ## Release Checklist
 
-- [ ] All tests pass locally
-- [ ] CHANGELOG.md updated
-- [ ] Version bumped appropriately
-- [ ] Tag created and pushed
-- [ ] Pipeline completed successfully
-- [ ] NPM publication approved (if applicable)
-- [ ] Package verified on NPM
-- [ ] GitLab release created
-- [ ] Installation tested
+- [ ] All tests pass in PR
+- [ ] Commits follow conventional commit format
+- [ ] PR merged to main branch
+- [ ] Release workflow completed successfully
+- [ ] CHANGELOG.md automatically updated
+- [ ] Package published to NPM
+- [ ] GitHub release created
+- [ ] Installation tested: `npm install -g cdk-cost-analyzer@latest`
 - [ ] Release announced
+
+## Commit Message Examples
+
+### Features
+
+```bash
+feat: add CloudWatch Logs pricing calculator
+feat(lambda): support provisioned concurrency pricing
+feat(cli): add --format json option for machine-readable output
+```
+
+### Bug Fixes
+
+```bash
+fix: correct NAT Gateway pricing calculation
+fix(dynamodb): resolve on-demand pricing lookup failures
+fix(cache): prevent stale pricing data
+```
+
+### Breaking Changes
+
+```bash
+feat!: change CLI output format to JSON by default
+
+BREAKING CHANGE: The default output format is now JSON instead of markdown.
+Use --format markdown for the previous behavior.
+```
+
+### Documentation
+
+```bash
+docs: add examples for multi-region deployments
+docs(readme): update installation instructions
+docs: fix typos in configuration guide
+```

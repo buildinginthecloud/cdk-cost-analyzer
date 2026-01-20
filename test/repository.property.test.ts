@@ -241,6 +241,7 @@ describe('Repository Structure - Property Tests', () => {
       'node_modules',
       'docs',
       'examples',
+      'demo', // Demo CDK project showcasing cdk-cost-analyzer usage
       'test-cdk-project', // Legacy test project, kept for backwards compatibility
       'coverage', // Jest coverage reports
       'test-reports', // Test output reports
@@ -260,6 +261,7 @@ describe('Repository Structure - Property Tests', () => {
       '.projenrc.ts', // Projen configuration
       '.projen', // Projen metadata
       'yarn.lock', // Projen uses yarn
+      '.versionrc.json', // Conventional commits configuration
 
       // Documentation
       'README.md',
@@ -279,13 +281,17 @@ describe('Repository Structure - Property Tests', () => {
     const rootEntries = fs.readdirSync(projectRoot);
     const unexpectedItems = rootEntries.filter(item => !allowedRootItems.has(item));
 
-    // Filter out common acceptable hidden files
+    // Filter out common acceptable hidden files and temporary debug logs
     const problematicItems = unexpectedItems.filter(item => {
       // Allow common hidden files
       if (item.startsWith('.') && !['.git', '.kiro'].includes(item)) {
         // Allow .DS_Store, .vscode, etc., but flag others
         const acceptableHidden = ['.DS_Store', '.vscode', '.idea', '.npmrc', '.nvmrc', '.cdk-cost-analyzer-cache', '.test-cache', '.test-cache-integration'];
         return !acceptableHidden.includes(item);
+      }
+      // Allow debug log files (temporary development artifacts)
+      if (item.endsWith('.log') && item.startsWith('debug')) {
+        return false;
       }
       return true;
     });

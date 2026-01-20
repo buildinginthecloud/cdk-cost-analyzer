@@ -1,0 +1,68 @@
+# .cdk-cost-analyzer.yml
+
+# Cost thresholds for pipeline enforcement
+thresholds:
+  # Default thresholds for all environments
+  default:
+    warning: 50  # USD per month - triggers warning but passes
+    error: 200   # USD per month - fails pipeline
+  
+  # Environment-specific thresholds
+  environments:
+    production:
+      warning: 25   # Stricter thresholds for production
+      error: 100
+    development:
+      warning: 100  # More lenient for development
+      error: 500
+
+# Custom usage assumptions for cost estimation
+usageAssumptions:
+  s3:
+    storageGB: 500
+    getRequests: 100000
+    putRequests: 10000
+  
+  lambda:
+    invocationsPerMonth: 5000000
+    averageDurationMs: 500
+  
+  ec2:
+    # Note: AutoScaling Groups are not automatically detected by cdk-cost-analyzer
+    # Manual cost calculation: 2 x t3.micro = $0.024/hour = ~$17.52/month
+    hoursPerMonth: 730
+  
+  natGateway:
+    dataProcessedGB: 500  # Data processed through NAT Gateway per month
+  
+  alb:
+    newConnectionsPerSecond: 50
+    activeConnectionsPerMinute: 5000
+    processedBytesGB: 1000
+  
+  nlb:
+    newConnectionsPerSecond: 100
+    activeConnectionsPerMinute: 10000
+    processedBytesGB: 1000
+  
+  vpcEndpoint:
+    dataProcessedGB: 100  # Data processed through interface endpoints
+  
+  cloudFront:
+    dataTransferGB: 100  # Data transfer out to internet per month
+    requests: 1000000    # HTTP/HTTPS requests per month
+  
+  apiGateway:
+    requestsPerMonth: 10000000
+
+# Resource types to exclude from cost analysis
+exclusions:
+  resourceTypes:
+    - AWS::IAM::Role
+    - AWS::IAM::Policy
+    - AWS::Logs::LogGroup
+
+# Pricing data cache configuration
+cache:
+  enabled: true
+  durationHours: 24

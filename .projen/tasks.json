@@ -33,6 +33,7 @@
         "BUMPFILE": "dist/version.txt",
         "RELEASETAG": "dist/releasetag.txt",
         "RELEASE_TAG_PREFIX": "",
+        "VERSIONRCOPTIONS": "{\"types\":[{\"type\":\"feat\",\"section\":\"Features\"},{\"type\":\"fix\",\"section\":\"Bug Fixes\"},{\"type\":\"chore\",\"hidden\":true},{\"type\":\"docs\",\"section\":\"Documentation\"},{\"type\":\"style\",\"hidden\":true},{\"type\":\"refactor\",\"section\":\"Code Refactoring\"},{\"type\":\"perf\",\"section\":\"Performance Improvements\"},{\"type\":\"test\",\"hidden\":true}]}",
         "BUMP_PACKAGE": "commit-and-tag-version@^12"
       },
       "steps": [
@@ -253,6 +254,7 @@
         "BUMPFILE": "dist/version.txt",
         "RELEASETAG": "dist/releasetag.txt",
         "RELEASE_TAG_PREFIX": "",
+        "VERSIONRCOPTIONS": "{\"types\":[{\"type\":\"feat\",\"section\":\"Features\"},{\"type\":\"fix\",\"section\":\"Bug Fixes\"},{\"type\":\"chore\",\"hidden\":true},{\"type\":\"docs\",\"section\":\"Documentation\"},{\"type\":\"style\",\"hidden\":true},{\"type\":\"refactor\",\"section\":\"Code Refactoring\"},{\"type\":\"perf\",\"section\":\"Performance Improvements\"},{\"type\":\"test\",\"hidden\":true}]}",
         "BUMP_PACKAGE": "commit-and-tag-version@^12"
       },
       "steps": [
