@@ -104,8 +104,8 @@ const project = new typescript.TypeScriptProject({
           conditions: [
             'author=github-actions[bot]',
             'title~=^chore\\(deps\\): upgrade dependencies',
-            'status-success=build',
-            'status-success=test',
+            'status-success=build/build (pull_request)',
+            'status-success=test/test (pull_request)',
           ],
           actions: {
             merge: {
@@ -118,8 +118,8 @@ const project = new typescript.TypeScriptProject({
           name: 'Automatically approve and merge PRs from trusted sources',
           conditions: [
             'author~=^(github-actions\\[bot\\]|dependabot\\[bot\\])$',
-            'status-success=build',
-            'status-success=test',
+            'status-success=build/build (pull_request)',
+            'status-success=test/test (pull_request)',
             '-title~=^(breaking|BREAKING)',
           ],
           actions: {
