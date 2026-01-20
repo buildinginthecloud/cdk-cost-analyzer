@@ -129,6 +129,20 @@ const project = new typescript.TypeScriptProject({
     'test-cdk-project/',
   ],
 
+  // Release configuration
+  versionrcOptions: {
+    types: [
+      { type: 'feat', section: 'Features' },
+      { type: 'fix', section: 'Bug Fixes' },
+      { type: 'chore', hidden: true },
+      { type: 'docs', section: 'Documentation' },
+      { type: 'style', hidden: true },
+      { type: 'refactor', section: 'Code Refactoring' },
+      { type: 'perf', section: 'Performance Improvements' },
+      { type: 'test', hidden: true },
+    ],
+  },
+
   // Disable default projen tasks we don't need
   projenrcTs: true,
 

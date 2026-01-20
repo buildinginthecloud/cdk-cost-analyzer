@@ -7,8 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Features
+- Add demo CDK project with ECS Fargate, bastion hosts, and serverless API
+
+### Documentation
+- Add GitHub CLI best practices steering document
+
+### Bug Fixes
+- Fix locale formatting in CustomAssumptions property test
+
 ### Security
 - Improved command execution security in CDK synthesis by using `shell: false` to prevent command injection vulnerabilities
+
+## [0.1.2] - 2025-01-20
+
+### Features
+- Add debug logging for pricing API calls with `--debug` flag
+- Add Logger utility class for consistent debug output
+- Add region normalization logging
+- Add cache status logging (memory/persistent)
+- Add comprehensive debug logging documentation
+
+### Changed
+- Upgrade dependencies to latest versions
+
+## [0.1.1] - 2024-12-11
+
+### Features
+- Enable npm release workflow
+- Add GitHub Actions workflow validation with act pre-commit hook
+- Migrate from Vitest to Jest and improve projen configuration
+- Add dedicated test workflow for GitHub Actions status checks
+
+### Bug Fixes
+- Update package name to unscoped cdk-cost-analyzer
+- Increase property test timeouts for CDK synthesis from 15s to 30s
+- Enforce npm version consistency in CI workflow
+- Pin Node.js version to 20.18.1 in GitHub Actions workflows
+- Ensure npm ci is used consistently in GitHub Actions
+- Add example project dependencies installation to build workflow
+
+### Changed
+- Clean up temporary CDK output files and artifacts
+- Remove temporary log files
+- Exclude CDK output directories from version control
+
+### Security
+- Fix security vulnerability in CDK synthesis process
 
 ## [0.1.0] - 2024-12-10
 
@@ -45,5 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AWS::ElastiCache::CacheCluster
 - AWS::EC2::VPCEndpoint
 
-[Unreleased]: https://github.com/buildinginthecloud/cdk-cost-analyzer/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/buildinginthecloud/cdk-cost-analyzer/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/buildinginthecloud/cdk-cost-analyzer/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/buildinginthecloud/cdk-cost-analyzer/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/buildinginthecloud/cdk-cost-analyzer/releases/tag/v0.1.0

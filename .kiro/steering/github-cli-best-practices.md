@@ -39,19 +39,16 @@ gh issue create \
 gh issue create --title "Fix bug" --body "The `$variable` doesn't work"
 ```
 
-**DO use simple bodies or heredoc for complex content:**
+**DO use simple bodies:**
 ```bash
 # GOOD - Simple body
 gh issue create --title "Fix bug" --body "Variable expansion fails in calculator" --label "bug"
 
-# GOOD - Heredoc for complex content
-gh issue create --title "Fix bug" --label "bug" --body - << 'EOF'
-The calculator fails when:
-- Using $variables
-- Backticks in code: `example`
-- Multiple lines
-EOF
+# GOOD - Use single quotes for special characters
+gh issue create --title "Fix bug" --body 'The calculator fails with $variables and backticks' --label "bug"
 ```
+
+**AVOID heredoc (EOF) syntax - it can cause issues in some environments**
 
 ### Label Management
 
@@ -82,8 +79,8 @@ gh issue create --title "Title" --body "Body" --label "bug,documentation"
 **Keep it simple for CLI:**
 - Use plain text without special formatting
 - Avoid backticks, dollar signs, quotes in CLI body
-- Use heredoc (<<) for complex content
-- Or create issue first, then edit in browser
+- For complex content, use --web flag to open browser editor
+- Or create issue first with simple body, then edit in browser
 
 **Example - Simple approach:**
 ```bash
@@ -93,20 +90,10 @@ gh issue create \
   --label "enhancement"
 ```
 
-**Example - Heredoc for complex content:**
+**Example - Complex content:**
 ```bash
-gh issue create --title "Fix NAT Gateway pricing" --label "bug" --body - << 'EOF'
-## Problem
-NAT Gateway shows $0.00 instead of expected cost.
-
-## Test Case
-- Resource: AWS::EC2::NatGateway
-- Region: eu-central-1
-- Expected: ~$33/month
-
-## Solution
-Fix pricing query filters.
-EOF
+# Use --web flag to open browser for complex formatting
+gh issue create --title "Fix NAT Gateway pricing" --label "bug" --web
 ```
 
 ## Creating Pull Requests
@@ -177,15 +164,10 @@ gh pr list --author "@me"
 gh issue comment 26 --body "Working on this now"
 
 # Long comment with special characters - use single quotes
-gh issue comment 26 --body 'Fixed the $variable issue. The `calculator` now works correctly.'
+gh issue comment 26 --body 'Fixed the $variable issue. The calculator now works correctly.'
 
-# Multi-line comment - use heredoc
-gh issue comment 26 --body - << 'EOF'
-Update on progress:
-- Fixed pricing queries
-- Added tests
-- Ready for review
-EOF
+# For multi-line comments, keep them simple or use --web flag
+gh issue comment 26 --body 'Update: Fixed pricing queries, added tests, ready for review'
 ```
 
 ### Add Comment to PR
@@ -209,18 +191,13 @@ gh issue comment 26 --body 'The $variable and `code` work now'
 gh issue comment 26 --body "The $variable and `code` work now"
 ```
 
-**Use heredoc for long multi-line comments:**
+**For long multi-line comments, keep them simple:**
 ```bash
-gh issue comment 26 --body - << 'EOF'
-Completed the following:
-1. Fixed NAT Gateway pricing ($33/month)
-2. Added debug logging with `--debug` flag
-3. Updated tests
+# Keep it concise in a single line
+gh issue comment 26 --body 'Completed: Fixed NAT Gateway pricing, added debug logging, updated tests. Next: Review PR and update docs.'
 
-Next steps:
-- Review PR #27
-- Update documentation
-EOF
+# Or use --web flag to open browser for complex formatting
+gh issue comment 26 --web
 ```
 
 ## Closing and Reopening
@@ -320,25 +297,24 @@ cd /path/to/correct/repo
 
 **Error: Shell escaping issues with body text**
 ```bash
-# Solution: Use heredoc or simpler body text
-gh issue create --title "Title" --label "bug" --body - << 'EOF'
-Complex body with $special characters
-EOF
+# Solution: Use single quotes or --web flag
+gh issue create --title "Title" --label "bug" --body 'Complex body with special characters'
+# Or use --web flag to open browser
+gh issue create --title "Title" --label "bug" --web
 ```
 
 ## Best Practices Summary
 
 1. **Always verify auth status** before operations
 2. **Check available labels** before using them
-3. **Keep CLI bodies simple** - use heredoc for complex content
-4. **Avoid special characters** in CLI strings (use heredoc instead)
-5. **Use single quotes** for strings with special characters ($, `, ", etc.)
-6. **Use single quotes** for heredoc delimiter to prevent expansion
-7. **Test with one issue** before bulk operations
-8. **Use --web flag** for complex issue creation
-9. **Link issues and PRs** with "Fixes #123" or "Closes #123"
-10. **Check repository context** with `gh repo view`
-11. **Use issue templates** when available
+3. **Keep CLI bodies simple** - use --web flag for complex content
+4. **Use single quotes** for strings with special characters ($, `, ", etc.)
+5. **NEVER use heredoc (EOF) syntax** - it can crash some environments
+6. **Test with one issue** before bulk operations
+7. **Use --web flag** for complex issue creation or editing
+8. **Link issues and PRs** with "Fixes #123" or "Closes #123"
+9. **Check repository context** with `gh repo view`
+10. **Use issue templates** when available
 
 ## Integration with Workflow
 
