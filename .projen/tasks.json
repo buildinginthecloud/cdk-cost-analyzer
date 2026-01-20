@@ -179,24 +179,6 @@
       "name": "post-compile",
       "description": "Runs after successful compilation"
     },
-    "post-release": {
-      "name": "post-release",
-      "description": "Update CHANGELOG.md after release",
-      "steps": [
-        {
-          "exec": "cp dist/changelog.md CHANGELOG.md"
-        },
-        {
-          "exec": "git add CHANGELOG.md"
-        },
-        {
-          "exec": "git diff --staged --quiet || git commit -m \"chore: update CHANGELOG.md [skip ci]\""
-        },
-        {
-          "exec": "git push"
-        }
-      ]
-    },
     "post-upgrade": {
       "name": "post-upgrade",
       "description": "Runs after upgrading dependencies"

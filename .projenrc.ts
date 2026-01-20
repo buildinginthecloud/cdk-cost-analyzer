@@ -1,7 +1,6 @@
 import { typescript } from 'projen';
 import * as projen from 'projen';
 import { NodePackageManager, NpmAccess } from 'projen/lib/javascript';
-import { JobPermission } from 'projen/lib/github/workflows-model';
 
 const project = new typescript.TypeScriptProject({
   name: 'cdk-cost-analyzer',
@@ -263,65 +262,10 @@ project.addTask('prepare', {
   exec: 'husky install',
 });
 
-// Add post-release task to update CHANGELOG.md in repository
-const postRelease = project.addTask('post-release', {
-  description: 'Update CHANGELOG.md after release',
-});
-
-postRelease.exec('cp dist/changelog.md CHANGELOG.md');
-postRelease.exec('git add CHANGELOG.md');
-postRelease.exec('git diff --staged --quiet || git commit -m "chore: update CHANGELOG.md [skip ci]"');
-postRelease.exec('git push');
-
-// Add the post-release task to the release workflow
-if (project.release) {
-  project.release.addJobs({
-    update_changelog: {
-      name: 'Update CHANGELOG',
-      needs: ['release_github'],
-      runsOn: ['ubuntu-latest'],
-      permissions: {
-        contents: JobPermission.WRITE,
-      },
-      if: "needs.release.outputs.tag_exists != 'true' && needs.release.outputs.latest_commit == github.sha",
-      steps: [
-        {
-          name: 'Checkout',
-          uses: 'actions/checkout@v5',
-          with: {
-            ref: 'main',
-            'fetch-depth': 0,
-          },
-        },
-        {
-          name: 'Set git identity',
-          run: [
-            'git config user.name "github-actions[bot]"',
-            'git config user.email "41898282+github-actions[bot]@users.noreply.github.com"',
-          ].join('\n'),
-        },
-        {
-          name: 'Setup Node.js',
-          uses: 'actions/setup-node@v5',
-          with: {
-            'node-version': '20.18.1',
-          },
-        },
-        {
-          name: 'Download build artifacts',
-          uses: 'actions/download-artifact@v5',
-          with: {
-            name: 'build-artifact',
-            path: 'dist',
-          },
-        },
-        {
-          name: 'Update CHANGELOG.md',
-          run: 'npx projen post-release',
-        },
-      ],
-    },
-  });
-}
+// Note: CHANGELOG.md is generated in dist/changelog.md during release
+// and used for GitHub release notes. Due to branch protection rules,
+// we cannot automatically update CHANGELOG.md in the repository.
+// The changelog can be manually updated by copying dist/changelog.md
+// from the release artifacts if needed.
 
 project.synth();
