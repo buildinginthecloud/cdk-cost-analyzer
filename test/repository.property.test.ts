@@ -261,7 +261,6 @@ describe('Repository Structure - Property Tests', () => {
       '.projenrc.ts', // Projen configuration
       '.projen', // Projen metadata
       'yarn.lock', // Projen uses yarn
-      '.versionrc.json', // Conventional commits configuration
 
       // Documentation
       'README.md',
