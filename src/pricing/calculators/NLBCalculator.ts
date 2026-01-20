@@ -18,6 +18,12 @@ export class NLBCalculator implements ResourceCostCalculator {
     return resourceType === 'AWS::ElasticLoadBalancingV2::LoadBalancer';
   }
 
+  canCalculate(resource: ResourceWithId): boolean {
+    // Only handle Network Load Balancers
+    const loadBalancerType = resource.properties?.Type;
+    return this.supports(resource.type) && loadBalancerType === 'network';
+  }
+
   async calculateCost(
     resource: ResourceWithId,
     region: string,
@@ -41,7 +47,7 @@ export class NLBCalculator implements ResourceCostCalculator {
         region: normalizeRegion(region),
         filters: [
           { field: 'productFamily', value: 'Load Balancer-Network' },
-          { field: 'usagetype', value: `${this.getRegionPrefix(region)}LoadBalancerUsage` },
+          { field: 'usagetype', value: `${this.getRegionPrefix(region)}-LoadBalancerUsage` },
         ],
       });
 
@@ -51,7 +57,7 @@ export class NLBCalculator implements ResourceCostCalculator {
         region: normalizeRegion(region),
         filters: [
           { field: 'productFamily', value: 'Load Balancer-Network' },
-          { field: 'usagetype', value: `${this.getRegionPrefix(region)}LCUUsage` },
+          { field: 'usagetype', value: `${this.getRegionPrefix(region)}-LCUUsage` },
         ],
       });
 
