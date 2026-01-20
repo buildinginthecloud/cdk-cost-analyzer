@@ -34,13 +34,13 @@ export class NatGatewayCalculator implements ResourceCostCalculator {
         region: normalizeRegion(region),
         filters: [
           { field: 'productFamily', value: 'NAT Gateway' },
-          { field: 'usagetype', value: `${regionPrefix}-NatGateway-Hours` },
+          { field: 'usagetype', value: `${regionPrefix}NatGateway-Hours` },
         ],
       });
 
       Logger.debug('NAT Gateway hourly rate retrieved', {
         hourlyRate,
-        usageType: `${regionPrefix}-NatGateway-Hours`,
+        usageType: `${regionPrefix}NatGateway-Hours`,
       });
 
       // Get data processing rate
@@ -49,13 +49,13 @@ export class NatGatewayCalculator implements ResourceCostCalculator {
         region: normalizeRegion(region),
         filters: [
           { field: 'productFamily', value: 'NAT Gateway' },
-          { field: 'usagetype', value: `${regionPrefix}-NatGateway-Bytes` },
+          { field: 'usagetype', value: `${regionPrefix}NatGateway-Bytes` },
         ],
       });
 
       Logger.debug('NAT Gateway data processing rate retrieved', {
         dataProcessingRate,
-        usageType: `${regionPrefix}-NatGateway-Bytes`,
+        usageType: `${regionPrefix}NatGateway-Bytes`,
       });
 
       if (hourlyRate === null || dataProcessingRate === null) {
@@ -127,7 +127,7 @@ export class NatGatewayCalculator implements ResourceCostCalculator {
 
   private getRegionPrefix(region: string): string {
     // AWS uses region prefixes in usage types for NAT Gateway
-    // Format: {PREFIX}-NatGateway-Hours or {PREFIX}-NatGateway-Bytes
+    // Format: {PREFIX}NatGateway-Hours or {PREFIX}NatGateway-Bytes
     // Reference: https://cur.vantage.sh/aws/nat-gateways/
     const prefixMap: Record<string, string> = {
       // US Regions
