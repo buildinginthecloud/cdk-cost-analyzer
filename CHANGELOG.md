@@ -9,12 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Features
 - Add demo CDK project with ECS Fargate, bastion hosts, and serverless API
+- Add integration test for NAT Gateway pricing with real AWS API calls
+- Add discovery tool for exploring AWS Pricing API NAT Gateway responses
+
+### Bug Fixes
+- Fix NAT Gateway calculator region prefix format for AWS Pricing API queries
+  - Changed usageType format from `{PREFIX}NatGateway-Hours` to `{PREFIX}-NatGateway-Hours`
+  - Changed usageType format from `{PREFIX}NatGateway-Bytes` to `{PREFIX}-NatGateway-Bytes`
+  - Fixes pricing detection for eu-central-1 and other regions
+  - NAT Gateway costs now show correct monthly estimates (~$37/month for eu-central-1 with 100GB data)
+- Fix locale formatting in CustomAssumptions property test
+
+### Changed
+- Expand NAT Gateway region prefix mappings to include all AWS commercial and government regions
+- Add comprehensive debug logging to NAT Gateway calculator for pricing queries and calculations
 
 ### Documentation
 - Add GitHub CLI best practices steering document
-
-### Bug Fixes
-- Fix locale formatting in CustomAssumptions property test
+- Add NAT Gateway testing and debugging guide
+- Add NAT Gateway pricing example with debug logging
 
 ### Security
 - Improved command execution security in CDK synthesis by using `shell: false` to prevent command injection vulnerabilities
