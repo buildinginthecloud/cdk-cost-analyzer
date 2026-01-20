@@ -2,7 +2,7 @@
 
 import * as fs from 'fs';
 import { Command } from 'commander';
-import { analyzeCosts } from '../api';
+import { analyzeCosts, analyzeSingleTemplate } from '../api';
 import { GitLabIntegration } from '../integrations/GitLabIntegration';
 import { PipelineOrchestrator } from '../pipeline/PipelineOrchestrator';
 import { Logger } from '../utils/Logger';
@@ -13,6 +13,57 @@ program
   .name('cdk-cost-analyzer')
   .description('Analyze AWS CDK infrastructure changes and provide cost impact summaries')
   .version('1.0.0');
+
+// New analyze command for single template analysis
+program
+  .command('analyze')
+  .description('Analyze a single CloudFormation template for estimated costs')
+  .argument('<template>', 'Path to CloudFormation template')
+  .option('--region <region>', 'AWS region for pricing', 'eu-central-1')
+  .option('--format <format>', 'Output format: text|json|markdown', 'text')
+  .option('--config <path>', 'Path to configuration file')
+  .option('--debug', 'Enable verbose debug logging for pricing API calls')
+  .action(async (templatePath: string, options: { region: string; format: string; config?: string; debug?: boolean }) => {
+    try {
+      // Enable debug logging if flag is set
+      if (options.debug) {
+        Logger.setDebugEnabled(true);
+        Logger.debug('Debug logging enabled');
+      }
+
+      // Check if template file exists
+      if (!fs.existsSync(templatePath)) {
+        console.error(`Error: Template file not found: ${templatePath}`);
+        process.exit(1);
+      }
+
+      // Read the template
+      const template = fs.readFileSync(templatePath, 'utf-8');
+
+      // Analyze the template
+      const result = await analyzeSingleTemplate({
+        template,
+        region: options.region,
+        format: options.format as 'text' | 'json' | 'markdown',
+      });
+
+      // Output the results
+      if (options.format === 'json') {
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        console.log(result.summary);
+      }
+
+      process.exit(0);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(`Error: ${error.message}`);
+      } else {
+        console.error(`Error: ${String(error)}`);
+      }
+      process.exit(1);
+    }
+  });
 
 // Original command for direct template comparison
 program

@@ -8,6 +8,7 @@ A TypeScript package that analyzes AWS CDK infrastructure changes and provides c
 
 ## Key Features
 
+- **Single Template Analysis**: Analyze individual CloudFormation templates for estimated monthly costs without comparison
 - **Template Comparison**: Parse and diff CloudFormation templates (JSON/YAML) to identify added, removed, and modified resources
 - **Cost Estimation**: Calculate monthly costs for AWS resources using real-time AWS Pricing API data
 - **Automatic CDK Synthesis**: Optionally synthesize CDK applications in CI/CD pipelines
@@ -20,6 +21,7 @@ A TypeScript package that analyzes AWS CDK infrastructure changes and provides c
 
 ## Use Cases
 
+- Analyze single CloudFormation templates for cost estimation
 - Analyze infrastructure changes in GitLab merge requests
 - Estimate costs before deploying CDK applications
 - Enforce cost approval gates in CI/CD pipelines
@@ -47,8 +49,15 @@ npm install cdk-cost-analyzer
 ### CLI Usage
 
 ```bash
+# Analyze a single CloudFormation template
+cdk-cost-analyzer analyze template.json --region us-east-1
+
+# Analyze with different output formats
+cdk-cost-analyzer analyze template.yaml --format markdown
+cdk-cost-analyzer analyze template.json --format json
+
 # Compare two CloudFormation templates
-cdk-cost-analyzer base-template.json target-template.json --region eu-central-1
+cdk-cost-analyzer compare base-template.json target-template.json --region eu-central-1
 
 # Use pipeline command with automatic synthesis
 cdk-cost-analyzer pipeline \
@@ -61,10 +70,12 @@ cdk-cost-analyzer pipeline \
 cdk-cost-analyzer compare base.yaml target.yaml --region us-east-1 --format markdown
 
 # Enable debug logging to troubleshoot pricing issues
+cdk-cost-analyzer analyze template.yaml --debug
 cdk-cost-analyzer compare base.yaml target.yaml --debug
 
 # Show help
 cdk-cost-analyzer --help
+cdk-cost-analyzer analyze --help
 ```
 
 ### Debug Logging
@@ -209,6 +220,25 @@ The GitHub Actions workflow automatically runs on every push and pull request, e
 ### Programmatic Usage
 
 See [examples/api-usage.js](examples/api-usage.js) for a complete working example.
+
+#### Analyze a Single Template
+
+```typescript
+import { analyzeSingleTemplate } from 'cdk-cost-analyzer';
+
+const result = await analyzeSingleTemplate({
+  template: templateContent,  // CloudFormation template (JSON or YAML string)
+  region: 'us-east-1',
+  format: 'text'  // or 'json', 'markdown'
+});
+
+console.log(`Total monthly cost: $${result.totalMonthlyCost.toFixed(2)} ${result.currency}`);
+console.log(`Total resources: ${result.metadata.resourceCount}`);
+console.log(`Supported resources: ${result.metadata.supportedResourceCount}`);
+console.log(result.summary); // Formatted report
+```
+
+#### Compare Two Templates
 
 ```typescript
 import { analyzeCosts } from 'cdk-cost-analyzer';

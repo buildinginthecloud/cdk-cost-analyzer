@@ -1,0 +1,1 @@
+export { SingleTemplateAnalyzer } from './SingleTemplateAnalyzer';
