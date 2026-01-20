@@ -1,4 +1,5 @@
 import { typescript } from 'projen';
+import * as projen from 'projen';
 import { NodePackageManager, NpmAccess } from 'projen/lib/javascript';
 import { JobPermission } from 'projen/lib/github/workflows-model';
 
@@ -96,7 +97,7 @@ const project = new typescript.TypeScriptProject({
   // GitHub configuration
   github: true,
   githubOptions: {
-    mergify: false,
+    mergify: false, // Disable default mergify to avoid conflicts
     pullRequestLint: false,
   },
 
@@ -159,6 +160,29 @@ const project = new typescript.TypeScriptProject({
     'validate:workflows': 'node tools/workflows/validate-workflows.js',
   },
 });
+
+// Add custom Mergify configuration
+if (project.github) {
+  new projen.github.Mergify(project.github, {
+    rules: [
+      {
+        name: 'Automatic merge on approval and successful build',
+        conditions: [
+          '#approved-reviews-by>=1',
+          '-label~=(do-not-merge)',
+          'status-success=build',
+          'status-success=test',
+        ],
+        actions: {
+          merge: {
+            method: 'squash',
+          },
+          delete_head_branch: {},
+        },
+      },
+    ],
+  });
+}
 
 // Override test command to use Jest with silent flag
 project.testTask.reset('jest --passWithNoTests --updateSnapshot --silent');
