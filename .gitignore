@@ -3,7 +3,6 @@
 !/.projen/tasks.json
 !/.projen/deps.json
 !/.projen/files.json
-!/.mergify.yml
 !/package.json
 !/LICENSE
 !/.npmignore
@@ -57,5 +56,6 @@ junit.xml
 /lib
 /dist/
 !/.eslintrc.json
+!/.mergify.yml
 !/.github/workflows/test.yml
 !/.projenrc.ts
