@@ -6,6 +6,11 @@ export class LambdaCalculator implements ResourceCostCalculator {
   private readonly DEFAULT_INVOCATIONS = 1000000;
   private readonly DEFAULT_DURATION_MS = 1000;
   private readonly DEFAULT_MEMORY_MB = 128;
+  
+  // Fallback pricing rates (AWS Lambda us-east-1 pricing as of 2024)
+  // Used when API pricing is unavailable but user provided usage assumptions
+  private readonly FALLBACK_REQUEST_PRICE = 0.20; // Per 1M requests
+  private readonly FALLBACK_COMPUTE_PRICE = 0.0000166667; // Per GB-second
 
   constructor(
     private readonly customInvocationsPerMonth?: number,
@@ -56,6 +61,33 @@ export class LambdaCalculator implements ResourceCostCalculator {
       }
 
       if (requestPrice === null || computePrice === null) {
+        // If user provided custom usage assumptions, use fallback pricing
+        // Otherwise return 0 (pricing not available)
+        const hasCustomAssumptions = this.customInvocationsPerMonth !== undefined || 
+                                     this.customAverageDurationMs !== undefined;
+        
+        if (hasCustomAssumptions) {
+          // Use fallback pricing to provide estimate
+          const effectiveRequestPrice = requestPrice ?? this.FALLBACK_REQUEST_PRICE;
+          const effectiveComputePrice = computePrice ?? this.FALLBACK_COMPUTE_PRICE;
+          
+          const requestCost = (invocations / 1000000) * effectiveRequestPrice;
+          const gbSeconds = (memorySize / 1024) * (durationMs / 1000) * invocations;
+          const computeCost = gbSeconds * effectiveComputePrice;
+          const totalCost = requestCost + computeCost;
+          
+          return {
+            amount: totalCost,
+            currency: 'USD',
+            confidence: 'low',
+            assumptions: [
+              requestPrice === null ? 'Using fallback request pricing (API unavailable)' : '',
+              computePrice === null ? 'Using fallback compute pricing (API unavailable)' : '',
+              ...assumptions,
+            ].filter(a => a !== ''),
+          };
+        }
+        
         return {
           amount: 0,
           currency: 'USD',
@@ -93,6 +125,29 @@ export class LambdaCalculator implements ResourceCostCalculator {
       }
       if (this.customAverageDurationMs !== undefined) {
         assumptions.push('Using custom duration assumption from configuration');
+      }
+
+      // If user provided custom usage assumptions, use fallback pricing
+      // Otherwise return 0 (pricing API failed)
+      const hasCustomAssumptions = this.customInvocationsPerMonth !== undefined || 
+                                   this.customAverageDurationMs !== undefined;
+      
+      if (hasCustomAssumptions) {
+        // Use fallback pricing to provide estimate even when API fails
+        const requestCost = (invocations / 1000000) * this.FALLBACK_REQUEST_PRICE;
+        const gbSeconds = (memorySize / 1024) * (durationMs / 1000) * invocations;
+        const computeCost = gbSeconds * this.FALLBACK_COMPUTE_PRICE;
+        const totalCost = requestCost + computeCost;
+        
+        return {
+          amount: totalCost,
+          currency: 'USD',
+          confidence: 'low',
+          assumptions: [
+            'Using fallback pricing (API error)',
+            ...assumptions.slice(1), // Skip the "Failed to fetch" message, already covered
+          ],
+        };
       }
 
       return {

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Command } from 'commander';
-// Jest imports are global
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { analyzeCosts } from '../../src/api';
 
 // Mock the API module
@@ -50,7 +50,7 @@ describe('CLI Unit Tests', () => {
     jest.clearAllMocks();
 
     // Setup default mock implementation
-    (analyzeCosts as any).mockResolvedValue({
+    jest.mocked(analyzeCosts).mockResolvedValue({
       totalDelta: 10.5,
       currency: 'USD',
       addedResources: [],
@@ -326,7 +326,7 @@ describe('CLI Unit Tests', () => {
     });
 
     // Mock analyzeCosts to throw error for invalid region
-    (analyzeCosts as any).mockRejectedValueOnce(new Error('Invalid region: invalid-region-123'));
+    jest.mocked(analyzeCosts).mockRejectedValueOnce(new Error('Invalid region: invalid-region-123'));
 
     try {
       const program = new Command();
@@ -622,7 +622,7 @@ describe('CLI Unit Tests', () => {
     });
 
     // Mock analyzeCosts to throw an error
-    (analyzeCosts as any).mockRejectedValueOnce(new Error('Failed to parse template'));
+    jest.mocked(analyzeCosts).mockRejectedValueOnce(new Error('Failed to parse template'));
 
     try {
       const program = new Command();
@@ -911,7 +911,7 @@ describe('CLI Unit Tests', () => {
     }
 
     expect(analyzeCosts).toHaveBeenCalled();
-    const callArgs = (analyzeCosts as any).mock.calls[0][0];
+    const callArgs = jest.mocked(analyzeCosts).mock.calls[0][0];
     expect(callArgs.region).toBe('eu-central-1');
   });
 
@@ -984,7 +984,7 @@ describe('CLI Unit Tests', () => {
     }
 
     expect(analyzeCosts).toHaveBeenCalled();
-    const callArgs = (analyzeCosts as any).mock.calls[0][0];
+    const callArgs = jest.mocked(analyzeCosts).mock.calls[0][0];
     expect(callArgs.format).toBe('text');
   });
 });

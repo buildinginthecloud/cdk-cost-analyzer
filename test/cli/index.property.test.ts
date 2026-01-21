@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as fc from 'fast-check';
-// Jest imports are global
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { analyzeCosts } from '../../src/api';
 
 // Mock the analyzeCosts function to track region parameter
@@ -48,7 +48,7 @@ describe('CLI - Property Tests', () => {
     jest.clearAllMocks();
 
     // Setup default mock implementation
-    (analyzeCosts as any).mockResolvedValue({
+    jest.mocked(analyzeCosts).mockResolvedValue({
       totalDelta: 0,
       currency: 'USD',
       addedResources: [],
@@ -129,7 +129,7 @@ describe('CLI - Property Tests', () => {
 
         // Verify analyzeCosts was called with the provided region
         expect(analyzeCosts).toHaveBeenCalled();
-        const callArgs = (analyzeCosts as any).mock.calls[0][0];
+        const callArgs = jest.mocked(analyzeCosts).mock.calls[0][0];
         expect(callArgs.region).toBe(region);
       }),
       { numRuns: 100 },
@@ -187,7 +187,7 @@ describe('CLI - Property Tests', () => {
 
           try {
             // Mock analyzeCosts to return valid result
-            (analyzeCosts as any).mockResolvedValueOnce({
+            jest.mocked(analyzeCosts).mockResolvedValueOnce({
               totalDelta: 10.5,
               currency: 'USD',
               addedResources: [],

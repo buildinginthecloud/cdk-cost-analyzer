@@ -1,5 +1,5 @@
 import * as fc from 'fast-check';
-// Jest imports are global
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { PricingClient } from '../../src/pricing/PricingClient';
 
 describe('Credential Detection - Property Tests', () => {
