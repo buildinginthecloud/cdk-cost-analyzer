@@ -68,8 +68,8 @@ export class SingleTemplateReporter {
 
     // Resource counts
     report += `Total Resources: ${result.metadata.resourceCount}\n`;
-    report += `  Supported: ${result.metadata.supportedResourceCount}\n`;
-    report += `  Unsupported: ${result.metadata.unsupportedResourceCount}\n\n`;
+    report += `Supported Resources: ${result.metadata.supportedResourceCount}\n`;
+    report += `Unsupported Resources: ${result.metadata.unsupportedResourceCount}\n\n`;
 
     // Cost breakdown by confidence
     if (result.costBreakdown.byConfidenceLevel.length > 0) {
