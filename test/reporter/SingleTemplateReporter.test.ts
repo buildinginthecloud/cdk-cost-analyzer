@@ -269,7 +269,7 @@ describe('SingleTemplateReporter', () => {
       const reporter = new SingleTemplateReporter();
       const report = reporter.generateReport(resultWithUnsupported, 'text');
 
-      expect(report).toContain('Unsupported: 1');
+      expect(report).toContain('Unsupported Resources: 1');
     });
   });
 });
