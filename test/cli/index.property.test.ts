@@ -1,12 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as fc from 'fast-check';
-import { describe, it, expect, beforeEach, afterEach@jest/globals '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { analyzeCosts } from '../../src/api';
 
 // Mock the analyzeCosts function to track region parameter
-vi.mock('../../src/api', () => ({
-  analyzeCosts: vi.fn(),
+jest.mock('../../src/api', () => ({
+  analyzeCosts: jest.fn(),
 }));
 
 describe('CLI - Property Tests', () => {
@@ -45,10 +45,10 @@ describe('CLI - Property Tests', () => {
     fs.writeFileSync(targetTemplatePath, JSON.stringify(targetTemplate, null, 2));
 
     // Reset mock before each test
-    vi.clearAllMocks();
+    jest.clearAllMocks();
 
     // Setup default mock implementation
-    vi.mocked(analyzeCosts).mockResolvedValue({
+    jest.mocked(analyzeCosts).mockResolvedValue({
       totalDelta: 0,
       currency: 'USD',
       addedResources: [],
@@ -93,7 +93,7 @@ describe('CLI - Property Tests', () => {
     await fc.assert(
       fc.asyncProperty(awsRegionArb, async (region) => {
         // Clear mock calls before each property test iteration
-        vi.clearAllMocks();
+        jest.clearAllMocks();
 
         // Dynamically import the CLI module to execute it
         const { Command } = await import('commander');
@@ -129,7 +129,7 @@ describe('CLI - Property Tests', () => {
 
         // Verify analyzeCosts was called with the provided region
         expect(analyzeCosts).toHaveBeenCalled();
-        const callArgs = vi.mocked(analyzeCosts).mock.calls[0][0];
+        const callArgs = jest.mocked(analyzeCosts).mock.calls[0][0];
         expect(callArgs.region).toBe(region);
       }),
       { numRuns: 100 },
@@ -173,21 +173,21 @@ describe('CLI - Property Tests', () => {
           // Mock console.log to capture stdout
           const originalLog = console.log;
           let stdoutOutput = '';
-          console.log = vi.fn((message: string) => {
+          console.log = jest.fn((message: string) => {
             stdoutOutput += message + '\n';
           });
 
           // Mock process.exit to prevent actual exit
           const originalExit = process.exit;
           let exitCode: number | undefined;
-          (process.exit as any) = vi.fn((code?: number) => {
+          (process.exit as any) = jest.fn((code?: number) => {
             exitCode = code || 0;
             throw new Error('EXIT_CALLED'); // Throw to stop execution
           });
 
           try {
             // Mock analyzeCosts to return valid result
-            vi.mocked(analyzeCosts).mockResolvedValueOnce({
+            jest.mocked(analyzeCosts).mockResolvedValueOnce({
               totalDelta: 10.5,
               currency: 'USD',
               addedResources: [],
@@ -270,14 +270,14 @@ describe('CLI - Property Tests', () => {
         // Mock console.error to capture stderr
         const originalError = console.error;
         let stderrOutput = '';
-        console.error = vi.fn((...args: any[]) => {
+        console.error = jest.fn((...args: any[]) => {
           stderrOutput += args.join(' ') + '\n';
         });
 
         // Mock process.exit to prevent actual exit
         const originalExit = process.exit;
         let exitCode: number | undefined;
-        (process.exit as any) = vi.fn((code?: number) => {
+        (process.exit as any) = jest.fn((code?: number) => {
           exitCode = code || 0;
           throw new Error('EXIT_CALLED'); // Throw to stop execution
         });
@@ -388,14 +388,14 @@ describe('CLI - Property Tests', () => {
           // Mock console.error to capture stderr
           const originalError = console.error;
           let stderrOutput = '';
-          console.error = vi.fn((...args: any[]) => {
+          console.error = jest.fn((...args: any[]) => {
             stderrOutput += args.join(' ') + '\n';
           });
 
           // Mock process.exit to prevent actual exit
           const originalExit = process.exit;
           let exitCode: number | undefined;
-          (process.exit as any) = vi.fn((code?: number) => {
+          (process.exit as any) = jest.fn((code?: number) => {
             exitCode = code || 0;
             throw new Error('EXIT_CALLED');
           });
