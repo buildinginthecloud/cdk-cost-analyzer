@@ -77,6 +77,10 @@ const project = new typescript.TypeScriptProject({
       testTimeout: 30000, // 30 second default timeout
       forceExit: true, // Force exit to prevent hanging
       detectOpenHandles: true, // Detect open handles that prevent Jest from exiting
+      testEnvironmentOptions: {
+        // Enable experimental VM modules for AWS SDK v3 dynamic imports
+        customExportConditions: ['node', 'node-addons'],
+      },
     },
   },
   sampleCode: false,
@@ -154,8 +158,8 @@ const project = new typescript.TypeScriptProject({
 
   // Additional scripts
   scripts: {
-    'test:watch': 'jest --watch',
-    'test:silent': 'jest --silent',
+    'test:watch': 'NODE_OPTIONS="--experimental-vm-modules" jest --watch',
+    'test:silent': 'NODE_OPTIONS="--experimental-vm-modules" jest --silent',
     'ci:local': 'npm ci --prefix examples/single-stack && npm ci --prefix examples/multi-stack && npm run lint && npm run test:silent',
     'validate:workflows': 'node tools/workflows/validate-workflows.js',
   },
@@ -184,8 +188,8 @@ if (project.github) {
   });
 }
 
-// Override test command to use Jest with silent flag
-project.testTask.reset('jest --passWithNoTests --updateSnapshot --silent');
+// Override test command to use Jest with experimental VM modules for AWS SDK v3
+project.testTask.reset('NODE_OPTIONS="--experimental-vm-modules" jest --passWithNoTests --updateSnapshot --silent');
 
 // Add lint task
 project.addTask('lint', {

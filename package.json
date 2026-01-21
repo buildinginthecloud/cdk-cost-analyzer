@@ -91,6 +91,12 @@
     "testTimeout": 30000,
     "forceExit": true,
     "detectOpenHandles": true,
+    "testEnvironmentOptions": {
+      "customExportConditions": [
+        "node",
+        "node-addons"
+      ]
+    },
     "testMatch": [
       "<rootDir>/@(src|test)/**/*(*.)@(spec|test).ts?(x)",
       "<rootDir>/@(src|test)/**/__tests__/**/*.ts?(x)",

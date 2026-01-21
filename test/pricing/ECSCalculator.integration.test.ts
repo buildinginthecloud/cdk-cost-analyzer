@@ -1,31 +1,34 @@
 import { PricingClient } from '../../src/pricing/PricingClient';
-import { NatGatewayCalculator } from '../../src/pricing/calculators/NatGatewayCalculator';
+import { ECSCalculator } from '../../src/pricing/calculators/ECSCalculator';
 import { Logger } from '../../src/utils/Logger';
 
 /**
- * Integration test for NAT Gateway pricing with actual AWS Pricing API
+ * Integration test for ECS Fargate pricing with actual AWS Pricing API
  * 
  * This test validates:
  * - Correct region prefix generation for eu-central-1
- * - Correct filter combinations for NAT Gateway pricing queries
+ * - Correct filter combinations for Fargate vCPU and memory pricing queries
  * - Expected pricing data matches AWS Pricing Calculator
  * - Debug logging captures pricing queries and responses
  * 
  * Expected pricing for eu-central-1:
- * - Hourly rate: ~$0.045/hour
- * - Data processing: ~$0.045/GB
- * - Monthly cost with 100GB data: ~$33-37/month
+ * - vCPU: ~$0.0466/vCPU-hour
+ * - Memory: ~$0.0051/GB-hour
+ * - Monthly cost (0.25 vCPU, 0.5 GB, 2 tasks): ~$20-22/month
  * 
- * To run: npm test -- NatGatewayCalculator.integration.test.ts
- * To run with debug logging: DEBUG=true npm test -- NatGatewayCalculator.integration.test.ts
+ * To run: npm test -- ECSCalculator.integration.test.ts
+ * To run with debug logging: DEBUG=true npm test -- ECSCalculator.integration.test.ts
  */
-describe('NatGatewayCalculator - AWS API Integration', () => {
+describe('ECSCalculator - AWS API Integration', () => {
   let pricingClient: PricingClient;
   const testRegion = 'eu-central-1';
   const testResource = {
-    logicalId: 'TestNatGateway',
-    type: 'AWS::EC2::NatGateway',
-    properties: {},
+    logicalId: 'TestECSService',
+    type: 'AWS::ECS::Service',
+    properties: {
+      LaunchType: 'FARGATE',
+      DesiredCount: 2,
+    },
   };
 
   beforeAll(() => {
@@ -55,8 +58,8 @@ describe('NatGatewayCalculator - AWS API Integration', () => {
   // Skip this test in CI unless explicitly enabled
   const testMode = process.env.RUN_INTEGRATION_TESTS === 'true' ? it : it.skip;
 
-  testMode('should fetch real NAT Gateway hourly pricing for eu-central-1', async () => {
-    const calculator = new NatGatewayCalculator();
+  testMode('should fetch real ECS Fargate pricing for eu-central-1', async () => {
+    const calculator = new ECSCalculator();
     
     const cost = await calculator.calculateCost(testResource, testRegion, pricingClient);
 
@@ -66,18 +69,18 @@ describe('NatGatewayCalculator - AWS API Integration', () => {
     
     // If pricing was found, validate it's reasonable
     if (cost.amount > 0) {
-      // NAT Gateway costs should be positive
+      // ECS Fargate costs should be positive
       expect(cost.amount).toBeGreaterThan(0);
       
-      // For eu-central-1 with 100GB data processing:
-      // Hourly: 0.045 * 730 = 32.85
-      // Data: 0.045 * 100 = 4.50
-      // Total: ~37.35
-      // Allow 20% variance: 29.88 - 44.82
-      const expectedMin = 29.0;
-      const expectedMax = 45.0;
+      // For eu-central-1 with 0.25 vCPU, 0.5 GB, 2 tasks:
+      // vCPU: 0.0466 * 0.25 * 730 * 2 = 17.01
+      // Memory: 0.0051 * 0.5 * 730 * 2 = 3.72
+      // Total: ~20.73
+      // Allow 15% variance: 17.62 - 23.84
+      const expectedMin = 17.0;
+      const expectedMax = 24.0;
       
-      console.log('NAT Gateway pricing breakdown:');
+      console.log('ECS Fargate pricing breakdown:');
       console.log(`Total monthly cost: $${cost.amount.toFixed(2)}`);
       cost.assumptions.forEach(assumption => console.log(`  - ${assumption}`));
       
@@ -85,50 +88,55 @@ describe('NatGatewayCalculator - AWS API Integration', () => {
       expect(cost.amount).toBeLessThanOrEqual(expectedMax);
       expect(cost.confidence).toBe('medium');
       
-      // Verify assumptions include both hourly and data processing
+      // Verify assumptions include both vCPU and memory
       const assumptionText = cost.assumptions.join(' ').toLowerCase();
-      expect(assumptionText).toMatch(/hour/);
-      expect(assumptionText).toMatch(/data|processing|gb/);
+      expect(assumptionText).toMatch(/vcpu|cpu/);
+      expect(assumptionText).toMatch(/memory|gb/);
+      expect(assumptionText).toMatch(/fargate/);
     } else {
       // If pricing is 0, it means pricing lookup failed
-      console.warn('NAT Gateway pricing lookup failed:');
+      console.warn('ECS Fargate pricing lookup failed:');
       cost.assumptions.forEach(assumption => console.warn(`  - ${assumption}`));
       
       // This indicates the region prefix or filters are incorrect
       expect(cost.confidence).toBe('unknown');
-      throw new Error('NAT Gateway pricing should be available for eu-central-1. Check region prefix and filters.');
+      throw new Error('ECS Fargate pricing should be available for eu-central-1. Check region prefix and filters.');
     }
   }, 30000); // Increase timeout for API calls
 
-  testMode('should fetch real NAT Gateway data processing pricing for eu-central-1', async () => {
-    // Test with custom data processing to validate that component
-    const calculator = new NatGatewayCalculator(500); // 500GB data processing
+  testMode('should handle different task sizes', async () => {
+    // Test with different desired count
+    const largerResource = {
+      ...testResource,
+      properties: {
+        ...testResource.properties,
+        DesiredCount: 5,
+      },
+    };
     
-    const cost = await calculator.calculateCost(testResource, testRegion, pricingClient);
+    const calculator = new ECSCalculator();
+    const cost = await calculator.calculateCost(largerResource, testRegion, pricingClient);
 
     // Verify we got pricing data
     expect(cost).toBeDefined();
     
     if (cost.amount > 0) {
-      // With 500GB data processing:
-      // Hourly: 0.045 * 730 = 32.85
-      // Data: 0.045 * 500 = 22.50
-      // Total: ~55.35
-      // Allow variance
-      const expectedMin = 50.0;
-      const expectedMax = 65.0;
+      // With 5 tasks, cost should be roughly 2.5x the 2-task cost
+      // Expected: ~52/month
+      const expectedMin = 42.0;
+      const expectedMax = 60.0;
       
-      console.log('NAT Gateway pricing with 500GB data:');
+      console.log('ECS Fargate pricing with 5 tasks:');
       console.log(`Total monthly cost: $${cost.amount.toFixed(2)}`);
       
       expect(cost.amount).toBeGreaterThanOrEqual(expectedMin);
       expect(cost.amount).toBeLessThanOrEqual(expectedMax);
       
-      // Verify assumptions mention the 500GB
+      // Verify assumptions mention the 5 tasks
       const assumptionText = cost.assumptions.join(' ');
-      expect(assumptionText).toContain('500');
+      expect(assumptionText).toContain('5');
     } else {
-      throw new Error('NAT Gateway pricing should be available for eu-central-1');
+      throw new Error('ECS Fargate pricing should be available for eu-central-1');
     }
   }, 30000);
 
@@ -138,7 +146,7 @@ describe('NatGatewayCalculator - AWS API Integration', () => {
     Logger.setDebugEnabled(true);
 
     try {
-      const calculator = new NatGatewayCalculator();
+      const calculator = new ECSCalculator();
       await calculator.calculateCost(testResource, testRegion, pricingClient);
       
       // If we reach here, the query executed (whether successful or not)
@@ -153,25 +161,39 @@ describe('NatGatewayCalculator - AWS API Integration', () => {
     // This test will help us discover the correct region prefix format
     // by attempting to fetch pricing and examining the results
     
-    const calculator = new NatGatewayCalculator(0); // Zero data processing to isolate hourly rate
+    const calculator = new ECSCalculator();
     const cost = await calculator.calculateCost(testResource, testRegion, pricingClient);
 
     if (cost.amount > 0) {
       // Successfully got pricing, so region prefix is correct
-      // Hourly cost only (no data processing)
-      // Expected: ~32.85 but actual may be higher due to pricing changes
-      // Allow for 30% variance to account for AWS pricing updates
-      const hourlyOnlyCost = 0.045 * 730; // ~32.85
-      expect(cost.amount).toBeGreaterThan(hourlyOnlyCost * 0.9); // At least 90% of expected
-      expect(cost.amount).toBeLessThan(hourlyOnlyCost * 1.5); // No more than 150% of expected
       console.log(`Verified region prefix works for eu-central-1: $${cost.amount.toFixed(2)}`);
+      expect(cost.confidence).toBe('medium');
     } else {
       console.error('Failed to get pricing. Possible issues:');
       console.error('1. Region prefix is incorrect');
       console.error('2. UsageType filter format is wrong');
       console.error('3. ProductFamily filter is incorrect');
       cost.assumptions.forEach(assumption => console.error(`  - ${assumption}`));
-      throw new Error('Unable to fetch NAT Gateway pricing - check region prefix and filters');
+      throw new Error('Unable to fetch ECS Fargate pricing - check region prefix and filters');
     }
+  }, 30000);
+
+  testMode('should handle EC2 launch type', async () => {
+    const ec2Resource = {
+      logicalId: 'TestECSService',
+      type: 'AWS::ECS::Service',
+      properties: {
+        LaunchType: 'EC2',
+        DesiredCount: 3,
+      },
+    };
+    
+    const calculator = new ECSCalculator();
+    const cost = await calculator.calculateCost(ec2Resource, testRegion, pricingClient);
+
+    // EC2 launch type should return 0 with low confidence
+    expect(cost.amount).toBe(0);
+    expect(cost.confidence).toBe('low');
+    expect(cost.assumptions).toContain('3 task(s) running on EC2 launch type');
   }, 30000);
 });
