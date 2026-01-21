@@ -228,7 +228,7 @@ describe('Single Template Analysis - Property Tests', () => {
             const result = await analyzeSingleTemplate({
               template: JSON.stringify(template),
               region: input.region,
-              format: input.format,
+              format: input.format as 'text' | 'json' | 'markdown',
             });
 
             // Check consistent structure

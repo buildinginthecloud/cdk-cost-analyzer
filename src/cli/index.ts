@@ -16,9 +16,8 @@ program
 
 // New analyze command for single template analysis
 program
-  .command('analyze')
+  .command('analyze <template>')
   .description('Analyze a single CloudFormation template for estimated costs')
-  .argument('<template>', 'Path to CloudFormation template')
   .option('--region <region>', 'AWS region for pricing', 'eu-central-1')
   .option('--format <format>', 'Output format: text|json|markdown', 'text')
   .option('--config <path>', 'Path to configuration file')
@@ -47,12 +46,8 @@ program
         format: options.format as 'text' | 'json' | 'markdown',
       });
 
-      // Output the results
-      if (options.format === 'json') {
-        console.log(JSON.stringify(result, null, 2));
-      } else {
-        console.log(result.summary);
-      }
+      // Output the results (summary already contains formatted output)
+      console.log(result.summary);
 
       process.exit(0);
     } catch (error) {
@@ -257,64 +252,6 @@ program
       if (result.thresholdStatus.level === 'error' && !result.thresholdStatus.passed) {
         console.error('Pipeline failed: Cost threshold exceeded');
         process.exit(2);
-      }
-
-      process.exit(0);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(`Error: ${error.message}`);
-      } else {
-        console.error(`Error: ${String(error)}`);
-      }
-      process.exit(1);
-    }
-  });
-
-// Default to compare command for backward compatibility
-program
-  .argument('[base]', 'Path to base CloudFormation template')
-  .argument('[target]', 'Path to target CloudFormation template')
-  .option('--region <region>', 'AWS region', 'eu-central-1')
-  .option('--format <format>', 'Output format: text|json|markdown', 'text')
-  .option('--config <path>', 'Path to configuration file')
-  .option('--debug', 'Enable verbose debug logging for pricing API calls')
-  .action(async (basePath?: string, targetPath?: string, options?: { region: string; format: string; config?: string; debug?: boolean }) => {
-    if (!basePath || !targetPath) {
-      program.help();
-      return;
-    }
-
-    try {
-      // Enable debug logging if flag is set
-      if (options?.debug) {
-        Logger.setDebugEnabled(true);
-        Logger.debug('Debug logging enabled');
-      }
-
-      if (!fs.existsSync(basePath)) {
-        console.error(`Error: Base template file not found: ${basePath}`);
-        process.exit(1);
-      }
-
-      if (!fs.existsSync(targetPath)) {
-        console.error(`Error: Target template file not found: ${targetPath}`);
-        process.exit(1);
-      }
-
-      const baseTemplate = fs.readFileSync(basePath, 'utf-8');
-      const targetTemplate = fs.readFileSync(targetPath, 'utf-8');
-
-      const result = await analyzeCosts({
-        baseTemplate,
-        targetTemplate,
-        region: options?.region || 'eu-central-1',
-        format: (options?.format as 'text' | 'json' | 'markdown') || 'text',
-      });
-
-      if (options?.format === 'json') {
-        console.log(JSON.stringify(result, null, 2));
-      } else {
-        console.log(result.summary);
       }
 
       process.exit(0);

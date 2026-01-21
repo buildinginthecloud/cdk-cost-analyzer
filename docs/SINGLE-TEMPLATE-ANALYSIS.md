@@ -369,4 +369,4 @@ rm -rf .cdk-cost-analyzer-cache
 - [Configuration Guide](../docs/CONFIGURATION.md)
 - [Calculator Reference](../docs/CALCULATORS.md)
 - [Troubleshooting Guide](../docs/TROUBLESHOOTING.md)
-- [API Examples](./single-template-usage.js)
+- [API Examples](../examples/api-usage.js)

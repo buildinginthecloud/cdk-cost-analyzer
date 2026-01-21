@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Command } from 'commander';
-// Jest imports are global
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { analyzeCosts } from '../../src/api';
 
 // Mock the API module
@@ -47,10 +47,10 @@ describe('CLI Unit Tests', () => {
     fs.writeFileSync(invalidTemplatePath, 'invalid json content');
 
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Setup default mock implementation
-    (analyzeCosts as any).mockResolvedValue({
+    vi.mocked(analyzeCosts).mockResolvedValue({
       totalDelta: 10.5,
       currency: 'USD',
       addedResources: [],
@@ -80,11 +80,11 @@ describe('CLI Unit Tests', () => {
       }
     }
 
-    console.log = jest.fn((message: string) => {
+    console.log = vi.fn((message: string) => {
       stdoutOutput += message + '\n';
     });
 
-    (process.exit as any) = jest.fn((code?: number) => {
+    (process.exit as any) = vi.fn((code?: number) => {
       exitCode = code || 0;
       throw new ExitError(code || 0);
     });
@@ -161,11 +161,11 @@ describe('CLI Unit Tests', () => {
     let stderrOutput = '';
     let exitCode: number | undefined;
 
-    console.error = jest.fn((...args: any[]) => {
+    console.error = vi.fn((...args: any[]) => {
       stderrOutput += args.join(' ') + '\n';
     });
 
-    (process.exit as any) = jest.fn((code?: number) => {
+    (process.exit as any) = vi.fn((code?: number) => {
       exitCode = code || 0;
       throw new Error('EXIT_CALLED');
     });
@@ -238,11 +238,11 @@ describe('CLI Unit Tests', () => {
     let stderrOutput = '';
     let exitCode: number | undefined;
 
-    console.error = jest.fn((...args: any[]) => {
+    console.error = vi.fn((...args: any[]) => {
       stderrOutput += args.join(' ') + '\n';
     });
 
-    (process.exit as any) = jest.fn((code?: number) => {
+    (process.exit as any) = vi.fn((code?: number) => {
       exitCode = code || 0;
       throw new Error('EXIT_CALLED');
     });
@@ -316,17 +316,17 @@ describe('CLI Unit Tests', () => {
     let stderrOutput = '';
     let exitCode: number | undefined;
 
-    console.error = jest.fn((...args: any[]) => {
+    console.error = vi.fn((...args: any[]) => {
       stderrOutput += args.join(' ') + '\n';
     });
 
-    (process.exit as any) = jest.fn((code?: number) => {
+    (process.exit as any) = vi.fn((code?: number) => {
       exitCode = code || 0;
       throw new Error('EXIT_CALLED');
     });
 
     // Mock analyzeCosts to throw error for invalid region
-    (analyzeCosts as any).mockRejectedValueOnce(new Error('Invalid region: invalid-region-123'));
+    vi.mocked(analyzeCosts).mockRejectedValueOnce(new Error('Invalid region: invalid-region-123'));
 
     try {
       const program = new Command();
@@ -437,11 +437,11 @@ describe('CLI Unit Tests', () => {
       }
     }
 
-    console.log = jest.fn((message: string) => {
+    console.log = vi.fn((message: string) => {
       stdoutOutput += message + '\n';
     });
 
-    (process.exit as any) = jest.fn((code?: number) => {
+    (process.exit as any) = vi.fn((code?: number) => {
       exitCode = code || 0;
       throw new ExitError(code || 0);
     });
@@ -525,11 +525,11 @@ describe('CLI Unit Tests', () => {
       }
     }
 
-    console.log = jest.fn((message: string) => {
+    console.log = vi.fn((message: string) => {
       stdoutOutput += message + '\n';
     });
 
-    (process.exit as any) = jest.fn((code?: number) => {
+    (process.exit as any) = vi.fn((code?: number) => {
       exitCode = code || 0;
       throw new ExitError(code || 0);
     });
@@ -612,17 +612,17 @@ describe('CLI Unit Tests', () => {
     let stderrOutput = '';
     let exitCode: number | undefined;
 
-    console.error = jest.fn((...args: any[]) => {
+    console.error = vi.fn((...args: any[]) => {
       stderrOutput += args.join(' ') + '\n';
     });
 
-    (process.exit as any) = jest.fn((code?: number) => {
+    (process.exit as any) = vi.fn((code?: number) => {
       exitCode = code || 0;
       throw new Error('EXIT_CALLED');
     });
 
     // Mock analyzeCosts to throw an error
-    (analyzeCosts as any).mockRejectedValueOnce(new Error('Failed to parse template'));
+    vi.mocked(analyzeCosts).mockRejectedValueOnce(new Error('Failed to parse template'));
 
     try {
       const program = new Command();
@@ -699,9 +699,9 @@ describe('CLI Unit Tests', () => {
       }
     }
 
-    console.log = jest.fn();
+    console.log = vi.fn();
 
-    (process.exit as any) = jest.fn((code?: number) => {
+    (process.exit as any) = vi.fn((code?: number) => {
       exitCode = code || 0;
       throw new ExitError(code || 0);
     });
@@ -775,9 +775,9 @@ describe('CLI Unit Tests', () => {
     const originalExit = process.exit;
     let exitCode: number | undefined;
 
-    console.error = jest.fn();
+    console.error = vi.fn();
 
-    (process.exit as any) = jest.fn((code?: number) => {
+    (process.exit as any) = vi.fn((code?: number) => {
       exitCode = code || 0;
       throw new Error('EXIT_CALLED');
     });
@@ -847,9 +847,9 @@ describe('CLI Unit Tests', () => {
     const originalLog = console.log;
     const originalExit = process.exit;
 
-    console.log = jest.fn();
+    console.log = vi.fn();
 
-    (process.exit as any) = jest.fn((_code?: number) => {
+    (process.exit as any) = vi.fn((_code?: number) => {
       throw new Error('EXIT_CALLED');
     });
 
@@ -911,7 +911,7 @@ describe('CLI Unit Tests', () => {
     }
 
     expect(analyzeCosts).toHaveBeenCalled();
-    const callArgs = (analyzeCosts as any).mock.calls[0][0];
+    const callArgs = vi.mocked(analyzeCosts).mock.calls[0][0];
     expect(callArgs.region).toBe('eu-central-1');
   });
 
@@ -920,9 +920,9 @@ describe('CLI Unit Tests', () => {
     const originalLog = console.log;
     const originalExit = process.exit;
 
-    console.log = jest.fn();
+    console.log = vi.fn();
 
-    (process.exit as any) = jest.fn((_code?: number) => {
+    (process.exit as any) = vi.fn((_code?: number) => {
       throw new Error('EXIT_CALLED');
     });
 
@@ -984,7 +984,7 @@ describe('CLI Unit Tests', () => {
     }
 
     expect(analyzeCosts).toHaveBeenCalled();
-    const callArgs = (analyzeCosts as any).mock.calls[0][0];
+    const callArgs = vi.mocked(analyzeCosts).mock.calls[0][0];
     expect(callArgs.format).toBe('text');
   });
 });
