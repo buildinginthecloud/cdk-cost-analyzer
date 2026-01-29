@@ -1,18 +1,24 @@
 #!/usr/bin/env node
 
 import * as fs from 'fs';
+import * as path from 'path';
 import { Command } from 'commander';
 import { analyzeCosts, analyzeSingleTemplate } from '../api';
 import { GitLabIntegration } from '../integrations/GitLabIntegration';
 import { PipelineOrchestrator } from '../pipeline/PipelineOrchestrator';
 import { Logger } from '../utils/Logger';
 
+// Read version from package.json
+const packageJsonPath = path.join(__dirname, '../../package.json');
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+const version = packageJson.version || '0.0.0';
+
 const program = new Command();
 
 program
   .name('cdk-cost-analyzer')
   .description('Analyze AWS CDK infrastructure changes and provide cost impact summaries')
-  .version('1.0.0');
+  .version(version);
 
 // New analyze command for single template analysis
 program
