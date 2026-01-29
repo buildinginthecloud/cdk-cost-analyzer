@@ -12,164 +12,578 @@ This guide covers integrating CDK Cost Analyzer into your CI/CD pipelines for au
 
 ## GitHub Actions
 
-### Basic Setup
+### Basic Cost Analysis Workflow
 
-Create `.github/workflows/ci.yml`:
+Create `.github/workflows/cost-analysis.yml`:
 
 ```yaml
-name: CI
+name: Cost Analysis
 
 on:
-  push:
-    branches: ['**']
   pull_request:
-    branches: ['**']
+    branches: [main]
+    paths:
+      - 'infrastructure/**'
+      - 'cdk.json'
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
-  test:
+  analyze-costs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for comparison
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install CDK Cost Analyzer
+        run: npm install -g cdk-cost-analyzer
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Synthesize base template
+        run: |
+          git checkout ${{ github.event.pull_request.base.sha }}
+          cd infrastructure
+          npx cdk synth --all --output ../cdk.out.base
+
+      - name: Synthesize target template
+        run: |
+          git checkout ${{ github.event.pull_request.head.sha }}
+          cd infrastructure
+          npx cdk synth --all --output ../cdk.out.target
+
+      - name: Analyze cost changes
+        id: cost-analysis
+        run: |
+          cdk-cost-analyzer compare \
+            cdk.out.base/MyStack.template.json \
+            cdk.out.target/MyStack.template.json \
+            --region us-east-1 \
+            --format markdown > cost-report.md
+
+      - name: Comment PR with cost analysis
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('cost-report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+```
+
+### Using Pipeline Command with Synthesis
+
+For automatic CDK synthesis:
+
+```yaml
+name: Cost Analysis
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  analyze-costs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '20.x'
           cache: 'npm'
-      - run: npm ci
-      - run: npm run eslint
-      - run: npm run lint
-      - run: npm run build
-      - run: npm run test:silent
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install CDK Cost Analyzer
+        run: npm install -g cdk-cost-analyzer
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Run cost analysis
+        id: cost-analysis
+        run: |
+          cdk-cost-analyzer pipeline \
+            --synth \
+            --cdk-app-path ./infrastructure \
+            --region us-east-1 \
+            --config .cdk-cost-analyzer.yml \
+            --format markdown > cost-report.md
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('cost-report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+```
+
+### Single Template Analysis
+
+Analyze a single template without comparison:
+
+```yaml
+name: Cost Estimation
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  estimate-costs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install CDK Cost Analyzer
+        run: npm install -g cdk-cost-analyzer
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Analyze template
+        run: |
+          cdk-cost-analyzer analyze infrastructure/template.json \
+            --region us-east-1 \
+            --format markdown > cost-estimate.md
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('cost-estimate.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
 ```
 
 ### Configuration Options
+
+#### AWS Credentials Setup
+
+**Important**: CDK Cost Analyzer requires AWS credentials to query the AWS Pricing API for real-time cost data. Without valid credentials, the tool cannot fetch pricing information.
+
+**Required IAM Permissions**:
+
+The AWS credentials must have permission to call the Pricing API:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "pricing:GetProducts",
+        "pricing:DescribeServices"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+**GitHub Repository Secrets**:
+
+Store AWS credentials as GitHub repository secrets:
+
+1. Go to **Settings** → **Secrets and variables** → **Actions**
+2. Add secrets:
+   - `AWS_ACCESS_KEY_ID` - AWS access key with Pricing API permissions
+   - `AWS_SECRET_ACCESS_KEY` - AWS secret access key
+   - `AWS_REGION` (optional, can be set in workflow)
+
+**Note**: The Pricing API is a global service, but credentials must be configured. The region parameter in the workflow determines which regional pricing data to fetch, not which AWS region to authenticate against.
 
 #### Trigger Events
 
 ```yaml
 # Run on all branches
 on:
-  push:
-    branches: ['**']
   pull_request:
     branches: ['**']
 
 # Run only on specific branches
 on:
-  push:
-    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 # Run on specific paths
 on:
-  push:
+  pull_request:
     paths:
-      - 'src/**'
-      - 'test/**'
-      - 'package.json'
+      - 'infrastructure/**'
+      - 'cdk.json'
+      - '.cdk-cost-analyzer.yml'
 ```
 
-#### Multi-Version Testing
+#### Cost Threshold Enforcement
+
+Fail the workflow if costs exceed thresholds:
 
 ```yaml
+name: Cost Analysis with Thresholds
+
+on:
+  pull_request:
+    branches: [main]
+
 jobs:
-  test:
+  analyze-costs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install CDK Cost Analyzer
+        run: npm install -g cdk-cost-analyzer
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Run cost analysis with thresholds
+        run: |
+          cdk-cost-analyzer pipeline \
+            --synth \
+            --cdk-app-path ./infrastructure \
+            --region us-east-1 \
+            --config .cdk-cost-analyzer.yml \
+            --environment production \
+            --format markdown > cost-report.md
+        # Exit code 2 means threshold exceeded
+        continue-on-error: true
+        id: cost-check
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('cost-report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+      - name: Fail if threshold exceeded
+        if: steps.cost-check.outcome == 'failure'
+        run: |
+          echo "Cost threshold exceeded - requires approval"
+          exit 1
+```
+
+#### Multi-Stack Analysis
+
+Analyze multiple stacks in a monorepo:
+
+```yaml
+name: Multi-Stack Cost Analysis
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  analyze-costs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20.x, 22.x]
+        stack:
+          - name: NetworkStack
+            path: packages/network
+          - name: ComputeStack
+            path: packages/compute
+          - name: StorageStack
+            path: packages/storage
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build
-      - run: npm run test:silent
+          node-version: '20.x'
+
+      - name: Install CDK Cost Analyzer
+        run: npm install -g cdk-cost-analyzer
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Analyze ${{ matrix.stack.name }}
+        run: |
+          cdk-cost-analyzer pipeline \
+            --synth \
+            --cdk-app-path ${{ matrix.stack.path }} \
+            --region us-east-1 \
+            --format markdown > cost-${{ matrix.stack.name }}.md
+
+      - name: Comment PR with ${{ matrix.stack.name }} costs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('cost-${{ matrix.stack.name }}.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ${{ matrix.stack.name }} Cost Analysis\n\n${report}`
+            });
 ```
 
-#### Test Coverage
+#### Caching for Faster Builds
+
+Cache pricing data and dependencies:
 
 ```yaml
+name: Cost Analysis with Caching
+
+on:
+  pull_request:
+    branches: [main]
+
 jobs:
-  test:
+  analyze-costs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
+          node-version: '20.x'
           cache: 'npm'
-      - run: npm ci
-      - run: npm run test:coverage
-      
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./coverage/coverage-final.json
-```
 
+      - name: Cache pricing data
+        uses: actions/cache@v4
+        with:
+          path: .cdk-cost-analyzer-cache
+          key: pricing-cache-${{ runner.os }}-${{ hashFiles('.cdk-cost-analyzer.yml') }}
+          restore-keys: |
+            pricing-cache-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install CDK Cost Analyzer
+        run: npm install -g cdk-cost-analyzer
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Run cost analysis
+        run: |
+          cdk-cost-analyzer pipeline \
+            --synth \
+            --cdk-app-path ./infrastructure \
+            --region us-east-1 \
+            --format markdown > cost-report.md
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('cost-report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+```
 ### Status Badge
 
-Add to your README:
+Add a status badge to your README:
 
 ```markdown
-[![CI](https://github.com/USERNAME/REPOSITORY/actions/workflows/ci.yml/badge.svg)](https://github.com/USERNAME/REPOSITORY/actions/workflows/ci.yml)
+[![Cost Analysis](https://github.com/USERNAME/REPOSITORY/actions/workflows/cost-analysis.yml/badge.svg)](https://github.com/USERNAME/REPOSITORY/actions/workflows/cost-analysis.yml)
 ```
 
 ### Complete Example
 
+Full workflow with all features:
+
 ```yaml
-name: CI
+name: Cost Analysis
 
 on:
-  push:
-    branches: ['**']
-    paths:
-      - 'src/**'
-      - 'test/**'
-      - 'package.json'
-      - 'package-lock.json'
   pull_request:
-    branches: ['**']
+    branches: [main]
+    paths:
+      - 'infrastructure/**'
+      - 'cdk.json'
+      - '.cdk-cost-analyzer.yml'
+
+permissions:
+  contents: read
+  pull-requests: write
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: cost-analysis-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test:
+  analyze-costs:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        node-version: [20.x, 22.x]
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '20.x'
           cache: 'npm'
-      
+
+      - name: Cache pricing data
+        uses: actions/cache@v4
+        with:
+          path: .cdk-cost-analyzer-cache
+          key: pricing-cache-${{ runner.os }}-${{ hashFiles('.cdk-cost-analyzer.yml') }}
+          restore-keys: |
+            pricing-cache-${{ runner.os }}-
+
       - name: Install dependencies
         run: npm ci
-      
-      - name: Run linting
-        run: npm run eslint
-      
-      - name: Run type checking
-        run: npm run lint
-      
-      - name: Build project
-        run: npm run build
-      
-      - name: Run tests
-        run: npm run test:silent
+
+      - name: Install CDK Cost Analyzer
+        run: npm install -g cdk-cost-analyzer
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Run cost analysis
+        id: cost-analysis
+        continue-on-error: true
+        run: |
+          cdk-cost-analyzer pipeline \
+            --synth \
+            --cdk-app-path ./infrastructure \
+            --region us-east-1 \
+            --config .cdk-cost-analyzer.yml \
+            --environment production \
+            --format markdown > cost-report.md
+
+      - name: Comment PR with results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('cost-report.md', 'utf8');
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Cost Analysis')
+            );
+            
+            const commentBody = `## 💰 Cost Analysis\n\n${report}\n\n---\n*Updated: ${new Date().toISOString()}*`;
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }
+
+      - name: Check threshold status
+        if: steps.cost-analysis.outcome == 'failure'
+        run: |
+          echo "::error::Cost threshold exceeded - requires approval"
+          exit 1
 ```
 
 ---
@@ -225,10 +639,34 @@ cost-analysis:
 
 ### AWS Credentials
 
+**Important**: CDK Cost Analyzer requires AWS credentials to query the AWS Pricing API for real-time cost data.
+
+**Required IAM Permissions**:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "pricing:GetProducts",
+        "pricing:DescribeServices"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+**GitLab CI/CD Variables**:
+
 Configure in **Settings > CI/CD > Variables**:
-- `AWS_ACCESS_KEY_ID` (masked)
-- `AWS_SECRET_ACCESS_KEY` (masked)
-- `AWS_REGION`
+- `AWS_ACCESS_KEY_ID` (masked) - AWS access key with Pricing API permissions
+- `AWS_SECRET_ACCESS_KEY` (masked) - AWS secret access key
+- `AWS_REGION` - Target region for pricing data (e.g., us-east-1, eu-central-1)
+
+**Note**: The Pricing API is a global service. The region variable determines which regional pricing data to fetch, not authentication region.
 
 ### Cost Analysis Options
 

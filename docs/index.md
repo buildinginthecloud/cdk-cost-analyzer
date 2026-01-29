@@ -33,6 +33,42 @@ A TypeScript package that analyzes AWS CDK infrastructure changes and provides c
 npm install cdk-cost-analyzer
 ```
 
+### AWS Credentials
+
+CDK Cost Analyzer requires AWS credentials to query the AWS Pricing API for real-time cost data.
+
+**Configure credentials**:
+
+```bash
+# Option 1: Environment variables
+export AWS_ACCESS_KEY_ID=your_access_key
+export AWS_SECRET_ACCESS_KEY=your_secret_key
+
+# Option 2: AWS CLI configuration
+aws configure
+
+# Option 3: IAM role (when running in AWS)
+# Credentials are automatically available
+```
+
+**Required IAM permissions**:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "pricing:GetProducts",
+        "pricing:DescribeServices"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
 ### CLI Usage
 
 ```bash
