@@ -12,7 +12,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
     // Clean up all services created during tests
     servicesToCleanup.forEach(service => {
       try {
-        (service as any).pricingClient?.destroy();
+        service.destroy();
       } catch (error) {
         // Ignore cleanup errors
       }

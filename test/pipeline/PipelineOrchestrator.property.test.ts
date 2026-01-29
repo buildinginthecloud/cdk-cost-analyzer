@@ -11,7 +11,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
   afterAll(() => {
     // Clean up the shared service
     try {
-      (pricingService as any).pricingClient?.destroy();
+      pricingService.destroy();
     } catch (error) {
       // Ignore cleanup errors
     }
