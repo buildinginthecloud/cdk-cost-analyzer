@@ -105,20 +105,20 @@ console.log(`Total monthly cost: ${result.totalMonthlyCost} ${result.currency}`)
 ### Getting Started
 
 - [Installation & Quick Start](#quick-start)
-- [Configuration Guide](CONFIGURATION) - Configure thresholds, usage assumptions, and exclusions
-- [CI/CD Integration](CI_CD) - GitHub Actions and GitLab CI/CD setup guides
+- [Configuration Guide](CONFIGURATION.md) - Configure thresholds, usage assumptions, and exclusions
+- [CI/CD Integration](CI_CD.md) - GitHub Actions and GitLab CI/CD setup guides
 
 ### Reference
 
-- [Resource Calculator Reference](CALCULATORS) - Detailed cost calculation methods and assumptions
-- [Single Template Analysis](SINGLE-TEMPLATE-ANALYSIS) - Analyze individual templates without comparison
-- [NAT Gateway Testing](NAT_GATEWAY_TESTING) - Testing and debugging NAT Gateway pricing
+- [Resource Calculator Reference](CALCULATORS.md) - Detailed cost calculation methods and assumptions
+- [Single Template Analysis](SINGLE-TEMPLATE-ANALYSIS.md) - Analyze individual templates without comparison
+- [NAT Gateway Testing](NAT_GATEWAY_TESTING.md) - Testing and debugging NAT Gateway pricing
 
 ### Operations
 
-- [Troubleshooting Guide](TROUBLESHOOTING) - Common issues and solutions
-- [Development Guide](DEVELOPMENT) - Local development, testing, and architecture
-- [Release Process](RELEASE) - How to release new versions
+- [Troubleshooting Guide](TROUBLESHOOTING.md) - Common issues and solutions
+- [Development Guide](DEVELOPMENT.md) - Local development, testing, and architecture
+- [Release Process](RELEASE.md) - How to release new versions
 
 ## Supported Resource Types
 
@@ -143,7 +143,7 @@ console.log(`Total monthly cost: ${result.totalMonthlyCost} ${result.currency}`)
 ### Caching
 - AWS::ElastiCache::CacheCluster
 
-See the [Calculator Reference](CALCULATORS) for complete details on cost calculation methods and assumptions.
+See the [Calculator Reference](CALCULATORS.md) for complete details on cost calculation methods and assumptions.
 
 ## Configuration Example
 
@@ -176,7 +176,7 @@ exclusions:
     - AWS::Logs::LogGroup
 ```
 
-See the [Configuration Guide](CONFIGURATION) for complete documentation.
+See the [Configuration Guide](CONFIGURATION.md) for complete documentation.
 
 ## CI/CD Integration
 
@@ -224,7 +224,7 @@ jobs:
       - run: npm run test:silent
 ```
 
-See the [CI/CD Integration Guide](CI_CD) for complete documentation.
+See the [CI/CD Integration Guide](CI_CD.md) for complete documentation.
 
 ## Report Formats
 
@@ -293,7 +293,7 @@ npm run build
 npm run test
 ```
 
-See the [Development Guide](DEVELOPMENT) for detailed development instructions.
+See the [Development Guide](DEVELOPMENT.md) for detailed development instructions.
 
 ## License
 
