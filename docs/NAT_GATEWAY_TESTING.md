@@ -7,14 +7,14 @@ This guide provides information on testing and debugging the NAT Gateway pricing
 The NAT Gateway calculator had an issue with region prefix formatting that prevented it from fetching correct pricing data from the AWS Pricing API.
 
 ### Problem
-- **Before**: UsageType format was `EUC1NatGateway-Hours` (missing hyphen)
-- **After**: UsageType format is `EUC1-NatGateway-Hours` (correct format)
+- **Before**: UsageType format was `EUC1NatGateway-Hours` (missing hyphen and "Regional")
+- **After**: UsageType format is `EUC1-RegionalNatGateway-Hours` (correct format)
 
 ### Changes Made
 
 1. **Fixed UsageType Format** (NatGatewayCalculator.ts)
-   - Changed from `${regionPrefix}NatGateway-Hours` to `${regionPrefix}-NatGateway-Hours`
-   - Changed from `${regionPrefix}NatGateway-Bytes` to `${regionPrefix}-NatGateway-Bytes`
+   - Changed from `${regionPrefix}NatGateway-Hours` to `${regionPrefix}-RegionalNatGateway-Hours`
+   - Changed from `${regionPrefix}NatGateway-Bytes` to `${regionPrefix}-RegionalNatGateway-Bytes`
 
 2. **Expanded Region Coverage**
    - Added comprehensive region prefix mappings for all AWS commercial and government regions
@@ -116,7 +116,7 @@ npx ts-node tools/discover-nat-gateway-pricing.ts
 
 1. **Tests Multiple Format Combinations**:
    - Different region prefix formats (EUC1, EUC1-, EU-Central-1, etc.)
-   - Different usage type formats (NatGateway-Hours, NGW-Hours, etc.)
+   - Different usage type formats (RegionalNatGateway-Hours, NatGateway-Hours, NGW-Hours, etc.)
 
 2. **Lists All NAT Gateway Products**: Shows all available NAT Gateway products without filters
 
@@ -136,10 +136,10 @@ npx ts-node tools/discover-nat-gateway-pricing.ts
 
 Testing different filter combinations...
 
-Trying prefix "EUC1" with usageType: EUC1-NatGateway-Hours
+Trying prefix "EUC1" with usageType: EUC1-RegionalNatGateway-Hours
   ✅ SUCCESS! Found pricing data
   Region: EU (Frankfurt)
-  UsageType: EUC1-NatGateway-Hours
+  UsageType: EUC1-RegionalNatGateway-Hours
   Operation: NatGateway
   Description: $0.045 per NAT Gateway Hour
   Price: $0.045/Hrs
@@ -148,9 +148,9 @@ Trying prefix "EUC1" with usageType: EUC1-NatGateway-Hours
 Found 200+ NAT Gateway products
 
 📍 Found NAT Gateway products for EU (Frankfurt):
-  - UsageType: EUC1-NatGateway-Hours
+  - UsageType: EUC1-RegionalNatGateway-Hours
     Description: $0.045 per NAT Gateway Hour
-  - UsageType: EUC1-NatGateway-Bytes
+  - UsageType: EUC1-RegionalNatGateway-Bytes
     Description: $0.045 per GB - data processed by NAT Gateways
 ```
 
@@ -201,7 +201,7 @@ When debug logging is enabled, you'll see:
    [DEBUG 2025-01-09T10:30:02.000Z] NAT Gateway hourly rate retrieved
    {
      "hourlyRate": 0.045,
-     "usageType": "EUC1-NatGateway-Hours"
+     "usageType": "EUC1-RegionalNatGateway-Hours"
    }
    ```
 
