@@ -195,8 +195,8 @@ synthesis:
 ```
 
 **Timeout Behavior:**
-- CDK synthesis has a built-in 25-second timeout to prevent hanging processes
-- Process receives SIGTERM for graceful termination, followed by SIGKILL after 5 seconds
+- CDK synthesis has a built-in 15-second timeout to prevent hanging processes
+- Process receives SIGTERM for graceful termination, followed by SIGKILL after 1 second
 - If synthesis requires more time, use a custom command with extended timeout:
   ```yaml
   synthesis:

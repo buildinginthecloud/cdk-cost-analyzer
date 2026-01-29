@@ -14,11 +14,11 @@ This guide covers common issues and solutions when using CDK Cost Analyzer.
 
 ## CDK Synthesis Errors
 
-### Error: CDK synthesis timed out after 20 seconds
+### Error: CDK synthesis timed out after 15 seconds
 
 **Symptoms:**
 ```
-Error: CDK synthesis timed out after 20 seconds
+Error: CDK synthesis timed out after 15 seconds
 ```
 
 **Causes:**
@@ -64,7 +64,7 @@ cd infrastructure
 time npx cdk synth --all  # Measure synthesis time
 ```
 
-**Note:** The 20-second timeout is designed to prevent hanging processes in CI/CD environments while providing faster feedback. The timeout includes improved process cleanup with graceful termination (SIGTERM) followed by force termination (SIGKILL) after 2 seconds if needed. If your CDK application legitimately requires more time, consider optimizing the synthesis process or using a custom command with extended timeout.
+**Note:** The 15-second timeout is designed to prevent hanging processes in CI/CD environments while providing faster feedback. The timeout includes improved process cleanup with graceful termination (SIGTERM) followed by force termination (SIGKILL) after 1 second if needed. If your CDK application legitimately requires more time, consider optimizing the synthesis process or using a custom command with extended timeout.
 
 ### Error: CDK synthesis failed with exit code 1
 

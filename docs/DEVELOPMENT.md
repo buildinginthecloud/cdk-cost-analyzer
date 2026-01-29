@@ -202,7 +202,7 @@ npm run test:silent
 npm run test:watch
 
 # Run specific test file
-npx vitest run test/parser/TemplateParser.test.ts
+npx jest test/parser/TemplateParser.test.ts
 ```
 
 ### Test Structure
@@ -326,7 +326,7 @@ export class DynamoDBCalculator implements ResourceCostCalculator {
 
 ### Build Errors
 
-Check Node.js version (>= 18.0.0):
+Check Node.js version (>= 20.0.0):
 ```bash
 node --version
 ```
@@ -375,7 +375,7 @@ aws sts get-caller-identity --no-cli-pager
 
 ### Development
 - `typescript`: TypeScript compiler
-- `vitest`: Testing framework
+- `jest`: Testing framework
 - `fast-check`: Property-based testing
 - `@types/*`: Type definitions
 

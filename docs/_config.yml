@@ -1,0 +1,63 @@
+title: CDK Cost Analyzer
+description: Analyze AWS CDK infrastructure changes and provide cost impact summaries
+theme: jekyll-theme-cayman
+show_downloads: true
+
+# GitHub repository
+repository: buildinginthecloud/cdk-cost-analyzer
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: Configuration
+    url: /CONFIGURATION
+  - title: CI/CD Integration
+    url: /CI_CD
+  - title: Calculators
+    url: /CALCULATORS
+  - title: Troubleshooting
+    url: /TROUBLESHOOTING
+  - title: Development
+    url: /DEVELOPMENT
+  - title: Release Process
+    url: /RELEASE
+
+# Plugins
+plugins:
+  - jekyll-relative-links
+  - jekyll-optional-front-matter
+  - jekyll-readme-index
+  - jekyll-titles-from-headings
+  - jekyll-github-metadata
+
+# Relative links configuration
+relative_links:
+  enabled: true
+  collections: true
+
+# Optional front matter
+optional_front_matter:
+  remove_originals: true
+
+# Titles from headings
+titles_from_headings:
+  enabled: true
+  strip_title: true
+  collections: true
+
+# Markdown settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
+
+# Exclude from processing
+exclude:
+  - node_modules
+  - vendor
+  - .git
+  - .github
+  - .gitignore
+  - README.md
