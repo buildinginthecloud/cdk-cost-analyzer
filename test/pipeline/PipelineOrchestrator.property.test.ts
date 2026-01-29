@@ -8,6 +8,15 @@ describe('PipelineOrchestrator - Property Tests', () => {
   const pricingService = new PricingService();
   const diffEngine = new DiffEngine();
 
+  afterAll(() => {
+    // Clean up the shared service
+    try {
+      (pricingService as any).pricingClient?.destroy();
+    } catch (error) {
+      // Ignore cleanup errors
+    }
+  });
+
   // Feature: production-readiness, Property 2: Multi-stack cost aggregation equals sum of individual stacks
   // Validates: Requirements 2.4
   it('should aggregate costs correctly across multiple stacks', () => {

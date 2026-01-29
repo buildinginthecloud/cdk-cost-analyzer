@@ -6,6 +6,19 @@ import { PricingService } from '../../src/pricing/PricingService';
 
 describe('PricingService - Resource Exclusions Property Tests', () => {
   const diffEngine = new DiffEngine();
+  const servicesToCleanup: PricingService[] = [];
+
+  afterEach(() => {
+    // Clean up all services created during tests
+    servicesToCleanup.forEach(service => {
+      try {
+        (service as any).pricingClient?.destroy();
+      } catch (error) {
+        // Ignore cleanup errors
+      }
+    });
+    servicesToCleanup.length = 0;
+  });
 
   // Feature: production-readiness, Property 6: Resource exclusions are respected
   // Validates: Requirements 15.1, 15.2, 15.3
@@ -34,9 +47,11 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           undefined,
           excludedTypes,
         );
+        servicesToCleanup.push(serviceWithExclusions);
 
         // Create service without exclusions
         const serviceWithoutExclusions = new PricingService(region);
+        servicesToCleanup.push(serviceWithoutExclusions);
 
         const template: CloudFormationTemplate = { Resources: resources };
         const emptyTemplate: CloudFormationTemplate = { Resources: {} };
@@ -98,6 +113,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
 
         // Empty exclusion list
         const service = new PricingService(region, undefined, []);
+        servicesToCleanup.push(service);
 
         const template: CloudFormationTemplate = { Resources: resources };
         const emptyTemplate: CloudFormationTemplate = { Resources: {} };
@@ -150,6 +166,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           undefined,
           excludedTypes,
         );
+        servicesToCleanup.push(serviceWithExclusions);
 
         const allResources = { ...included, ...excluded };
         const template: CloudFormationTemplate = { Resources: allResources };
@@ -202,6 +219,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           undefined,
           excludedTypes,
         );
+        servicesToCleanup.push(serviceWithExclusions);
 
         const baseTemplate: CloudFormationTemplate = { Resources: baseResources };
         const targetTemplate: CloudFormationTemplate = { Resources: targetResources };
@@ -242,6 +260,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
 
         // Exclude with exact case
         const service = new PricingService(region, undefined, ['AWS::IAM::Role']);
+        servicesToCleanup.push(service);
 
         const template: CloudFormationTemplate = { Resources: resources };
         const emptyTemplate: CloudFormationTemplate = { Resources: {} };

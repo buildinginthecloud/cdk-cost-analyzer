@@ -4,6 +4,20 @@ import { UsageAssumptionsConfig } from '../../src/config/types';
 import { PricingService } from '../../src/pricing/PricingService';
 
 describe('PricingService - Custom Usage Assumptions Property Tests', () => {
+  const servicesToCleanup: PricingService[] = [];
+
+  afterEach(() => {
+    // Clean up all services created during tests
+    servicesToCleanup.forEach(service => {
+      try {
+        (service as any).pricingClient?.destroy();
+      } catch (error) {
+        // Ignore cleanup errors
+      }
+    });
+    servicesToCleanup.length = 0;
+  });
+
   // Feature: production-readiness, Property 5: Custom usage assumptions override defaults
   // Validates: Requirements 6.2, 6.3
   it('should use custom S3 assumptions when provided', () => {
@@ -24,9 +38,11 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
           region,
           customAssumptions as UsageAssumptionsConfig,
         );
+        servicesToCleanup.push(serviceWithCustom);
 
         // Create service with defaults
         const serviceWithDefaults = new PricingService(region);
+        servicesToCleanup.push(serviceWithDefaults);
 
         const s3Resource = {
           logicalId: 'TestBucket',
@@ -78,6 +94,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
           region,
           customAssumptions as UsageAssumptionsConfig,
         );
+        servicesToCleanup.push(serviceWithCustom);
 
         const lambdaResource = {
           logicalId: 'TestFunction',
@@ -119,6 +136,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
           region,
           customAssumptions as UsageAssumptionsConfig,
         );
+        servicesToCleanup.push(serviceWithCustom);
 
         const natGatewayResource = {
           logicalId: 'TestNatGateway',
@@ -160,6 +178,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
           region,
           customAssumptions as UsageAssumptionsConfig,
         );
+        servicesToCleanup.push(serviceWithCustom);
 
         const albResource = {
           logicalId: 'TestALB',
@@ -211,6 +230,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
           region,
           customAssumptions as UsageAssumptionsConfig,
         );
+        servicesToCleanup.push(serviceWithCustom);
 
         const cloudFrontResource = {
           logicalId: 'TestDistribution',
@@ -274,6 +294,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
           region,
           customAssumptions as UsageAssumptionsConfig,
         );
+        servicesToCleanup.push(service);
 
         // Test S3 if custom assumptions provided
         if (customAssumptions.s3?.storageGB !== undefined) {

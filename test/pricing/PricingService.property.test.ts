@@ -5,6 +5,15 @@ import { PricingService } from '../../src/pricing/PricingService';
 describe('PricingService - Property Tests', () => {
   const service = new PricingService();
 
+  afterAll(() => {
+    // Clean up the shared service
+    try {
+      (service as any).pricingClient?.destroy();
+    } catch (error) {
+      // Ignore cleanup errors
+    }
+  });
+
   // Feature: cdk-cost-analyzer, Property 3: Cost calculation produces valid results
   it('should return non-negative costs with valid currency and confidence', () => {
     const supportedTypes = [
@@ -240,48 +249,57 @@ describe('PricingService - Property Tests', () => {
         // Create a service that will have pricing failures
         const failingService = new PricingService('us-east-1');
 
-        // The service should complete without throwing errors
-        const result = await failingService.getCostDelta(diff, 'us-east-1');
+        try {
+          // The service should complete without throwing errors
+          const result = await failingService.getCostDelta(diff, 'us-east-1');
 
-        // Verify the result is defined and has the expected structure
-        expect(result).toBeDefined();
-        expect(result.totalDelta).toBeDefined();
-        expect(typeof result.totalDelta).toBe('number');
-        expect(result.currency).toBe('USD');
-        expect(Array.isArray(result.addedCosts)).toBe(true);
-        expect(Array.isArray(result.removedCosts)).toBe(true);
-        expect(Array.isArray(result.modifiedCosts)).toBe(true);
+          // Verify the result is defined and has the expected structure
+          expect(result).toBeDefined();
+          expect(result.totalDelta).toBeDefined();
+          expect(typeof result.totalDelta).toBe('number');
+          expect(result.currency).toBe('USD');
+          expect(Array.isArray(result.addedCosts)).toBe(true);
+          expect(Array.isArray(result.removedCosts)).toBe(true);
+          expect(Array.isArray(result.modifiedCosts)).toBe(true);
 
-        // Verify all resources are present in the result
-        expect(result.addedCosts.length).toBe(diff.added.length);
-        expect(result.removedCosts.length).toBe(diff.removed.length);
-        expect(result.modifiedCosts.length).toBe(diff.modified.length);
+          // Verify all resources are present in the result
+          expect(result.addedCosts.length).toBe(diff.added.length);
+          expect(result.removedCosts.length).toBe(diff.removed.length);
+          expect(result.modifiedCosts.length).toBe(diff.modified.length);
 
-        // Verify each resource has a valid cost structure with confidence level
-        [...result.addedCosts, ...result.removedCosts].forEach(
-          (resourceCost) => {
-            expect(resourceCost.monthlyCost).toBeDefined();
-            expect(resourceCost.monthlyCost.amount).toBeGreaterThanOrEqual(0);
-            expect(resourceCost.monthlyCost.currency).toBe('USD');
+          // Verify each resource has a valid cost structure with confidence level
+          [...result.addedCosts, ...result.removedCosts].forEach(
+            (resourceCost) => {
+              expect(resourceCost.monthlyCost).toBeDefined();
+              expect(resourceCost.monthlyCost.amount).toBeGreaterThanOrEqual(0);
+              expect(resourceCost.monthlyCost.currency).toBe('USD');
+              expect(['high', 'medium', 'low', 'unknown']).toContain(
+                resourceCost.monthlyCost.confidence,
+              );
+              expect(Array.isArray(resourceCost.monthlyCost.assumptions)).toBe(
+                true,
+              );
+            },
+          );
+
+          result.modifiedCosts.forEach((resourceCost) => {
+            expect(resourceCost.oldMonthlyCost).toBeDefined();
+            expect(resourceCost.newMonthlyCost).toBeDefined();
             expect(['high', 'medium', 'low', 'unknown']).toContain(
-              resourceCost.monthlyCost.confidence,
+              resourceCost.oldMonthlyCost.confidence,
             );
-            expect(Array.isArray(resourceCost.monthlyCost.assumptions)).toBe(
-              true,
+            expect(['high', 'medium', 'low', 'unknown']).toContain(
+              resourceCost.newMonthlyCost.confidence,
             );
-          },
-        );
-
-        result.modifiedCosts.forEach((resourceCost) => {
-          expect(resourceCost.oldMonthlyCost).toBeDefined();
-          expect(resourceCost.newMonthlyCost).toBeDefined();
-          expect(['high', 'medium', 'low', 'unknown']).toContain(
-            resourceCost.oldMonthlyCost.confidence,
-          );
-          expect(['high', 'medium', 'low', 'unknown']).toContain(
-            resourceCost.newMonthlyCost.confidence,
-          );
-        });
+          });
+        } finally {
+          // Clean up the service
+          try {
+            (failingService as any).pricingClient?.destroy();
+          } catch (error) {
+            // Ignore cleanup errors
+          }
+        }
       }),
       { numRuns: 50 },
     );
