@@ -2,36 +2,58 @@ import * as fc from 'fast-check';
 // Jest imports are global
 import { UsageAssumptionsConfig } from '../../src/config/types';
 import { PricingService } from '../../src/pricing/PricingService';
-import { PricingClient } from '../../src/pricing/PricingClient';
 
 // Mock PricingClient to avoid real AWS API calls
-jest.mock('../../src/pricing/PricingClient');
+jest.mock('../../src/pricing/PricingClient', () => {
+  return {
+    PricingClient: jest.fn().mockImplementation(() => {
+      return {
+        getPrice: jest.fn().mockImplementation((params) => {
+          const serviceCode = params?.serviceCode || 'AmazonEC2';
+          const filters = params?.filters || [];
+          
+          // Handle Lambda special cases
+          if (serviceCode === 'AWSLambda') {
+            const groupFilter = filters.find((f: any) => f.field === 'group');
+            if (groupFilter?.value === 'AWS-Lambda-Requests') {
+              return Promise.resolve(0.20);
+            }
+            if (groupFilter?.value === 'AWS-Lambda-Duration') {
+              return Promise.resolve(0.0000166667);
+            }
+          }
+          
+          // Handle CloudFront special cases
+          if (serviceCode === 'AmazonCloudFront') {
+            const transferTypeFilter = filters.find((f: any) => f.field === 'transferType');
+            const requestTypeFilter = filters.find((f: any) => f.field === 'requestType');
+            if (transferTypeFilter?.value === 'CloudFront to Internet') {
+              return Promise.resolve(0.085);
+            }
+            if (requestTypeFilter?.value === 'HTTP-Requests') {
+              return Promise.resolve(0.0075);
+            }
+          }
+          
+          const prices: Record<string, number> = {
+            AmazonEC2: 0.0116,
+            AmazonS3: 0.023,
+            AWSLambda: 0.0000166667,
+            AmazonRDS: 0.017,
+            AmazonCloudFront: 0.085,
+            AWSELB: 0.0225,
+          };
+          
+          return Promise.resolve(prices[serviceCode] || 0.01);
+        }),
+        destroy: jest.fn(),
+      };
+    }),
+  };
+});
 
 describe('PricingService - Custom Usage Assumptions Property Tests', () => {
   const servicesToCleanup: PricingService[] = [];
-
-  beforeEach(() => {
-    // Setup mock implementation with realistic pricing data
-    // getPrice returns number | null (price per unit)
-    const mockGetPrice = jest.fn().mockImplementation((params) => {
-      const prices: Record<string, number> = {
-        AmazonEC2: 0.0116, // per hour
-        AmazonS3: 0.023, // per GB-month
-        AWSLambda: 0.0000166667, // per request
-        AmazonRDS: 0.017, // per hour
-        AmazonCloudFront: 0.085, // per GB
-        AWSELB: 0.0225, // per hour
-      };
-      
-      const serviceCode = params?.serviceCode || 'AmazonEC2';
-      return Promise.resolve(prices[serviceCode] || prices.AmazonEC2);
-    });
-
-    (PricingClient as jest.MockedClass<typeof PricingClient>).mockImplementation(() => ({
-      getPrice: mockGetPrice,
-      destroy: jest.fn(),
-    } as any));
-  });
 
   afterEach(() => {
     // Clean up all services created during tests
@@ -43,7 +65,6 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
       }
     });
     servicesToCleanup.length = 0;
-    jest.clearAllMocks();
   });
 
   // Feature: production-readiness, Property 5: Custom usage assumptions override defaults

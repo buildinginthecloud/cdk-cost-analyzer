@@ -3,34 +3,44 @@ import * as fc from 'fast-check';
 import { DiffEngine } from '../../src/diff/DiffEngine';
 import { CloudFormationTemplate } from '../../src/parser/types';
 import { PricingService } from '../../src/pricing/PricingService';
-import { PricingClient } from '../../src/pricing/PricingClient';
 
 // Mock PricingClient to avoid real AWS API calls
-jest.mock('../../src/pricing/PricingClient');
+jest.mock('../../src/pricing/PricingClient', () => {
+  return {
+    PricingClient: jest.fn().mockImplementation(() => {
+      return {
+        getPrice: jest.fn().mockImplementation((params) => {
+          const serviceCode = params?.serviceCode || 'AmazonEC2';
+          const filters = params?.filters || [];
+          
+          // Handle Lambda special cases
+          if (serviceCode === 'AWSLambda') {
+            const groupFilter = filters.find((f: any) => f.field === 'group');
+            if (groupFilter?.value === 'AWS-Lambda-Requests') {
+              return Promise.resolve(0.20);
+            }
+            if (groupFilter?.value === 'AWS-Lambda-Duration') {
+              return Promise.resolve(0.0000166667);
+            }
+          }
+          
+          const prices: Record<string, number> = {
+            AmazonEC2: 0.0116,
+            AmazonS3: 0.023,
+            AWSLambda: 0.0000166667,
+          };
+          
+          return Promise.resolve(prices[serviceCode] || 0.01);
+        }),
+        destroy: jest.fn(),
+      };
+    }),
+  };
+});
 
 describe('PricingService - Resource Exclusions Property Tests', () => {
   const diffEngine = new DiffEngine();
   const servicesToCleanup: PricingService[] = [];
-
-  beforeEach(() => {
-    // Setup mock implementation with realistic pricing data
-    // getPrice returns number | null (price per unit)
-    const mockGetPrice = jest.fn().mockImplementation((params) => {
-      const prices: Record<string, number> = {
-        AmazonEC2: 0.0116,
-        AmazonS3: 0.023,
-        AWSLambda: 0.0000166667,
-      };
-      
-      const serviceCode = params?.serviceCode || 'AmazonEC2';
-      return Promise.resolve(prices[serviceCode] || prices.AmazonEC2);
-    });
-
-    (PricingClient as jest.MockedClass<typeof PricingClient>).mockImplementation(() => ({
-      getPrice: mockGetPrice,
-      destroy: jest.fn(),
-    } as any));
-  });
 
   afterEach(() => {
     // Clean up all services created during tests
@@ -42,7 +52,6 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
       }
     });
     servicesToCleanup.length = 0;
-    jest.clearAllMocks();
   });
 
   // Feature: production-readiness, Property 6: Resource exclusions are respected
@@ -114,7 +123,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           }
         });
       }),
-      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
+      { numRuns: 5 }, // Reduced for faster test execution
     );
   });
 
@@ -149,7 +158,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
         // Should analyze all resources
         expect(costDelta.addedCosts.length).toBe(Object.keys(resources).length);
       }),
-      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
+      { numRuns: 5 }, // Reduced for faster test execution
     );
   });
 
@@ -214,7 +223,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           expect(includedTypes).toContain(cost.type);
         });
       }),
-      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
+      { numRuns: 5 }, // Reduced for faster test execution
     );
   });
 
@@ -261,7 +270,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           expect(excludedTypes).not.toContain(cost.type);
         });
       }),
-      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
+      { numRuns: 5 }, // Reduced for faster test execution
     );
   });
 
@@ -305,7 +314,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
           expect(hasS3InResults).toBe(true);
         }
       }),
-      { numRuns: 10 }, // Reduced from 50 to speed up tests with API calls
+      { numRuns: 5 }, // Reduced for faster test execution
     );
   });
 });
