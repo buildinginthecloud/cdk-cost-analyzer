@@ -3,10 +3,34 @@ import * as fc from 'fast-check';
 import { DiffEngine } from '../../src/diff/DiffEngine';
 import { CloudFormationTemplate } from '../../src/parser/types';
 import { PricingService } from '../../src/pricing/PricingService';
+import { PricingClient } from '../../src/pricing/PricingClient';
+
+// Mock PricingClient to avoid real AWS API calls
+jest.mock('../../src/pricing/PricingClient');
 
 describe('PricingService - Resource Exclusions Property Tests', () => {
   const diffEngine = new DiffEngine();
   const servicesToCleanup: PricingService[] = [];
+
+  beforeEach(() => {
+    // Setup mock implementation with realistic pricing data
+    // getPrice returns number | null (price per unit)
+    const mockGetPrice = jest.fn().mockImplementation((params) => {
+      const prices: Record<string, number> = {
+        AmazonEC2: 0.0116,
+        AmazonS3: 0.023,
+        AWSLambda: 0.0000166667,
+      };
+      
+      const serviceCode = params?.serviceCode || 'AmazonEC2';
+      return Promise.resolve(prices[serviceCode] || prices.AmazonEC2);
+    });
+
+    (PricingClient as jest.MockedClass<typeof PricingClient>).mockImplementation(() => ({
+      getPrice: mockGetPrice,
+      destroy: jest.fn(),
+    } as any));
+  });
 
   afterEach(() => {
     // Clean up all services created during tests
@@ -18,6 +42,7 @@ describe('PricingService - Resource Exclusions Property Tests', () => {
       }
     });
     servicesToCleanup.length = 0;
+    jest.clearAllMocks();
   });
 
   // Feature: production-readiness, Property 6: Resource exclusions are respected

@@ -2,6 +2,18 @@ import * as fc from 'fast-check';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { PricingClient } from '../../src/pricing/PricingClient';
 
+// Mock the AWS SDK to avoid real credential checks
+jest.mock('@aws-sdk/client-pricing', () => {
+  const mockSend = jest.fn().mockRejectedValue(new Error('Could not load credentials'));
+  return {
+    PricingClient: jest.fn().mockImplementation(() => ({
+      send: mockSend,
+      destroy: jest.fn(),
+    })),
+    GetProductsCommand: jest.fn(),
+  };
+});
+
 describe('Credential Detection - Property Tests', () => {
   let originalEnv: NodeJS.ProcessEnv;
   const clientsToCleanup: PricingClient[] = [];
@@ -9,6 +21,7 @@ describe('Credential Detection - Property Tests', () => {
   beforeEach(() => {
     // Save original environment
     originalEnv = { ...process.env };
+    jest.clearAllMocks();
   });
 
   afterEach(() => {

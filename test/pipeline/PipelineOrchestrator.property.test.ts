@@ -4,6 +4,40 @@ import { DiffEngine } from '../../src/diff/DiffEngine';
 import { CloudFormationTemplate } from '../../src/parser/types';
 import { PricingService } from '../../src/pricing/PricingService';
 
+// Mock PricingClient to avoid real AWS API calls
+jest.mock('../../src/pricing/PricingClient', () => {
+  return {
+    PricingClient: jest.fn().mockImplementation(() => {
+      return {
+        getPrice: jest.fn().mockImplementation((params) => {
+          const serviceCode = params?.serviceCode || 'AmazonEC2';
+          const filters = params?.filters || [];
+          
+          // Handle Lambda special cases
+          if (serviceCode === 'AWSLambda') {
+            const groupFilter = filters.find((f: any) => f.field === 'group');
+            if (groupFilter?.value === 'AWS-Lambda-Requests') {
+              return Promise.resolve(0.20);
+            }
+            if (groupFilter?.value === 'AWS-Lambda-Duration') {
+              return Promise.resolve(0.0000166667);
+            }
+          }
+          
+          const prices: Record<string, number> = {
+            AmazonEC2: 0.0116,
+            AmazonS3: 0.023,
+            AWSLambda: 0.0000166667,
+          };
+          
+          return Promise.resolve(prices[serviceCode] || 0.01);
+        }),
+        destroy: jest.fn(),
+      };
+    }),
+  };
+});
+
 describe('PipelineOrchestrator - Property Tests', () => {
   const pricingService = new PricingService();
   const diffEngine = new DiffEngine();

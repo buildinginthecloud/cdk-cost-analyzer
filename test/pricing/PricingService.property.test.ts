@@ -2,13 +2,61 @@ import * as fc from 'fast-check';
 // Jest imports are global
 import { PricingService } from '../../src/pricing/PricingService';
 
+// Mock PricingClient to avoid real AWS API calls
+jest.mock('../../src/pricing/PricingClient', () => {
+  return {
+    PricingClient: jest.fn().mockImplementation(() => {
+      return {
+        getPrice: jest.fn().mockImplementation((params) => {
+          const serviceCode = params?.serviceCode || 'AmazonEC2';
+          const filters = params?.filters || [];
+          
+          // Handle Lambda special cases (has different prices for requests vs compute)
+          if (serviceCode === 'AWSLambda') {
+            const groupFilter = filters.find((f: any) => f.field === 'group');
+            if (groupFilter?.value === 'AWS-Lambda-Requests') {
+              return Promise.resolve(0.20); // per 1M requests
+            }
+            if (groupFilter?.value === 'AWS-Lambda-Duration') {
+              return Promise.resolve(0.0000166667); // per GB-second
+            }
+          }
+          
+          // Handle CloudFront special cases
+          if (serviceCode === 'AmazonCloudFront') {
+            const transferTypeFilter = filters.find((f: any) => f.field === 'transferType');
+            const requestTypeFilter = filters.find((f: any) => f.field === 'requestType');
+            if (transferTypeFilter?.value === 'CloudFront to Internet') {
+              return Promise.resolve(0.085); // per GB
+            }
+            if (requestTypeFilter?.value === 'HTTP-Requests') {
+              return Promise.resolve(0.0075); // per 10k requests
+            }
+          }
+          
+          const prices: Record<string, number> = {
+            AmazonEC2: 0.0116,
+            AmazonS3: 0.023,
+            AWSLambda: 0.0000166667,
+            AmazonRDS: 0.017,
+            AmazonCloudFront: 0.085,
+          };
+          
+          return Promise.resolve(prices[serviceCode] || 0.01);
+        }),
+        destroy: jest.fn(),
+      };
+    }),
+  };
+});
+
 describe('PricingService - Property Tests', () => {
   const service = new PricingService();
 
   afterAll(() => {
     // Clean up the shared service
     try {
-      (service as any).pricingClient?.destroy();
+      service.destroy();
     } catch (error) {
       // Ignore cleanup errors
     }
