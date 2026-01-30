@@ -2,6 +2,10 @@ import * as fc from 'fast-check';
 // Jest imports are global
 import { UsageAssumptionsConfig } from '../../src/config/types';
 import { PricingService } from '../../src/pricing/PricingService';
+import { PricingClient } from '../../src/pricing/PricingClient';
+
+// Mock PricingClient to avoid real AWS API calls
+jest.mock('../../src/pricing/PricingClient');
 
 // Mock PricingClient to avoid real AWS API calls
 jest.mock('../../src/pricing/PricingClient', () => {
@@ -55,6 +59,29 @@ jest.mock('../../src/pricing/PricingClient', () => {
 describe('PricingService - Custom Usage Assumptions Property Tests', () => {
   const servicesToCleanup: PricingService[] = [];
 
+  beforeEach(() => {
+    // Setup mock implementation with realistic pricing data
+    // getPrice returns number | null (price per unit)
+    const mockGetPrice = jest.fn().mockImplementation((params) => {
+      const prices: Record<string, number> = {
+        AmazonEC2: 0.0116, // per hour
+        AmazonS3: 0.023, // per GB-month
+        AWSLambda: 0.0000166667, // per request
+        AmazonRDS: 0.017, // per hour
+        AmazonCloudFront: 0.085, // per GB
+        AWSELB: 0.0225, // per hour
+      };
+      
+      const serviceCode = params?.serviceCode || 'AmazonEC2';
+      return Promise.resolve(prices[serviceCode] || prices.AmazonEC2);
+    });
+
+    (PricingClient as jest.MockedClass<typeof PricingClient>).mockImplementation(() => ({
+      getPrice: mockGetPrice,
+      destroy: jest.fn(),
+    } as any));
+  });
+
   afterEach(() => {
     // Clean up all services created during tests
     servicesToCleanup.forEach(service => {
@@ -65,6 +92,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
       }
     });
     servicesToCleanup.length = 0;
+    jest.clearAllMocks();
   });
 
   // Feature: production-readiness, Property 5: Custom usage assumptions override defaults
