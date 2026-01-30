@@ -54,6 +54,13 @@ usageAssumptions:
   vpcEndpoint:
     dataProcessedGB: 100    # GB of data processed per month
   
+  # DynamoDB assumptions (for on-demand billing mode)
+  dynamodb:
+    readRequestsPerMonth: 10000000   # Read requests per month
+    writeRequestsPerMonth: 1000000   # Write requests per month
+  # Note: For provisioned billing mode, costs are calculated from ReadCapacityUnits
+  # and WriteCapacityUnits specified in the CloudFormation template
+  
   # API Gateway assumptions
   apiGateway:
     requestsPerMonth: 10000000  # API requests per month

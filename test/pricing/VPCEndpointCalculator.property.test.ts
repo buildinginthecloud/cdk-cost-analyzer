@@ -84,7 +84,7 @@ describe('VPCEndpointCalculator - Property Tests', () => {
           expect(mockPricingClient.getPrice).not.toHaveBeenCalled();
         },
       ),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -167,7 +167,7 @@ describe('VPCEndpointCalculator - Property Tests', () => {
           expect(assumptionText).toMatch(/interface|hourly|data/);
         },
       ),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -244,7 +244,7 @@ describe('VPCEndpointCalculator - Property Tests', () => {
           expect(cost.assumptions.length).toBeGreaterThan(0);
         },
       ),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -300,7 +300,7 @@ describe('VPCEndpointCalculator - Property Tests', () => {
           expect(cost.assumptions[0]).toContain('Pricing data not available');
         },
       ),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 });

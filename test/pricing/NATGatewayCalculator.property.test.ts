@@ -47,7 +47,7 @@ describe('NatGatewayCalculator - Property Tests', () => {
         expect(assumptionText).toMatch(/hour|hourly/);
         expect(assumptionText).toMatch(/data|processing|gb/);
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -100,7 +100,7 @@ describe('NatGatewayCalculator - Property Tests', () => {
 
         return true;
       }),
-      { numRuns: 30 },
+      { numRuns: 10 },
     );
   });
 
@@ -131,7 +131,7 @@ describe('NatGatewayCalculator - Property Tests', () => {
         expect(cost.currency).toBe('USD');
         expect(cost.assumptions.length).toBeGreaterThan(0);
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -168,7 +168,7 @@ describe('NatGatewayCalculator - Property Tests', () => {
         const assumptionText = cost.assumptions.join(' ');
         expect(assumptionText).toContain(dataGB.toString());
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 });

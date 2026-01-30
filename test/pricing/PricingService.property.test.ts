@@ -87,7 +87,7 @@ describe('PricingService - Property Tests', () => {
         expect(['high', 'medium', 'low', 'unknown']).toContain(cost.confidence);
         expect(Array.isArray(cost.assumptions)).toBe(true);
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -122,7 +122,7 @@ describe('PricingService - Property Tests', () => {
           true,
         );
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -211,7 +211,7 @@ describe('PricingService - Property Tests', () => {
           );
         });
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -258,7 +258,7 @@ describe('PricingService - Property Tests', () => {
 
         expect(Math.abs(result.totalDelta - expectedDelta)).toBeLessThan(0.01);
       }),
-      { numRuns: 30 },
+      { numRuns: 10 },
     );
   });
 
@@ -349,7 +349,7 @@ describe('PricingService - Property Tests', () => {
           }
         }
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 });

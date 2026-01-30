@@ -1,0 +1,72 @@
+================================================================================
+Single Template Cost Analysis
+================================================================================
+
+Total Monthly Cost: $89.43 USD
+Analysis Date: 2026-01-30T11:48:09.160Z
+Region: eu-central-1
+Template Hash: a3e6bd0ce9b51177
+
+Total Resources: 36
+Supported Resources: 3
+Unsupported Resources: 33
+
+--------------------------------------------------------------------------------
+Cost Confidence Breakdown
+--------------------------------------------------------------------------------
+
+UNKNOWN    33 resources  $0.00 (0.0%)
+MEDIUM     3 resources  $89.43 (100.0%)
+
+--------------------------------------------------------------------------------
+Cost Breakdown by Resource Type
+--------------------------------------------------------------------------------
+
+AWS::EC2::NatGateway
+  Count: 1
+  Total Cost: $43.16 (48.3%)
+    ~ EcsVpcPublicSubnet1NATGateway84F4640B    $43.16
+
+AWS::ElasticLoadBalancingV2::LoadBalancer
+  Count: 1
+  Total Cost: $25.55 (28.6%)
+    ~ HelloWorldServiceLB7C80B268              $25.55
+
+AWS::ECS::Service
+  Count: 1
+  Total Cost: $20.72 (23.2%)
+    ~ HelloWorldService36ED7EB6                $20.72
+
+AWS::EC2::VPC
+  Count: 1
+  Total Cost: $0.00 (0.0%)
+    ✗ EcsVpcCEF3634B                           $0.00
+
+[... additional resources omitted for brevity ...]
+
+--------------------------------------------------------------------------------
+Cost Calculation Assumptions
+--------------------------------------------------------------------------------
+
+  • Hourly rate: $0.0520/hour × 730 hours = $37.96/month
+  • Data processing: $0.0520/GB × 100 GB = $5.20/month
+  • Total: $43.16/month
+
+  • Hourly rate: $0.0270/hour × 730 hours = $19.71/month
+  • LCU consumption: 1.00 LCU/hour based on:
+  •   - New connections: 25/sec → 1.00 LCU
+  •   - Active connections: 3000/min → 1.00 LCU
+  •   - Processed data: 100 GB/month → 0.14 LCU
+  • LCU cost: $0.0080/LCU/hour × 1.00 LCU × 730 hours = $5.84/month
+  • Total: $25.55/month
+
+  • 2 task(s) running
+  • Assumes 0.25 vCPU per task
+  • Assumes 0.5 GB memory per task
+  • Assumes 730 hours per month (24/7 operation)
+  • Fargate launch type
+  • Does not include data transfer or storage costs
+
+--------------------------------------------------------------------------------
+Legend: ✓ High confidence  ~ Medium confidence  ? Low confidence  ✗ Unknown/Unsupported
+================================================================================

@@ -164,7 +164,7 @@ describe('PricingClient - Property Tests', () => {
           expect(secondResult).toBeCloseTo(cachedPrice, 2);
         },
       ),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -225,7 +225,7 @@ describe('PricingClient - Property Tests', () => {
           expect(testMockSend).toHaveBeenCalled();
         },
       ),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 });

@@ -372,7 +372,7 @@ For resources with usage-based pricing, the following default assumptions are us
 
 ### Phase 2 Resources
 - **DynamoDB Tables (Provisioned)**: 5 read capacity units, 5 write capacity units
-- **DynamoDB Tables (On-Demand)**: 10M read requests, 1M write requests per month
+- **DynamoDB Tables (On-Demand)**: 10M read requests, 1M write requests per month (configurable)
 - **ECS Services (Fargate)**: 0.25 vCPU, 0.5 GB memory per task
 - **API Gateway (REST)**: 1M requests per month
 - **API Gateway (HTTP)**: 1M requests per month
