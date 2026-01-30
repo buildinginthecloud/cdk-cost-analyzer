@@ -19,7 +19,7 @@ import {
   CostDelta,
   ResourceCostCalculator,
 } from './types';
-import { UsageAssumptionsConfig, CacheConfig } from '../config/types';
+import { UsageAssumptionsConfig, CacheConfig, CostAnalyzerConfig } from '../config/types';
 import { ResourceWithId, ResourceDiff } from '../diff/types';
 
 export class PricingService implements IPricingService {
@@ -48,6 +48,10 @@ export class PricingService implements IPricingService {
       this.pricingClient = new PricingClient(region, cacheManager);
     }
     this.excludedResourceTypes = new Set(excludedResourceTypes || []);
+    
+    // Build config object for calculators that need it
+    const config: CostAnalyzerConfig | undefined = usageAssumptions ? { usageAssumptions } : undefined;
+    
     this.calculators = [
       new EC2Calculator(),
       new S3Calculator(),
@@ -56,7 +60,7 @@ export class PricingService implements IPricingService {
         usageAssumptions?.lambda?.averageDurationMs,
       ),
       new RDSCalculator(),
-      new DynamoDBCalculator(),
+      new DynamoDBCalculator(config),
       new ECSCalculator(),
       new APIGatewayCalculator(),
       new NatGatewayCalculator(usageAssumptions?.natGateway?.dataProcessedGB),

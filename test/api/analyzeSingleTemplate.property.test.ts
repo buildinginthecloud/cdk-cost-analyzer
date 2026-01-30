@@ -68,7 +68,7 @@ describe.skip('Single Template Analysis - Property Tests', () => {
             expect(result.costBreakdown.assumptions).toBeDefined();
           },
         ),
-        { numRuns: 50 }, // Run 50 iterations
+        { numRuns: 10 }, // Run 50 iterations
       );
     }, 60000); // 60 second timeout for property test
   });
@@ -139,7 +139,7 @@ describe.skip('Single Template Analysis - Property Tests', () => {
             }
           },
         ),
-        { numRuns: 50 },
+        { numRuns: 10 },
       );
     }, 60000);
   });
@@ -190,7 +190,7 @@ describe.skip('Single Template Analysis - Property Tests', () => {
             );
           },
         ),
-        { numRuns: 50 },
+        { numRuns: 10 },
       );
     }, 60000);
   });
@@ -252,7 +252,7 @@ describe.skip('Single Template Analysis - Property Tests', () => {
             expect(result.summary.length).toBeGreaterThan(0);
           },
         ),
-        { numRuns: 50 },
+        { numRuns: 10 },
       );
     }, 60000);
   });

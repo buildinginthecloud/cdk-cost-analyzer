@@ -24,10 +24,12 @@ usageAssumptions:
     memoryMB: 512                 # Allocated memory in MB
 
   # Amazon DynamoDB usage patterns
+  # For on-demand (pay-per-request) billing mode
   dynamodb:
-    readCapacityUnits: 5     # Provisioned read capacity units
-    writeCapacityUnits: 5    # Provisioned write capacity units
-    storageGB: 10            # Expected data storage in GB
+    readRequestsPerMonth: 10000000   # Monthly read requests (on-demand mode)
+    writeRequestsPerMonth: 1000000   # Monthly write requests (on-demand mode)
+  # Note: For provisioned billing mode, costs are calculated from ReadCapacityUnits
+  # and WriteCapacityUnits specified in the CloudFormation template
 
   # Amazon API Gateway usage patterns
   apiGateway:

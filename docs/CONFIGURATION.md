@@ -63,6 +63,10 @@ usageAssumptions:
     dataTransferGB: 100  # Data transfer out to internet per month
     requests: 1000000    # HTTP/HTTPS requests per month
   
+  dynamodb:
+    readRequestsPerMonth: 10000000   # Read requests per month (on-demand mode)
+    writeRequestsPerMonth: 1000000   # Write requests per month (on-demand mode)
+  
   apiGateway:
     requestsPerMonth: 10000000
 
@@ -173,6 +177,16 @@ usageAssumptions:
     dataTransferGB: 100    # Data transfer out to internet per month
     requests: 1000000      # HTTP/HTTPS requests per month
 ```
+
+#### DynamoDB
+```yaml
+usageAssumptions:
+  dynamodb:
+    readRequestsPerMonth: 10000000   # Read requests per month (on-demand mode)
+    writeRequestsPerMonth: 1000000   # Write requests per month (on-demand mode)
+```
+
+**Note**: These assumptions apply only to DynamoDB tables using on-demand (pay-per-request) billing mode. For provisioned billing mode, costs are calculated based on the configured read and write capacity units in the CloudFormation template.
 
 #### API Gateway
 ```yaml

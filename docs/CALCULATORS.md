@@ -180,50 +180,50 @@ Monthly Cost: ($0.068 × 730) + (100 × $0.115) = $61.14
 **Provisioned Mode:**
 - Read Capacity Units (RCU) × hours × rate
 - Write Capacity Units (WCU) × hours × rate
-- Storage: GB-month
 
 **On-Demand Mode:**
 - Read Request Units × rate
 - Write Request Units × rate
-- Storage: GB-month
 
 **Default Assumptions (Provisioned):**
-- 5 RCU
-- 5 WCU
-- 10 GB storage
+- Read capacity units and write capacity units are extracted from the CloudFormation template
+- If not specified, defaults to 5 RCU and 5 WCU
 
 **Default Assumptions (On-Demand):**
-- 10 million read requests/month
-- 1 million write requests/month
-- 10 GB storage
+- 10 million read requests per month
+- 1 million write requests per month
 
 **Configuration:**
 ```yaml
 usageAssumptions:
   dynamodb:
-    provisioned:
-      readCapacityUnits: 5
-      writeCapacityUnits: 5
-      storageGB: 10
-    onDemand:
-      readRequests: 10000000
-      writeRequests: 1000000
-      storageGB: 10
+    readRequestsPerMonth: 10000000   # Read requests per month (on-demand mode)
+    writeRequestsPerMonth: 1000000   # Write requests per month (on-demand mode)
 ```
+
+**Note:** These configuration values apply only to on-demand (pay-per-request) billing mode. For provisioned billing mode, costs are calculated based on the `ReadCapacityUnits` and `WriteCapacityUnits` specified in the CloudFormation template.
 
 **Example (Provisioned):**
 ```
 RCU: 5 × 730 hours × $0.00013/hour = $0.47
 WCU: 5 × 730 hours × $0.00065/hour = $2.37
-Storage: 10 GB × $0.25/GB = $2.50
-Total: $5.34/month
+Total: $2.84/month
+```
+
+**Example (On-Demand):**
+```
+Read Requests: 10,000,000 × $0.25 per million = $2.50
+Write Requests: 1,000,000 × $1.25 per million = $1.25
+Total: $3.75/month
 ```
 
 **Notes:**
-- Billing mode read from template
+- Billing mode detected from `BillingMode` property in template
+- Defaults to provisioned mode if not specified
 - Global tables multiply costs by number of regions
 - DynamoDB Streams not calculated
 - Backup costs not included
+- Storage costs not included in current implementation
 
 ## Networking Resources
 
@@ -651,14 +651,10 @@ usageAssumptions:
     storageGB: 200
   
   dynamodb:
-    provisioned:
-      readCapacityUnits: 10
-      writeCapacityUnits: 10
-      storageGB: 50
-    onDemand:
-      readRequests: 50000000
-      writeRequests: 5000000
-      storageGB: 50
+    readRequestsPerMonth: 50000000   # Read requests per month (on-demand mode)
+    writeRequestsPerMonth: 5000000   # Write requests per month (on-demand mode)
+  # Note: For provisioned mode, costs are calculated from ReadCapacityUnits
+  # and WriteCapacityUnits specified in the CloudFormation template
   
   # Networking
   natGateway:

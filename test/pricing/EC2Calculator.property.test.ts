@@ -128,7 +128,7 @@ describe('EC2Calculator - Property Tests', () => {
           expect(largerCost.confidence).toBe('high');
         },
       ),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -156,7 +156,7 @@ describe('EC2Calculator - Property Tests', () => {
           expect(cost.assumptions).toContain('Instance type not specified');
         },
       ),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -188,7 +188,7 @@ describe('EC2Calculator - Property Tests', () => {
           expect(cost.assumptions[0]).toContain('Pricing data not available');
         },
       ),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 });

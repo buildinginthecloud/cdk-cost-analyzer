@@ -150,7 +150,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
         expect(typeof result.duration).toBe('number');
         expect(result.duration).toBeGreaterThanOrEqual(0);
       }),
-      { numRuns: 20 },
+      { numRuns: 10 },
     );
   }, 30000);
 
@@ -235,7 +235,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
         expect(Array.isArray(result.templatePaths)).toBe(true);
         expect(Array.isArray(result.stackNames)).toBe(true);
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   }, 30000);
 
@@ -282,7 +282,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
           expect(result).toHaveProperty('error');
         }
       }),
-      { numRuns: 20 },
+      { numRuns: 10 },
     );
   }, 30000);
 

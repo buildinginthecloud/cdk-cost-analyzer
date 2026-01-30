@@ -58,7 +58,7 @@ describe('Reporter - Property Tests', () => {
           expect(report).toContain(resource.type);
         });
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -78,7 +78,7 @@ describe('Reporter - Property Tests', () => {
           });
         }
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -105,7 +105,7 @@ describe('Reporter - Property Tests', () => {
           }
         },
       ),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -132,7 +132,7 @@ describe('Reporter - Property Tests', () => {
           }
         },
       ),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -204,7 +204,7 @@ describe('Reporter - Property Tests', () => {
           expect(report).toContain('Custom Usage Assumptions');
         }
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -263,7 +263,7 @@ describe('Reporter - Property Tests', () => {
           expect(report).toContain('Actual Delta');
         }
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 });

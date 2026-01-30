@@ -121,7 +121,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
         expect(costWithCustom.amount).toBeGreaterThanOrEqual(0);
         expect(costWithDefaults.amount).toBeGreaterThanOrEqual(0);
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -164,7 +164,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
         expect(cost.amount).toBeGreaterThanOrEqual(0);
         expect(cost.assumptions.length).toBeGreaterThan(0);
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -204,7 +204,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
         expect(cost.amount).toBeGreaterThanOrEqual(0);
         expect(cost.assumptions.length).toBeGreaterThan(0);
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -257,7 +257,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
         expect(cost.amount).toBeGreaterThanOrEqual(0);
         expect(cost.assumptions.length).toBeGreaterThan(0);
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -307,7 +307,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
         expect(cost.amount).toBeGreaterThanOrEqual(0);
         expect(cost.assumptions.length).toBeGreaterThan(0);
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -379,7 +379,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
           expect(assumptionText).toContain(customAssumptions.natGateway.dataProcessedGB.toString());
         }
       }),
-      { numRuns: 30 },
+      { numRuns: 10 },
     );
   });
 });

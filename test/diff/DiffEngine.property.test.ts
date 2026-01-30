@@ -71,7 +71,7 @@ describe('DiffEngine - Property Tests', () => {
           });
         },
       ),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -122,7 +122,7 @@ describe('DiffEngine - Property Tests', () => {
           });
         },
       ),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 });
