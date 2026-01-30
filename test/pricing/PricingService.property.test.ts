@@ -2,8 +2,65 @@ import * as fc from 'fast-check';
 // Jest imports are global
 import { PricingService } from '../../src/pricing/PricingService';
 
+// Mock PricingClient to avoid real AWS API calls
+jest.mock('../../src/pricing/PricingClient', () => {
+  return {
+    PricingClient: jest.fn().mockImplementation(() => {
+      return {
+        getPrice: jest.fn().mockImplementation((params) => {
+          const serviceCode = params?.serviceCode || 'AmazonEC2';
+          const filters = params?.filters || [];
+          
+          // Handle Lambda special cases (has different prices for requests vs compute)
+          if (serviceCode === 'AWSLambda') {
+            const groupFilter = filters.find((f: any) => f.field === 'group');
+            if (groupFilter?.value === 'AWS-Lambda-Requests') {
+              return Promise.resolve(0.20); // per 1M requests
+            }
+            if (groupFilter?.value === 'AWS-Lambda-Duration') {
+              return Promise.resolve(0.0000166667); // per GB-second
+            }
+          }
+          
+          // Handle CloudFront special cases
+          if (serviceCode === 'AmazonCloudFront') {
+            const transferTypeFilter = filters.find((f: any) => f.field === 'transferType');
+            const requestTypeFilter = filters.find((f: any) => f.field === 'requestType');
+            if (transferTypeFilter?.value === 'CloudFront to Internet') {
+              return Promise.resolve(0.085); // per GB
+            }
+            if (requestTypeFilter?.value === 'HTTP-Requests') {
+              return Promise.resolve(0.0075); // per 10k requests
+            }
+          }
+          
+          const prices: Record<string, number> = {
+            AmazonEC2: 0.0116,
+            AmazonS3: 0.023,
+            AWSLambda: 0.0000166667,
+            AmazonRDS: 0.017,
+            AmazonCloudFront: 0.085,
+          };
+          
+          return Promise.resolve(prices[serviceCode] || 0.01);
+        }),
+        destroy: jest.fn(),
+      };
+    }),
+  };
+});
+
 describe('PricingService - Property Tests', () => {
   const service = new PricingService();
+
+  afterAll(() => {
+    // Clean up the shared service
+    try {
+      service.destroy();
+    } catch (error) {
+      // Ignore cleanup errors
+    }
+  });
 
   // Feature: cdk-cost-analyzer, Property 3: Cost calculation produces valid results
   it('should return non-negative costs with valid currency and confidence', () => {
@@ -240,48 +297,57 @@ describe('PricingService - Property Tests', () => {
         // Create a service that will have pricing failures
         const failingService = new PricingService('us-east-1');
 
-        // The service should complete without throwing errors
-        const result = await failingService.getCostDelta(diff, 'us-east-1');
+        try {
+          // The service should complete without throwing errors
+          const result = await failingService.getCostDelta(diff, 'us-east-1');
 
-        // Verify the result is defined and has the expected structure
-        expect(result).toBeDefined();
-        expect(result.totalDelta).toBeDefined();
-        expect(typeof result.totalDelta).toBe('number');
-        expect(result.currency).toBe('USD');
-        expect(Array.isArray(result.addedCosts)).toBe(true);
-        expect(Array.isArray(result.removedCosts)).toBe(true);
-        expect(Array.isArray(result.modifiedCosts)).toBe(true);
+          // Verify the result is defined and has the expected structure
+          expect(result).toBeDefined();
+          expect(result.totalDelta).toBeDefined();
+          expect(typeof result.totalDelta).toBe('number');
+          expect(result.currency).toBe('USD');
+          expect(Array.isArray(result.addedCosts)).toBe(true);
+          expect(Array.isArray(result.removedCosts)).toBe(true);
+          expect(Array.isArray(result.modifiedCosts)).toBe(true);
 
-        // Verify all resources are present in the result
-        expect(result.addedCosts.length).toBe(diff.added.length);
-        expect(result.removedCosts.length).toBe(diff.removed.length);
-        expect(result.modifiedCosts.length).toBe(diff.modified.length);
+          // Verify all resources are present in the result
+          expect(result.addedCosts.length).toBe(diff.added.length);
+          expect(result.removedCosts.length).toBe(diff.removed.length);
+          expect(result.modifiedCosts.length).toBe(diff.modified.length);
 
-        // Verify each resource has a valid cost structure with confidence level
-        [...result.addedCosts, ...result.removedCosts].forEach(
-          (resourceCost) => {
-            expect(resourceCost.monthlyCost).toBeDefined();
-            expect(resourceCost.monthlyCost.amount).toBeGreaterThanOrEqual(0);
-            expect(resourceCost.monthlyCost.currency).toBe('USD');
+          // Verify each resource has a valid cost structure with confidence level
+          [...result.addedCosts, ...result.removedCosts].forEach(
+            (resourceCost) => {
+              expect(resourceCost.monthlyCost).toBeDefined();
+              expect(resourceCost.monthlyCost.amount).toBeGreaterThanOrEqual(0);
+              expect(resourceCost.monthlyCost.currency).toBe('USD');
+              expect(['high', 'medium', 'low', 'unknown']).toContain(
+                resourceCost.monthlyCost.confidence,
+              );
+              expect(Array.isArray(resourceCost.monthlyCost.assumptions)).toBe(
+                true,
+              );
+            },
+          );
+
+          result.modifiedCosts.forEach((resourceCost) => {
+            expect(resourceCost.oldMonthlyCost).toBeDefined();
+            expect(resourceCost.newMonthlyCost).toBeDefined();
             expect(['high', 'medium', 'low', 'unknown']).toContain(
-              resourceCost.monthlyCost.confidence,
+              resourceCost.oldMonthlyCost.confidence,
             );
-            expect(Array.isArray(resourceCost.monthlyCost.assumptions)).toBe(
-              true,
+            expect(['high', 'medium', 'low', 'unknown']).toContain(
+              resourceCost.newMonthlyCost.confidence,
             );
-          },
-        );
-
-        result.modifiedCosts.forEach((resourceCost) => {
-          expect(resourceCost.oldMonthlyCost).toBeDefined();
-          expect(resourceCost.newMonthlyCost).toBeDefined();
-          expect(['high', 'medium', 'low', 'unknown']).toContain(
-            resourceCost.oldMonthlyCost.confidence,
-          );
-          expect(['high', 'medium', 'low', 'unknown']).toContain(
-            resourceCost.newMonthlyCost.confidence,
-          );
-        });
+          });
+        } finally {
+          // Clean up the service
+          try {
+            (failingService as any).pricingClient?.destroy();
+          } catch (error) {
+            // Ignore cleanup errors
+          }
+        }
       }),
       { numRuns: 50 },
     );

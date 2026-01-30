@@ -3,7 +3,70 @@ import * as fc from 'fast-check';
 import { UsageAssumptionsConfig } from '../../src/config/types';
 import { PricingService } from '../../src/pricing/PricingService';
 
+// Mock PricingClient to avoid real AWS API calls
+jest.mock('../../src/pricing/PricingClient', () => {
+  return {
+    PricingClient: jest.fn().mockImplementation(() => {
+      return {
+        getPrice: jest.fn().mockImplementation((params) => {
+          const serviceCode = params?.serviceCode || 'AmazonEC2';
+          const filters = params?.filters || [];
+          
+          // Handle Lambda special cases
+          if (serviceCode === 'AWSLambda') {
+            const groupFilter = filters.find((f: any) => f.field === 'group');
+            if (groupFilter?.value === 'AWS-Lambda-Requests') {
+              return Promise.resolve(0.20);
+            }
+            if (groupFilter?.value === 'AWS-Lambda-Duration') {
+              return Promise.resolve(0.0000166667);
+            }
+          }
+          
+          // Handle CloudFront special cases
+          if (serviceCode === 'AmazonCloudFront') {
+            const transferTypeFilter = filters.find((f: any) => f.field === 'transferType');
+            const requestTypeFilter = filters.find((f: any) => f.field === 'requestType');
+            if (transferTypeFilter?.value === 'CloudFront to Internet') {
+              return Promise.resolve(0.085);
+            }
+            if (requestTypeFilter?.value === 'HTTP-Requests') {
+              return Promise.resolve(0.0075);
+            }
+          }
+          
+          const prices: Record<string, number> = {
+            AmazonEC2: 0.0116,
+            AmazonS3: 0.023,
+            AWSLambda: 0.0000166667,
+            AmazonRDS: 0.017,
+            AmazonCloudFront: 0.085,
+            AWSELB: 0.0225,
+          };
+          
+          return Promise.resolve(prices[serviceCode] || 0.01);
+        }),
+        destroy: jest.fn(),
+      };
+    }),
+  };
+});
+
 describe('PricingService - Custom Usage Assumptions Property Tests', () => {
+  const servicesToCleanup: PricingService[] = [];
+
+  afterEach(() => {
+    // Clean up all services created during tests
+    servicesToCleanup.forEach(service => {
+      try {
+        service.destroy();
+      } catch (error) {
+        // Ignore cleanup errors
+      }
+    });
+    servicesToCleanup.length = 0;
+  });
+
   // Feature: production-readiness, Property 5: Custom usage assumptions override defaults
   // Validates: Requirements 6.2, 6.3
   it('should use custom S3 assumptions when provided', () => {
@@ -24,9 +87,11 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
           region,
           customAssumptions as UsageAssumptionsConfig,
         );
+        servicesToCleanup.push(serviceWithCustom);
 
         // Create service with defaults
         const serviceWithDefaults = new PricingService(region);
+        servicesToCleanup.push(serviceWithDefaults);
 
         const s3Resource = {
           logicalId: 'TestBucket',
@@ -78,6 +143,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
           region,
           customAssumptions as UsageAssumptionsConfig,
         );
+        servicesToCleanup.push(serviceWithCustom);
 
         const lambdaResource = {
           logicalId: 'TestFunction',
@@ -119,6 +185,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
           region,
           customAssumptions as UsageAssumptionsConfig,
         );
+        servicesToCleanup.push(serviceWithCustom);
 
         const natGatewayResource = {
           logicalId: 'TestNatGateway',
@@ -160,6 +227,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
           region,
           customAssumptions as UsageAssumptionsConfig,
         );
+        servicesToCleanup.push(serviceWithCustom);
 
         const albResource = {
           logicalId: 'TestALB',
@@ -211,6 +279,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
           region,
           customAssumptions as UsageAssumptionsConfig,
         );
+        servicesToCleanup.push(serviceWithCustom);
 
         const cloudFrontResource = {
           logicalId: 'TestDistribution',
@@ -274,6 +343,7 @@ describe('PricingService - Custom Usage Assumptions Property Tests', () => {
           region,
           customAssumptions as UsageAssumptionsConfig,
         );
+        servicesToCleanup.push(service);
 
         // Test S3 if custom assumptions provided
         if (customAssumptions.s3?.storageGB !== undefined) {

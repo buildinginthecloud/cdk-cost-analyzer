@@ -2,17 +2,41 @@ import * as fc from 'fast-check';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { PricingClient } from '../../src/pricing/PricingClient';
 
+// Mock the AWS SDK to avoid real credential checks
+jest.mock('@aws-sdk/client-pricing', () => {
+  const mockSend = jest.fn().mockRejectedValue(new Error('Could not load credentials'));
+  return {
+    PricingClient: jest.fn().mockImplementation(() => ({
+      send: mockSend,
+      destroy: jest.fn(),
+    })),
+    GetProductsCommand: jest.fn(),
+  };
+});
+
 describe('Credential Detection - Property Tests', () => {
   let originalEnv: NodeJS.ProcessEnv;
+  const clientsToCleanup: PricingClient[] = [];
 
   beforeEach(() => {
     // Save original environment
     originalEnv = { ...process.env };
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
     // Restore original environment
     process.env = originalEnv;
+    
+    // Clean up all clients created during tests
+    clientsToCleanup.forEach(client => {
+      try {
+        client.destroy();
+      } catch (error) {
+        // Ignore cleanup errors
+      }
+    });
+    clientsToCleanup.length = 0;
   });
 
   // Feature: production-readiness, Property 12: Missing AWS credentials are detected early
@@ -48,6 +72,7 @@ describe('Credential Detection - Property Tests', () => {
 
         // Create a pricing client (this should work without credentials)
         const client = new PricingClient('us-east-1');
+        clientsToCleanup.push(client);
 
         // Attempt to make an API call - this should fail with credential error
         try {
@@ -117,6 +142,7 @@ describe('Credential Detection - Property Tests', () => {
         Object.assign(process.env, envVars);
 
         const client = new PricingClient('us-east-1');
+        clientsToCleanup.push(client);
 
         // Make multiple attempts - should fail consistently
         const results = await Promise.allSettled([
@@ -239,6 +265,7 @@ describe('Credential Detection - Property Tests', () => {
         Object.assign(process.env, envVars);
 
         const client = new PricingClient('us-east-1');
+        clientsToCleanup.push(client);
 
         // Attempt API call with partial credentials
         try {
@@ -296,6 +323,7 @@ describe('Credential Detection - Property Tests', () => {
         delete process.env.AWS_PROFILE;
 
         const client = new PricingClient(region);
+        clientsToCleanup.push(client);
 
         // Attempt API call
         try {
