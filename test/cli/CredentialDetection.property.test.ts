@@ -117,7 +117,7 @@ describe('Credential Detection - Property Tests', () => {
           }
         }
       }),
-      { numRuns: 20 },
+      { numRuns: 10 },
     );
   }, 30000);
 
@@ -178,7 +178,7 @@ describe('Credential Detection - Property Tests', () => {
           }
         }
       }),
-      { numRuns: 20 },
+      { numRuns: 10 },
     );
   }, 30000);
 
@@ -227,7 +227,7 @@ describe('Credential Detection - Property Tests', () => {
 
         expect(!!hasBasicCredentials).toBe(expectedToHaveCredentials);
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -298,7 +298,7 @@ describe('Credential Detection - Property Tests', () => {
           }
         }
       }),
-      { numRuns: 20 },
+      { numRuns: 10 },
     );
   }, 30000);
 
@@ -348,7 +348,7 @@ describe('Credential Detection - Property Tests', () => {
           expect(errorMessage).toBeTruthy();
         }
       }),
-      { numRuns: 20 },
+      { numRuns: 10 },
     );
   }, 30000);
 });

@@ -26,6 +26,22 @@ export interface UsageAssumptionsConfig {
     invocationsPerMonth?: number;
     averageDurationMs?: number;
   };
+  /**
+   * DynamoDB usage assumptions for on-demand (pay-per-request) billing mode.
+   * These values are used to estimate monthly costs for DynamoDB tables
+   * configured with BillingMode: PAY_PER_REQUEST.
+   *
+   * For provisioned billing mode, costs are calculated based on the
+   * ReadCapacityUnits and WriteCapacityUnits specified in the template.
+   *
+   * @see https://aws.amazon.com/dynamodb/pricing/
+   */
+  dynamodb?: {
+    /** Number of read requests per month (default: 10,000,000) */
+    readRequestsPerMonth?: number;
+    /** Number of write requests per month (default: 1,000,000) */
+    writeRequestsPerMonth?: number;
+  };
   natGateway?: {
     dataProcessedGB?: number;
   };

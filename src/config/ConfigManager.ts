@@ -200,6 +200,17 @@ export class ConfigManager {
       );
     }
 
+    if (assumptions.dynamodb) {
+      validatePositive(
+        assumptions.dynamodb.readRequestsPerMonth,
+        'usageAssumptions.dynamodb.readRequestsPerMonth',
+      );
+      validatePositive(
+        assumptions.dynamodb.writeRequestsPerMonth,
+        'usageAssumptions.dynamodb.writeRequestsPerMonth',
+      );
+    }
+
     if (assumptions.natGateway) {
       validatePositive(
         assumptions.natGateway.dataProcessedGB,

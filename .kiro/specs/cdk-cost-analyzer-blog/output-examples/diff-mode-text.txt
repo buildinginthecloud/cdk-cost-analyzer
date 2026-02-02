@@ -1,0 +1,31 @@
+============================================================
+CDK Cost Analysis Report
+============================================================
+
+Total Cost Delta: +$2.08
+
+ADDED RESOURCES:
+------------------------------------------------------------
+  • SloganApiSloganHandler60D7C325 (AWS::Lambda::Function): $2.08 [medium]
+  • SloganApiSloganTableCB6C1B43 (AWS::DynamoDB::Table): $0.00 [unknown]
+  • SloganApiSloganHandlerServiceRoleECEA30F0 (AWS::IAM::Role): $0.00 [unknown]
+  • SloganApiSloganHandlerServiceRoleDefaultPolicy6CF9FA7B (AWS::IAM::Policy): $0.00 [unknown]
+  • SloganApiCE741B91 (AWS::ApiGateway::RestApi): $0.00 [unknown]
+  • SloganApiCloudWatchRoleEE348950 (AWS::IAM::Role): $0.00 [unknown]
+  • SloganApiAccount7298EC58 (AWS::ApiGateway::Account): $0.00 [unknown]
+  • SloganApiDeploymentEE6F43ECc6df96eeb874377443dc4186ac23be0f (AWS::ApiGateway::Deployment): $0.00 [unknown]
+  • SloganApiDeploymentStageprod489F153F (AWS::ApiGateway::Stage): $0.00 [unknown]
+  • SloganApiOPTIONS6E73DF2C (AWS::ApiGateway::Method): $0.00 [unknown]
+  • SloganApislogans775A04F4 (AWS::ApiGateway::Resource): $0.00 [unknown]
+  • SloganApislogansOPTIONSF8944C44 (AWS::ApiGateway::Method): $0.00 [unknown]
+  • SloganApislogansrandomD8CAA1EC (AWS::ApiGateway::Resource): $0.00 [unknown]
+  • SloganApislogansrandomOPTIONS3724D5F7 (AWS::ApiGateway::Method): $0.00 [unknown]
+  • SloganApislogansrandomGETApiPermissiondemodevSloganApi4213025DGETslogansrandomC0A6868F (AWS::Lambda::Permission): $0.00 [unknown]
+  • SloganApislogansrandomGETApiPermissionTestdemodevSloganApi4213025DGETslogansrandomAB319182 (AWS::Lambda::Permission): $0.00 [unknown]
+  • SloganApislogansrandomGET0722CDC5 (AWS::ApiGateway::Method): $0.00 [unknown]
+
+MODIFIED RESOURCES:
+------------------------------------------------------------
+  • CDKMetadata (AWS::CDK::Metadata): $0.00 → $0.00 ($0.00)
+
+============================================================

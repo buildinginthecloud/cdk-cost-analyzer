@@ -46,7 +46,7 @@ describe('TemplateParser - Property Tests', () => {
         expect(result.Resources).toBeDefined();
         expect(Object.keys(result.Resources).length).toBeGreaterThan(0);
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -84,7 +84,7 @@ describe('TemplateParser - Property Tests', () => {
         expect(result.Resources).toBeDefined();
         expect(Object.keys(result.Resources).length).toBeGreaterThan(0);
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 });

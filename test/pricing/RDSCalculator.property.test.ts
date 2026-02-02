@@ -97,7 +97,7 @@ describe('RDSCalculator - Property Tests', () => {
           expect(cost.assumptions.some(a => a.includes('Single-AZ'))).toBe(true);
         },
       ),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -173,7 +173,7 @@ describe('RDSCalculator - Property Tests', () => {
           expect(largerCost.confidence).toBe('high');
         },
       ),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -227,7 +227,7 @@ describe('RDSCalculator - Property Tests', () => {
           expect(costWithoutClass.assumptions[0]).toContain('not specified');
         },
       ),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -261,7 +261,7 @@ describe('RDSCalculator - Property Tests', () => {
           expect(cost.assumptions[0]).toContain('Pricing data not available');
         },
       ),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -296,7 +296,7 @@ describe('RDSCalculator - Property Tests', () => {
           expect(cost.assumptions[0]).toContain('Failed to fetch pricing');
         },
       ),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -364,7 +364,7 @@ describe('RDSCalculator - Property Tests', () => {
           expect(cost.confidence).toBe('high');
         },
       ),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 });

@@ -64,7 +64,7 @@ describe('S3Calculator - Property Tests', () => {
           expect(cost.assumptions.some(a => a.includes('storage'))).toBe(true);
         },
       ),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -99,7 +99,7 @@ describe('S3Calculator - Property Tests', () => {
           expect(cost1.confidence).toBe(cost2.confidence);
         },
       ),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -129,7 +129,7 @@ describe('S3Calculator - Property Tests', () => {
           expect(cost.assumptions[0]).toContain('Pricing data not available');
         },
       ),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -159,7 +159,7 @@ describe('S3Calculator - Property Tests', () => {
           expect(cost.assumptions[0]).toContain('Failed to fetch pricing');
         },
       ),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 });

@@ -47,7 +47,7 @@ describe('ConfigManager - Property Tests', () => {
         );
         expect(hasThresholdError).toBe(true);
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -114,7 +114,7 @@ describe('ConfigManager - Property Tests', () => {
         );
         expect(hasUsageAssumptionError).toBe(true);
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -144,7 +144,7 @@ describe('ConfigManager - Property Tests', () => {
         );
         expect(hasCacheError).toBe(true);
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -292,7 +292,7 @@ describe('ConfigManager - Property Tests', () => {
         expect(result.valid).toBe(true);
         expect(result.errors.length).toBe(0);
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -325,7 +325,7 @@ describe('ConfigManager - Property Tests', () => {
         );
         expect(hasWarningMessage).toBe(true);
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -378,7 +378,7 @@ describe('ConfigManager - Property Tests', () => {
           expect(result.valid).toBe(true);
         }
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 });

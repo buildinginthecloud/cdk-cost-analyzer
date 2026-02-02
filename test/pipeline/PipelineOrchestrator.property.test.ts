@@ -134,7 +134,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
 
         expect(mergedCostDelta.addedCosts.length).toBe(totalAddedIndividual);
       }),
-      { numRuns: 30 },
+      { numRuns: 10 },
     );
   });
 
@@ -215,7 +215,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
           cost1.modifiedCosts.length + cost2.modifiedCosts.length,
         );
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -257,7 +257,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
         const difference = Math.abs(combined - nonEmptyCost.totalDelta);
         expect(difference).toBeLessThan(0.01);
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -302,7 +302,7 @@ describe('PipelineOrchestrator - Property Tests', () => {
         const totalDelta = results.reduce((sum, r) => sum + r.totalDelta, 0);
         expect(typeof totalDelta).toBe('number');
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 });

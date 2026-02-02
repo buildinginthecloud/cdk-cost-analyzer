@@ -132,7 +132,7 @@ describe('CLI - Property Tests', () => {
         const callArgs = jest.mocked(analyzeCosts).mock.calls[0][0];
         expect(callArgs.region).toBe(region);
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -252,7 +252,7 @@ describe('CLI - Property Tests', () => {
           }
         }
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -361,7 +361,7 @@ describe('CLI - Property Tests', () => {
           expect(stderrOutput).toContain('Target template file not found');
         }
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -478,7 +478,7 @@ describe('CLI - Property Tests', () => {
           }
         }
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 });

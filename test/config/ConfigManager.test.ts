@@ -73,6 +73,53 @@ describe('ConfigManager', () => {
       expect(result.errors).toContain('usageAssumptions.s3.storageGB must be non-negative');
     });
 
+    it('should reject negative DynamoDB read requests', () => {
+      const config: CostAnalyzerConfig = {
+        usageAssumptions: {
+          dynamodb: {
+            readRequestsPerMonth: -1000,
+          },
+        },
+      };
+
+      const result = configManager.validateConfig(config);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(
+        'usageAssumptions.dynamodb.readRequestsPerMonth must be non-negative',
+      );
+    });
+
+    it('should reject negative DynamoDB write requests', () => {
+      const config: CostAnalyzerConfig = {
+        usageAssumptions: {
+          dynamodb: {
+            writeRequestsPerMonth: -500,
+          },
+        },
+      };
+
+      const result = configManager.validateConfig(config);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(
+        'usageAssumptions.dynamodb.writeRequestsPerMonth must be non-negative',
+      );
+    });
+
+    it('should accept valid DynamoDB usage assumptions', () => {
+      const config: CostAnalyzerConfig = {
+        usageAssumptions: {
+          dynamodb: {
+            readRequestsPerMonth: 10000000,
+            writeRequestsPerMonth: 1000000,
+          },
+        },
+      };
+
+      const result = configManager.validateConfig(config);
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
     it('should reject non-positive cache duration', () => {
       const config: CostAnalyzerConfig = {
         cache: {

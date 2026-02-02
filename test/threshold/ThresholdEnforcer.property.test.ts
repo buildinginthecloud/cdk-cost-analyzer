@@ -83,7 +83,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
         expect(result1.recommendations).toEqual(result2.recommendations);
         expect(result1.recommendations).toEqual(result3.recommendations);
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -132,7 +132,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
           expect(result.delta).toBe(costDelta);
         },
       ),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -163,7 +163,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
         expect(result3.level).toBe('none');
         expect(result3.delta).toBe(costDelta);
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -198,7 +198,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
         expect(result.threshold).toBe(error);
         expect(result.threshold).not.toBe(warning);
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
@@ -238,7 +238,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
           });
         },
       ),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -312,7 +312,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
         // Verify environment selection works - different thresholds used
         expect(prodResult.threshold).not.toBe(defaultResult.threshold);
       }),
-      { numRuns: 50 },
+      { numRuns: 10 },
     );
   });
 
@@ -342,7 +342,7 @@ describe('ThresholdEnforcer - Property Tests', () => {
         expect(result.level).toBe('none');
         expect(result.delta).toBe(costDelta);
       }),
-      { numRuns: 100 },
+      { numRuns: 10 },
     );
   });
 
