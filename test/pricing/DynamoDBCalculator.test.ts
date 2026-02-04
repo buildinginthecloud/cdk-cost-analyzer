@@ -109,8 +109,8 @@ describe('DynamoDBCalculator', () => {
         const readCall = jest.mocked(mockPricingClient.getPrice).mock.calls[0][0];
         
         expect(readCall.filters).toEqual([
+          { field: 'productFamily', value: 'Amazon DynamoDB PayPerRequest Throughput', type: 'TERM_MATCH' },
           { field: 'group', value: 'DDB-ReadUnits', type: 'TERM_MATCH' },
-          { field: 'groupDescription', value: 'OnDemand ReadRequestUnits', type: 'TERM_MATCH' },
         ]);
       });
 
@@ -131,8 +131,8 @@ describe('DynamoDBCalculator', () => {
         const writeCall = jest.mocked(mockPricingClient.getPrice).mock.calls[1][0];
         
         expect(writeCall.filters).toEqual([
+          { field: 'productFamily', value: 'Amazon DynamoDB PayPerRequest Throughput', type: 'TERM_MATCH' },
           { field: 'group', value: 'DDB-WriteUnits', type: 'TERM_MATCH' },
-          { field: 'groupDescription', value: 'OnDemand WriteRequestUnits', type: 'TERM_MATCH' },
         ]);
       });
 

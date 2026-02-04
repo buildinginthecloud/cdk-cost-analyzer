@@ -90,10 +90,10 @@ describe('DynamoDBCalculator Property-Based Tests', () => {
 
             const mockPricingClient: PricingClient = {
               getPrice: jest.fn().mockImplementation(async (query) => {
-                if (query.filters.some((f: PriceFilter) => f.value.includes('ReadRequestUnits'))) {
+                if (query.filters.some((f: PriceFilter) => f.value === 'DDB-ReadUnits')) {
                   return readPrice;
                 }
-                if (query.filters.some((f: PriceFilter) => f.value.includes('WriteRequestUnits'))) {
+                if (query.filters.some((f: PriceFilter) => f.value === 'DDB-WriteUnits')) {
                   return writePrice;
                 }
                 return null;
@@ -309,10 +309,10 @@ describe('DynamoDBCalculator Property-Based Tests', () => {
             const mockPricingClient: PricingClient = {
               getPrice: jest.fn().mockImplementation(async (query) => {
                 // Return different prices based on the query
-                if (query.filters.some((f: PriceFilter) => f.value.includes('ReadRequestUnits'))) {
+                if (query.filters.some((f: PriceFilter) => f.value === 'DDB-ReadUnits')) {
                   return readPrice;
                 }
-                if (query.filters.some((f: PriceFilter) => f.value.includes('WriteRequestUnits'))) {
+                if (query.filters.some((f: PriceFilter) => f.value === 'DDB-WriteUnits')) {
                   return writePrice;
                 }
                 return null;
@@ -331,19 +331,20 @@ describe('DynamoDBCalculator Property-Based Tests', () => {
             // Calculate cost
             const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
 
-            // Calculate expected cost using the formula from the design
-            const expectedCost = 
-              (readRequestsPerMonth / 1_000_000 * readPrice) + 
-              (writeRequestsPerMonth / 1_000_000 * writePrice);
+            // Calculate expected cost using the formula: requests * pricePerUnit
+            // AWS Pricing API returns price per individual request unit
+            const expectedCost =
+              (readRequestsPerMonth * readPrice) +
+              (writeRequestsPerMonth * writePrice);
 
             // Verify the calculated cost matches the expected formula
             expect(result.amount).toBeCloseTo(expectedCost, 5);
 
             // Verify the assumptions include the configured values
-            const readAssumption = result.assumptions.find(a => 
+            const readAssumption = result.assumptions.find(a =>
               a.includes(readRequestsPerMonth.toLocaleString()) && a.includes('read requests')
             );
-            const writeAssumption = result.assumptions.find(a => 
+            const writeAssumption = result.assumptions.find(a =>
               a.includes(writeRequestsPerMonth.toLocaleString()) && a.includes('write requests')
             );
 
@@ -370,10 +371,10 @@ describe('DynamoDBCalculator Property-Based Tests', () => {
             // Mock pricing client
             const mockPricingClient: PricingClient = {
               getPrice: jest.fn().mockImplementation(async (query) => {
-                if (query.filters.some((f: PriceFilter) => f.value.includes('ReadRequestUnits'))) {
+                if (query.filters.some((f: PriceFilter) => f.value === 'DDB-ReadUnits')) {
                   return readPrice;
                 }
-                if (query.filters.some((f: PriceFilter) => f.value.includes('WriteRequestUnits'))) {
+                if (query.filters.some((f: PriceFilter) => f.value === 'DDB-WriteUnits')) {
                   return writePrice;
                 }
                 return null;
@@ -396,10 +397,10 @@ describe('DynamoDBCalculator Property-Based Tests', () => {
             const defaultReadRequests = 10_000_000;
             const defaultWriteRequests = 1_000_000;
 
-            // Calculate expected cost using defaults
-            const expectedCost = 
-              (defaultReadRequests / 1_000_000 * readPrice) + 
-              (defaultWriteRequests / 1_000_000 * writePrice);
+            // Calculate expected cost using defaults: requests * pricePerUnit
+            const expectedCost =
+              (defaultReadRequests * readPrice) +
+              (defaultWriteRequests * writePrice);
 
             // Verify the calculated cost matches the expected formula with defaults
             expect(result.amount).toBeCloseTo(expectedCost, 5);
@@ -441,10 +442,10 @@ describe('DynamoDBCalculator Property-Based Tests', () => {
 
             const mockPricingClient: PricingClient = {
               getPrice: jest.fn().mockImplementation(async (query) => {
-                if (query.filters.some((f: PriceFilter) => f.value.includes('ReadRequestUnits'))) {
+                if (query.filters.some((f: PriceFilter) => f.value === 'DDB-ReadUnits')) {
                   return readPrice;
                 }
-                if (query.filters.some((f: PriceFilter) => f.value.includes('WriteRequestUnits'))) {
+                if (query.filters.some((f: PriceFilter) => f.value === 'DDB-WriteUnits')) {
                   return writePrice;
                 }
                 return null;
@@ -463,9 +464,9 @@ describe('DynamoDBCalculator Property-Based Tests', () => {
 
             // Should use default for read (10,000,000) and configured value for write
             const defaultReadRequests = 10_000_000;
-            const expectedCost = 
-              (defaultReadRequests / 1_000_000 * readPrice) + 
-              (writeRequestsPerMonth / 1_000_000 * writePrice);
+            const expectedCost =
+              (defaultReadRequests * readPrice) +
+              (writeRequestsPerMonth * writePrice);
 
             expect(result.amount).toBeCloseTo(expectedCost, 5);
 
@@ -506,10 +507,10 @@ describe('DynamoDBCalculator Property-Based Tests', () => {
 
             const mockPricingClient: PricingClient = {
               getPrice: jest.fn().mockImplementation(async (query) => {
-                if (query.filters.some((f: PriceFilter) => f.value.includes('ReadRequestUnits'))) {
+                if (query.filters.some((f: PriceFilter) => f.value === 'DDB-ReadUnits')) {
                   return readPrice;
                 }
-                if (query.filters.some((f: PriceFilter) => f.value.includes('WriteRequestUnits'))) {
+                if (query.filters.some((f: PriceFilter) => f.value === 'DDB-WriteUnits')) {
                   return writePrice;
                 }
                 return null;
@@ -528,9 +529,9 @@ describe('DynamoDBCalculator Property-Based Tests', () => {
 
             // Should use configured value for read and default for write (1,000,000)
             const defaultWriteRequests = 1_000_000;
-            const expectedCost = 
-              (readRequestsPerMonth / 1_000_000 * readPrice) + 
-              (defaultWriteRequests / 1_000_000 * writePrice);
+            const expectedCost =
+              (readRequestsPerMonth * readPrice) +
+              (defaultWriteRequests * writePrice);
 
             expect(result.amount).toBeCloseTo(expectedCost, 5);
 
@@ -634,10 +635,10 @@ describe('DynamoDBCalculator Property-Based Tests', () => {
   describe('Property 2: Pay-Per-Request Cost Calculation Formula', () => {
     /**
      * **Validates: Requirements 2.4**
-     * 
+     *
      * For any pay-per-request table with given usage assumptions and pricing data,
-     * the calculated monthly cost should equal (readRequests / 1,000,000 * readPrice) + 
-     * (writeRequests / 1,000,000 * writePrice).
+     * the calculated monthly cost should equal readRequests * readPricePerUnit +
+     * writeRequests * writePricePerUnit (AWS returns price per individual request unit).
      */
     it('should calculate pay-per-request costs using the correct formula', async () => {
       await fc.assert(
@@ -662,10 +663,10 @@ describe('DynamoDBCalculator Property-Based Tests', () => {
             // Mock pricing client to return our test prices
             const mockPricingClient: PricingClient = {
               getPrice: jest.fn().mockImplementation(async (query) => {
-                if (query.filters.some((f: PriceFilter) => f.value.includes('ReadRequestUnits'))) {
+                if (query.filters.some((f: PriceFilter) => f.value === 'DDB-ReadUnits')) {
                   return readPrice;
                 }
-                if (query.filters.some((f: PriceFilter) => f.value.includes('WriteRequestUnits'))) {
+                if (query.filters.some((f: PriceFilter) => f.value === 'DDB-WriteUnits')) {
                   return writePrice;
                 }
                 return null;
@@ -684,10 +685,11 @@ describe('DynamoDBCalculator Property-Based Tests', () => {
             // Calculate cost
             const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
 
-            // Calculate expected cost using the formula from the design
-            const expectedCost = 
-              (readRequests / 1_000_000 * readPrice) + 
-              (writeRequests / 1_000_000 * writePrice);
+            // Calculate expected cost: requests * pricePerUnit
+            // AWS Pricing API returns price per individual request unit
+            const expectedCost =
+              (readRequests * readPrice) +
+              (writeRequests * writePrice);
 
             // Verify the calculated cost matches the expected formula
             expect(result.amount).toBeCloseTo(expectedCost, 5);
@@ -767,7 +769,7 @@ describe('DynamoDBCalculator Property-Based Tests', () => {
   describe('Property 9: Pay-Per-Request Assumptions Completeness', () => {
     /**
      * **Validates: Requirements 6.1, 6.2, 6.3, 6.7**
-     * 
+     *
      * For any pay-per-request table cost result, the assumptions array should contain:
      * - The number of read requests per month
      * - The number of write requests per month
@@ -795,10 +797,10 @@ describe('DynamoDBCalculator Property-Based Tests', () => {
 
             const mockPricingClient: PricingClient = {
               getPrice: jest.fn().mockImplementation(async (query) => {
-                if (query.filters.some((f: PriceFilter) => f.value.includes('ReadRequestUnits'))) {
+                if (query.filters.some((f: PriceFilter) => f.value === 'DDB-ReadUnits')) {
                   return readPrice;
                 }
-                if (query.filters.some((f: PriceFilter) => f.value.includes('WriteRequestUnits'))) {
+                if (query.filters.some((f: PriceFilter) => f.value === 'DDB-WriteUnits')) {
                   return writePrice;
                 }
                 return null;
