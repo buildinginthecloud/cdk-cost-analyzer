@@ -286,7 +286,7 @@ describe('Repository Structure - Property Tests', () => {
       // Allow common hidden files
       if (item.startsWith('.') && !['.git', '.kiro'].includes(item)) {
         // Allow .DS_Store, .vscode, etc., but flag others
-        const acceptableHidden = ['.DS_Store', '.vscode', '.idea', '.npmrc', '.nvmrc', '.cdk-cost-analyzer-cache', '.test-cache', '.test-cache-integration'];
+        const acceptableHidden = ['.DS_Store', '.vscode', '.idea', '.npmrc', '.nvmrc', '.cdk-cost-analyzer-cache', '.test-cache', '.test-cache-integration', '.claude'];
         return !acceptableHidden.includes(item);
       }
       // Allow debug log files (temporary development artifacts)

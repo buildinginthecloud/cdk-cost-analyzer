@@ -11,7 +11,7 @@ jest.mock('../../src/pricing/PricingClient', () => {
         getPrice: jest.fn().mockImplementation((params) => {
           const serviceCode = params?.serviceCode || 'AmazonEC2';
           const filters = params?.filters || [];
-          
+
           // Handle Lambda special cases
           if (serviceCode === 'AWSLambda') {
             const groupFilter = filters.find((f: any) => f.field === 'group');
@@ -22,7 +22,7 @@ jest.mock('../../src/pricing/PricingClient', () => {
               return Promise.resolve(0.0000166667);
             }
           }
-          
+
           // Handle CloudFront special cases
           if (serviceCode === 'AmazonCloudFront') {
             const transferTypeFilter = filters.find((f: any) => f.field === 'transferType');
@@ -34,7 +34,7 @@ jest.mock('../../src/pricing/PricingClient', () => {
               return Promise.resolve(0.0075);
             }
           }
-          
+
           const prices: Record<string, number> = {
             AmazonEC2: 0.0116,
             AmazonS3: 0.023,
@@ -43,7 +43,7 @@ jest.mock('../../src/pricing/PricingClient', () => {
             AmazonCloudFront: 0.085,
             AWSELB: 0.0225,
           };
-          
+
           return Promise.resolve(prices[serviceCode] || 0.01);
         }),
         destroy: jest.fn(),

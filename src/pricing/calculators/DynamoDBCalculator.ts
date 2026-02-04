@@ -49,25 +49,28 @@ export class DynamoDBCalculator implements ResourceCostCalculator {
       // Normalize region for pricing queries
       const normalizedRegion = normalizeRegion(region);
 
-      const readCostPerMillion = await pricingClient.getPrice({
+      // Query pricing using productFamily filter for more accurate on-demand pricing
+      // Note: AWS Pricing API returns price per request unit (not per million)
+      // See: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadWriteCapacityMode.html#HowItWorks.OnDemand
+      const readCostPerUnit = await pricingClient.getPrice({
         serviceCode: 'AmazonDynamoDB',
         region: normalizedRegion,
         filters: [
+          { field: 'productFamily', value: 'Amazon DynamoDB PayPerRequest Throughput', type: 'TERM_MATCH' },
           { field: 'group', value: 'DDB-ReadUnits', type: 'TERM_MATCH' },
-          { field: 'groupDescription', value: 'OnDemand ReadRequestUnits', type: 'TERM_MATCH' },
         ],
       });
 
-      const writeCostPerMillion = await pricingClient.getPrice({
+      const writeCostPerUnit = await pricingClient.getPrice({
         serviceCode: 'AmazonDynamoDB',
         region: normalizedRegion,
         filters: [
+          { field: 'productFamily', value: 'Amazon DynamoDB PayPerRequest Throughput', type: 'TERM_MATCH' },
           { field: 'group', value: 'DDB-WriteUnits', type: 'TERM_MATCH' },
-          { field: 'groupDescription', value: 'OnDemand WriteRequestUnits', type: 'TERM_MATCH' },
         ],
       });
 
-      if (readCostPerMillion === null || writeCostPerMillion === null) {
+      if (readCostPerUnit === null || writeCostPerUnit === null) {
         return {
           amount: 0,
           currency: 'USD',
@@ -79,8 +82,9 @@ export class DynamoDBCalculator implements ResourceCostCalculator {
         };
       }
 
-      const readCost = (assumedReadRequests / 1_000_000) * readCostPerMillion;
-      const writeCost = (assumedWriteRequests / 1_000_000) * writeCostPerMillion;
+      // Calculate total cost: requests × price per request unit
+      const readCost = assumedReadRequests * readCostPerUnit;
+      const writeCost = assumedWriteRequests * writeCostPerUnit;
       const monthlyCost = readCost + writeCost;
 
       return {
