@@ -8,6 +8,7 @@ import { EC2Calculator } from './calculators/EC2Calculator';
 import { ECSCalculator } from './calculators/ECSCalculator';
 import { ElastiCacheCalculator } from './calculators/ElastiCacheCalculator';
 import { LambdaCalculator } from './calculators/LambdaCalculator';
+import { LaunchTemplateCalculator } from './calculators/LaunchTemplateCalculator';
 import { NatGatewayCalculator } from './calculators/NatGatewayCalculator';
 import { NLBCalculator } from './calculators/NLBCalculator';
 import { RDSCalculator } from './calculators/RDSCalculator';
@@ -82,6 +83,7 @@ export class PricingService implements IPricingService {
       ),
       new ElastiCacheCalculator(),
       new AutoScalingGroupCalculator(),
+      new LaunchTemplateCalculator(),
     ];
   }
 
