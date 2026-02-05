@@ -42,7 +42,7 @@ export class LaunchTemplateCalculator implements ResourceCostCalculator {
       return {
         amount: 0,
         currency: 'USD',
-        confidence: 'low',
+        confidence: 'unknown',
         assumptions: [
           'LaunchTemplate does not specify an instance type',
           'LaunchTemplates have no direct cost; costs are incurred when instances are launched',
@@ -57,6 +57,17 @@ export class LaunchTemplateCalculator implements ResourceCostCalculator {
         region,
         pricingClient,
       );
+
+      if (instanceCost === 0) {
+        return {
+          amount: 0,
+          currency: 'USD',
+          confidence: 'unknown',
+          assumptions: [
+            `Pricing data not available for instance type ${config.instanceType} in region ${region}`,
+          ],
+        };
+      }
 
       const storageCost = await this.calculateStorageCost(
         config.ebsVolumes,
@@ -78,6 +89,20 @@ export class LaunchTemplateCalculator implements ResourceCostCalculator {
           (v) => `${v.deviceName}: ${v.volumeSizeGB}GB ${v.volumeType}`,
         );
         assumptions.push(`EBS volumes: ${volumeDescriptions.join(', ')}`);
+      }
+
+      const hasProvisionedIops = config.ebsVolumes.some(
+        (v) => (v.volumeType === 'io1' || v.volumeType === 'io2') && v.iops,
+      );
+      if (hasProvisionedIops) {
+        assumptions.push('Provisioned IOPS costs for io1/io2 volumes are not included');
+      }
+
+      const hasThroughput = config.ebsVolumes.some(
+        (v) => v.volumeType === 'gp3' && v.throughput && v.throughput > 125,
+      );
+      if (hasThroughput) {
+        assumptions.push('Additional throughput costs for gp3 volumes are not included');
       }
 
       if (config.imageId) {
@@ -128,22 +153,6 @@ export class LaunchTemplateCalculator implements ResourceCostCalculator {
       imageId,
       ebsVolumes,
     };
-  }
-
-  /**
-   * Get the instance type from a LaunchTemplate resource.
-   * This is a convenience method for other calculators.
-   */
-  static getInstanceType(resource: ResourceWithId): string | null {
-    const launchTemplateData = resource.properties.LaunchTemplateData as
-      | Record<string, unknown>
-      | undefined;
-
-    if (!launchTemplateData) {
-      return null;
-    }
-
-    return (launchTemplateData.InstanceType as string) || null;
   }
 
   private extractEbsVolumes(
@@ -212,14 +221,12 @@ export class LaunchTemplateCalculator implements ResourceCostCalculator {
     let totalStorageCost = 0;
 
     for (const volume of ebsVolumes) {
-      const volumeTypeMapping = this.mapVolumeType(volume.volumeType);
-
       const pricePerGBMonth = await pricingClient.getPrice({
         serviceCode: 'AmazonEC2',
         region: normalizeRegion(region),
         filters: [
           { field: 'productFamily', value: 'Storage' },
-          { field: 'volumeApiName', value: volumeTypeMapping },
+          { field: 'volumeApiName', value: volume.volumeType.toLowerCase() },
         ],
       });
 
@@ -231,17 +238,4 @@ export class LaunchTemplateCalculator implements ResourceCostCalculator {
     return totalStorageCost;
   }
 
-  private mapVolumeType(volumeType: string): string {
-    const volumeTypeMap: Record<string, string> = {
-      gp2: 'gp2',
-      gp3: 'gp3',
-      io1: 'io1',
-      io2: 'io2',
-      st1: 'st1',
-      sc1: 'sc1',
-      standard: 'standard',
-    };
-
-    return volumeTypeMap[volumeType.toLowerCase()] || volumeType;
-  }
 }

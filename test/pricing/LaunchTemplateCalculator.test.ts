@@ -142,46 +142,6 @@ describe('LaunchTemplateCalculator', () => {
     });
   });
 
-  describe('getInstanceType static method', () => {
-    it('should return instance type from LaunchTemplate resource', () => {
-      const resource: ResourceWithId = {
-        logicalId: 'MyLaunchTemplate',
-        type: 'AWS::EC2::LaunchTemplate',
-        properties: {
-          LaunchTemplateData: {
-            InstanceType: 'm5.large',
-          },
-        },
-      };
-
-      expect(LaunchTemplateCalculator.getInstanceType(resource)).toBe('m5.large');
-    });
-
-    it('should return null when no LaunchTemplateData', () => {
-      const resource: ResourceWithId = {
-        logicalId: 'MyLaunchTemplate',
-        type: 'AWS::EC2::LaunchTemplate',
-        properties: {},
-      };
-
-      expect(LaunchTemplateCalculator.getInstanceType(resource)).toBeNull();
-    });
-
-    it('should return null when no InstanceType in LaunchTemplateData', () => {
-      const resource: ResourceWithId = {
-        logicalId: 'MyLaunchTemplate',
-        type: 'AWS::EC2::LaunchTemplate',
-        properties: {
-          LaunchTemplateData: {
-            ImageId: 'ami-12345678',
-          },
-        },
-      };
-
-      expect(LaunchTemplateCalculator.getInstanceType(resource)).toBeNull();
-    });
-  });
-
   describe('calculateCost', () => {
     const mockPricingClient: PricingClient = {
       getPrice: jest.fn(),
@@ -289,7 +249,7 @@ describe('LaunchTemplateCalculator', () => {
       expect(result.amount).toBe(expectedInstanceCost + expectedStorageCost);
     });
 
-    it('should return low confidence when instance type is not specified', async () => {
+    it('should return unknown confidence when instance type is not specified', async () => {
       const resource: ResourceWithId = {
         logicalId: 'MyLaunchTemplate',
         type: 'AWS::EC2::LaunchTemplate',
@@ -303,7 +263,7 @@ describe('LaunchTemplateCalculator', () => {
       const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
 
       expect(result.amount).toBe(0);
-      expect(result.confidence).toBe('low');
+      expect(result.confidence).toBe('unknown');
       expect(result.assumptions).toContain('LaunchTemplate does not specify an instance type');
       expect(mockPricingClient.getPrice).not.toHaveBeenCalled();
     });
@@ -318,7 +278,7 @@ describe('LaunchTemplateCalculator', () => {
       const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
 
       expect(result.amount).toBe(0);
-      expect(result.confidence).toBe('low');
+      expect(result.confidence).toBe('unknown');
       expect(mockPricingClient.getPrice).not.toHaveBeenCalled();
     });
 
@@ -357,7 +317,10 @@ describe('LaunchTemplateCalculator', () => {
       const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
 
       expect(result.amount).toBe(0);
-      expect(result.confidence).toBe('low');
+      expect(result.confidence).toBe('unknown');
+      expect(result.assumptions).toContain(
+        'Pricing data not available for instance type t3.micro in region us-east-1',
+      );
     });
 
     it('should handle pricing API errors', async () => {
@@ -510,6 +473,104 @@ describe('LaunchTemplateCalculator', () => {
 
       const config = calculator.extractConfig(resource);
       expect(config.ebsVolumes).toHaveLength(1);
+    });
+
+    it('should include assumption about provisioned IOPS for io1/io2 volumes', async () => {
+      jest
+        .mocked(mockPricingClient.getPrice)
+        .mockResolvedValueOnce(0.0104) // EC2 hourly rate
+        .mockResolvedValueOnce(0.125); // io2 per GB/month
+
+      const resource: ResourceWithId = {
+        logicalId: 'MyLaunchTemplate',
+        type: 'AWS::EC2::LaunchTemplate',
+        properties: {
+          LaunchTemplateData: {
+            InstanceType: 't3.micro',
+            BlockDeviceMappings: [
+              {
+                DeviceName: '/dev/xvda',
+                Ebs: {
+                  VolumeSize: 100,
+                  VolumeType: 'io2',
+                  Iops: 3000,
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
+
+      expect(result.assumptions).toContain(
+        'Provisioned IOPS costs for io1/io2 volumes are not included',
+      );
+    });
+
+    it('should include assumption about additional throughput for gp3 volumes', async () => {
+      jest
+        .mocked(mockPricingClient.getPrice)
+        .mockResolvedValueOnce(0.0104) // EC2 hourly rate
+        .mockResolvedValueOnce(0.08); // gp3 per GB/month
+
+      const resource: ResourceWithId = {
+        logicalId: 'MyLaunchTemplate',
+        type: 'AWS::EC2::LaunchTemplate',
+        properties: {
+          LaunchTemplateData: {
+            InstanceType: 't3.micro',
+            BlockDeviceMappings: [
+              {
+                DeviceName: '/dev/xvda',
+                Ebs: {
+                  VolumeSize: 100,
+                  VolumeType: 'gp3',
+                  Throughput: 500,
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
+
+      expect(result.assumptions).toContain(
+        'Additional throughput costs for gp3 volumes are not included',
+      );
+    });
+
+    it('should not include IOPS assumption for gp volumes', async () => {
+      jest
+        .mocked(mockPricingClient.getPrice)
+        .mockResolvedValueOnce(0.0104) // EC2 hourly rate
+        .mockResolvedValueOnce(0.08); // gp3 per GB/month
+
+      const resource: ResourceWithId = {
+        logicalId: 'MyLaunchTemplate',
+        type: 'AWS::EC2::LaunchTemplate',
+        properties: {
+          LaunchTemplateData: {
+            InstanceType: 't3.micro',
+            BlockDeviceMappings: [
+              {
+                DeviceName: '/dev/xvda',
+                Ebs: {
+                  VolumeSize: 100,
+                  VolumeType: 'gp3',
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
+
+      expect(result.assumptions).not.toContain(
+        'Provisioned IOPS costs for io1/io2 volumes are not included',
+      );
     });
   });
 });
