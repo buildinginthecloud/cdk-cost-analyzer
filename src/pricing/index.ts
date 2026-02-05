@@ -7,4 +7,9 @@ export { LambdaCalculator } from './calculators/LambdaCalculator';
 export { RDSCalculator } from './calculators/RDSCalculator';
 export { CloudFrontCalculator } from './calculators/CloudFrontCalculator';
 export { ElastiCacheCalculator } from './calculators/ElastiCacheCalculator';
+export {
+  LaunchTemplateCalculator,
+  LaunchTemplateConfig,
+  EbsVolumeConfig,
+} from './calculators/LaunchTemplateCalculator';
 export * from './types';
