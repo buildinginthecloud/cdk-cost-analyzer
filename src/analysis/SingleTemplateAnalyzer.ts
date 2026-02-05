@@ -52,7 +52,7 @@ export class SingleTemplateAnalyzer {
       const analyzedAt = new Date();
       const resourceCosts: EnhancedResourceCost[] = await Promise.all(
         resources.map(async (resource) => {
-          const monthlyCost = await pricingService.getResourceCost(resource, region);
+          const monthlyCost = await pricingService.getResourceCost(resource, region, resources);
           return {
             logicalId: resource.logicalId,
             type: resource.type,
