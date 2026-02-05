@@ -21,9 +21,13 @@ describe('APIGatewayCalculator', () => {
   });
 
   describe('calculateCost', () => {
-    const mockPricingClient: PricingClient = {
-      getPrice: jest.fn(),
-    };
+    let mockPricingClient: PricingClient;
+
+    beforeEach(() => {
+      mockPricingClient = {
+        getPrice: jest.fn(),
+      };
+    });
 
     it('should calculate cost for REST API', async () => {
       jest.mocked(mockPricingClient.getPrice).mockResolvedValue(3.5);
@@ -40,6 +44,48 @@ describe('APIGatewayCalculator', () => {
       expect(result.currency).toBe('USD');
       expect(result.confidence).toBe('medium');
       expect(result.assumptions).toContain('REST API type');
+    });
+
+    it('should use correct usagetype filter for REST API', async () => {
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(3.5);
+
+      const resource = {
+        logicalId: 'MyRestApi',
+        type: 'AWS::ApiGateway::RestApi',
+        properties: {},
+      };
+
+      await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
+
+      expect(mockPricingClient.getPrice).toHaveBeenCalledWith(
+        expect.objectContaining({
+          serviceCode: 'AmazonApiGateway',
+          filters: expect.arrayContaining([
+            { field: 'productFamily', value: 'API Calls' },
+            { field: 'usagetype', value: 'USE1-ApiGatewayRequest' },
+          ]),
+        }),
+      );
+    });
+
+    it('should use correct regional prefix for EU region REST API', async () => {
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(3.5);
+
+      const resource = {
+        logicalId: 'MyRestApi',
+        type: 'AWS::ApiGateway::RestApi',
+        properties: {},
+      };
+
+      await calculator.calculateCost(resource, 'eu-central-1', mockPricingClient);
+
+      expect(mockPricingClient.getPrice).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: expect.arrayContaining([
+            { field: 'usagetype', value: 'EUC1-ApiGatewayRequest' },
+          ]),
+        }),
+      );
     });
 
     it('should calculate cost for HTTP API', async () => {
@@ -61,6 +107,30 @@ describe('APIGatewayCalculator', () => {
       expect(result.assumptions).toContain('HTTP API type');
     });
 
+    it('should use correct usagetype filter for HTTP API', async () => {
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(1.0);
+
+      const resource = {
+        logicalId: 'MyHttpApi',
+        type: 'AWS::ApiGatewayV2::Api',
+        properties: {
+          ProtocolType: 'HTTP',
+        },
+      };
+
+      await calculator.calculateCost(resource, 'us-west-2', mockPricingClient);
+
+      expect(mockPricingClient.getPrice).toHaveBeenCalledWith(
+        expect.objectContaining({
+          serviceCode: 'AmazonApiGateway',
+          filters: expect.arrayContaining([
+            { field: 'productFamily', value: 'API Calls' },
+            { field: 'usagetype', value: 'USW2-ApiGatewayHttpRequest' },
+          ]),
+        }),
+      );
+    });
+
     it('should calculate cost for WebSocket API', async () => {
       jest.mocked(mockPricingClient.getPrice).mockResolvedValue(1.0);
 
@@ -78,6 +148,45 @@ describe('APIGatewayCalculator', () => {
       expect(result.currency).toBe('USD');
       expect(result.confidence).toBe('medium');
       expect(result.assumptions.some(a => a.includes('WebSocket'))).toBe(true);
+    });
+
+    it('should use correct usagetype filters for WebSocket API', async () => {
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(1.0);
+
+      const resource = {
+        logicalId: 'MyWebSocketApi',
+        type: 'AWS::ApiGatewayV2::Api',
+        properties: {
+          ProtocolType: 'WEBSOCKET',
+        },
+      };
+
+      await calculator.calculateCost(resource, 'ap-northeast-1', mockPricingClient);
+
+      // Should call getPrice twice for WebSocket: once for messages, once for minutes
+      expect(mockPricingClient.getPrice).toHaveBeenCalledTimes(2);
+
+      // Check message pricing query
+      expect(mockPricingClient.getPrice).toHaveBeenCalledWith(
+        expect.objectContaining({
+          serviceCode: 'AmazonApiGateway',
+          filters: expect.arrayContaining([
+            { field: 'productFamily', value: 'WebSocket' },
+            { field: 'usagetype', value: 'APN1-ApiGatewayMessage' },
+          ]),
+        }),
+      );
+
+      // Check connection minutes pricing query
+      expect(mockPricingClient.getPrice).toHaveBeenCalledWith(
+        expect.objectContaining({
+          serviceCode: 'AmazonApiGateway',
+          filters: expect.arrayContaining([
+            { field: 'productFamily', value: 'WebSocket' },
+            { field: 'usagetype', value: 'APN1-ApiGatewayMinute' },
+          ]),
+        }),
+      );
     });
 
     it('should default to REST API for v1 APIs', async () => {
@@ -123,6 +232,27 @@ describe('APIGatewayCalculator', () => {
       expect(result.amount).toBe(0);
       expect(result.confidence).toBe('unknown');
       expect(result.assumptions[0]).toContain('Failed to fetch pricing');
+    });
+
+    it('should handle unknown region gracefully', async () => {
+      jest.mocked(mockPricingClient.getPrice).mockResolvedValue(3.5);
+
+      const resource = {
+        logicalId: 'MyApi',
+        type: 'AWS::ApiGateway::RestApi',
+        properties: {},
+      };
+
+      await calculator.calculateCost(resource, 'unknown-region', mockPricingClient);
+
+      // Should use usagetype without prefix for unknown regions
+      expect(mockPricingClient.getPrice).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: expect.arrayContaining([
+            { field: 'usagetype', value: 'ApiGatewayRequest' },
+          ]),
+        }),
+      );
     });
   });
 });
