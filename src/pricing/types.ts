@@ -1,7 +1,7 @@
 import { ResourceWithId, ResourceDiff } from '../diff/types';
 
 export interface PricingService {
-  getResourceCost(resource: ResourceWithId, region: string): Promise<MonthlyCost>;
+  getResourceCost(resource: ResourceWithId, region: string, templateResources?: ResourceWithId[]): Promise<MonthlyCost>;
   getCostDelta(diff: ResourceDiff, region: string): Promise<CostDelta>;
 }
 
@@ -38,7 +38,8 @@ export interface ResourceCostCalculator {
   calculateCost(
     resource: ResourceWithId,
     region: string,
-    pricingClient: PricingClient
+    pricingClient: PricingClient,
+    templateResources?: ResourceWithId[],
   ): Promise<MonthlyCost>;
 }
 

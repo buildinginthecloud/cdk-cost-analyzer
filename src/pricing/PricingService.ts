@@ -1,6 +1,7 @@
 import { CacheManager } from './CacheManager';
 import { ALBCalculator } from './calculators/ALBCalculator';
 import { APIGatewayCalculator } from './calculators/APIGatewayCalculator';
+import { AutoScalingGroupCalculator } from './calculators/AutoScalingGroupCalculator';
 import { CloudFrontCalculator } from './calculators/CloudFrontCalculator';
 import { DynamoDBCalculator } from './calculators/DynamoDBCalculator';
 import { EC2Calculator } from './calculators/EC2Calculator';
@@ -80,10 +81,11 @@ export class PricingService implements IPricingService {
         usageAssumptions?.cloudfront?.requests,
       ),
       new ElastiCacheCalculator(),
+      new AutoScalingGroupCalculator(),
     ];
   }
 
-  async getResourceCost(resource: ResourceWithId, region: string): Promise<MonthlyCost> {
+  async getResourceCost(resource: ResourceWithId, region: string, templateResources?: ResourceWithId[]): Promise<MonthlyCost> {
     // Check if resource type is excluded
     if (this.excludedResourceTypes.has(resource.type)) {
       return {
@@ -112,7 +114,7 @@ export class PricingService implements IPricingService {
     }
 
     try {
-      return await calculator.calculateCost(resource, region, this.pricingClient);
+      return await calculator.calculateCost(resource, region, this.pricingClient, templateResources);
     } catch (error) {
       return {
         amount: 0,
@@ -129,9 +131,20 @@ export class PricingService implements IPricingService {
     const filteredRemoved = diff.removed.filter(r => !this.excludedResourceTypes.has(r.type));
     const filteredModified = diff.modified.filter(r => !this.excludedResourceTypes.has(r.type));
 
+    // Build template resource context from all resources in the diff
+    const allResources: ResourceWithId[] = [
+      ...diff.added,
+      ...diff.removed,
+      ...diff.modified.map(r => ({
+        logicalId: r.logicalId,
+        type: r.type,
+        properties: r.newProperties,
+      })),
+    ];
+
     const addedCosts = await Promise.all(
       filteredAdded.map(async (resource) => {
-        const monthlyCost = await this.getResourceCost(resource, region);
+        const monthlyCost = await this.getResourceCost(resource, region, allResources);
         return {
           logicalId: resource.logicalId,
           type: resource.type,
@@ -142,7 +155,7 @@ export class PricingService implements IPricingService {
 
     const removedCosts = await Promise.all(
       filteredRemoved.map(async (resource) => {
-        const monthlyCost = await this.getResourceCost(resource, region);
+        const monthlyCost = await this.getResourceCost(resource, region, allResources);
         return {
           logicalId: resource.logicalId,
           type: resource.type,
@@ -164,8 +177,8 @@ export class PricingService implements IPricingService {
           properties: resource.newProperties,
         };
 
-        const oldMonthlyCost = await this.getResourceCost(oldResource, region);
-        const newMonthlyCost = await this.getResourceCost(newResource, region);
+        const oldMonthlyCost = await this.getResourceCost(oldResource, region, allResources);
+        const newMonthlyCost = await this.getResourceCost(newResource, region, allResources);
         const costDelta = newMonthlyCost.amount - oldMonthlyCost.amount;
 
         return {
