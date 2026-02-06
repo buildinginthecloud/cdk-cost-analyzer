@@ -208,4 +208,193 @@ describe('LambdaCalculator', () => {
       expect(result.assumptions[0]).toContain('Network timeout');
     });
   });
+
+  describe('fallback pricing with custom assumptions (lines 70-89)', () => {
+    const fallbackMockClient: PricingClient = {
+      getPrice: jest.fn(),
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should use fallback pricing when request price is null but custom invocations provided', async () => {
+      const customCalculator = new LambdaCalculator(2000000, undefined);
+      
+      jest.mocked(fallbackMockClient.getPrice)
+        .mockResolvedValueOnce(null) // Request pricing unavailable
+        .mockResolvedValueOnce(0.0000166667); // Compute pricing available
+
+      const resource = {
+        logicalId: 'MyFunction',
+        type: 'AWS::Lambda::Function',
+        properties: { MemorySize: 256 },
+      };
+
+      const result = await customCalculator.calculateCost(resource, 'us-east-1', fallbackMockClient);
+
+      expect(result.amount).toBeGreaterThan(0);
+      expect(result.confidence).toBe('low');
+      expect(result.assumptions.some(a => a.includes('fallback request pricing'))).toBe(true);
+    });
+
+    it('should use fallback pricing when compute price is null but custom duration provided', async () => {
+      const customCalculator = new LambdaCalculator(undefined, 500);
+      
+      jest.mocked(fallbackMockClient.getPrice)
+        .mockResolvedValueOnce(0.20) // Request pricing available
+        .mockResolvedValueOnce(null); // Compute pricing unavailable
+
+      const resource = {
+        logicalId: 'MyFunction',
+        type: 'AWS::Lambda::Function',
+        properties: { MemorySize: 512 },
+      };
+
+      const result = await customCalculator.calculateCost(resource, 'us-east-1', fallbackMockClient);
+
+      expect(result.amount).toBeGreaterThan(0);
+      expect(result.confidence).toBe('low');
+      expect(result.assumptions.some(a => a.includes('fallback compute pricing'))).toBe(true);
+    });
+
+    it('should use both fallback prices when both are null and custom assumptions provided', async () => {
+      const customCalculator = new LambdaCalculator(5000000, 2000);
+      
+      jest.mocked(fallbackMockClient.getPrice).mockResolvedValue(null);
+
+      const resource = {
+        logicalId: 'MyFunction',
+        type: 'AWS::Lambda::Function',
+        properties: { MemorySize: 1024 },
+      };
+
+      const result = await customCalculator.calculateCost(resource, 'us-east-1', fallbackMockClient);
+
+      expect(result.amount).toBeGreaterThan(0);
+      expect(result.confidence).toBe('low');
+      expect(result.assumptions.some(a => a.includes('fallback'))).toBe(true);
+    });
+  });
+
+  describe('custom assumption messages in error handler (lines 123-128)', () => {
+    const errorMockClient: PricingClient = {
+      getPrice: jest.fn(),
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should include custom invocation assumption message on error', async () => {
+      const customCalculator = new LambdaCalculator(3000000, undefined);
+      
+      jest.mocked(errorMockClient.getPrice).mockRejectedValue(new Error('API Error'));
+
+      const resource = {
+        logicalId: 'MyFunction',
+        type: 'AWS::Lambda::Function',
+        properties: { MemorySize: 256 },
+      };
+
+      const result = await customCalculator.calculateCost(resource, 'us-east-1', errorMockClient);
+
+      expect(result.assumptions.some(a => a.includes('custom invocation count'))).toBe(true);
+    });
+
+    it('should include custom duration assumption message on error', async () => {
+      const customCalculator = new LambdaCalculator(undefined, 750);
+      
+      jest.mocked(errorMockClient.getPrice).mockRejectedValue(new Error('Timeout'));
+
+      const resource = {
+        logicalId: 'MyFunction',
+        type: 'AWS::Lambda::Function',
+        properties: { MemorySize: 512 },
+      };
+
+      const result = await customCalculator.calculateCost(resource, 'us-east-1', errorMockClient);
+
+      expect(result.assumptions.some(a => a.includes('custom duration'))).toBe(true);
+    });
+
+    it('should include both custom assumption messages when both provided on error', async () => {
+      const customCalculator = new LambdaCalculator(2000000, 1500);
+      
+      jest.mocked(errorMockClient.getPrice).mockRejectedValue(new Error('Network Error'));
+
+      const resource = {
+        logicalId: 'MyFunction',
+        type: 'AWS::Lambda::Function',
+        properties: { MemorySize: 1024 },
+      };
+
+      const result = await customCalculator.calculateCost(resource, 'us-east-1', errorMockClient);
+
+      expect(result.assumptions.some(a => a.includes('custom invocation count'))).toBe(true);
+      expect(result.assumptions.some(a => a.includes('custom duration'))).toBe(true);
+    });
+  });
+
+  describe('error handler with fallback pricing (lines 135-151)', () => {
+    const fallbackErrorMockClient: PricingClient = {
+      getPrice: jest.fn(),
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should use fallback pricing on API error when custom invocations provided', async () => {
+      const customCalculator = new LambdaCalculator(1000000, undefined);
+      
+      jest.mocked(fallbackErrorMockClient.getPrice).mockRejectedValue(new Error('Service unavailable'));
+
+      const resource = {
+        logicalId: 'MyFunction',
+        type: 'AWS::Lambda::Function',
+        properties: { MemorySize: 128 },
+      };
+
+      const result = await customCalculator.calculateCost(resource, 'us-east-1', fallbackErrorMockClient);
+
+      expect(result.amount).toBeGreaterThan(0);
+      expect(result.confidence).toBe('low');
+      expect(result.assumptions.some(a => a.includes('fallback pricing'))).toBe(true);
+    });
+
+    it('should use fallback pricing on API error when custom duration provided', async () => {
+      const customCalculator = new LambdaCalculator(undefined, 500);
+      
+      jest.mocked(fallbackErrorMockClient.getPrice).mockRejectedValue(new Error('Connection refused'));
+
+      const resource = {
+        logicalId: 'MyFunction',
+        type: 'AWS::Lambda::Function',
+        properties: { MemorySize: 256 },
+      };
+
+      const result = await customCalculator.calculateCost(resource, 'us-east-1', fallbackErrorMockClient);
+
+      expect(result.amount).toBeGreaterThan(0);
+      expect(result.confidence).toBe('low');
+    });
+
+    it('should return zero cost on API error without custom assumptions', async () => {
+      const defaultCalculator = new LambdaCalculator();
+      
+      jest.mocked(fallbackErrorMockClient.getPrice).mockRejectedValue(new Error('API Error'));
+
+      const resource = {
+        logicalId: 'MyFunction',
+        type: 'AWS::Lambda::Function',
+        properties: { MemorySize: 512 },
+      };
+
+      const result = await defaultCalculator.calculateCost(resource, 'us-east-1', fallbackErrorMockClient);
+
+      expect(result.amount).toBe(0);
+      expect(result.confidence).toBe('unknown');
+    });
+  });
 });

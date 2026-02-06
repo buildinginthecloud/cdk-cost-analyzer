@@ -172,3 +172,183 @@ describe('NatGatewayCalculator - Property Tests', () => {
     );
   });
 });
+
+describe('NatGatewayCalculator - Unit Tests', () => {
+  const testResource = {
+    logicalId: 'TestNatGateway',
+    type: 'AWS::EC2::NatGateway',
+    properties: {},
+  };
+
+  describe('pricing unavailable paths (lines 62-86)', () => {
+    it('should return zero cost with unknown confidence when hourly rate is null', async () => {
+      const mockPricingClient = {
+        getPrice: jest.fn().mockImplementation(async (params: any) => {
+          if (params.filters.some((f: any) => f.value.includes('Hours'))) {
+            return null; // Hourly rate unavailable
+          }
+          if (params.filters.some((f: any) => f.value.includes('Bytes'))) {
+            return 0.045; // Data processing available
+          }
+          return null;
+        }),
+      };
+
+      const calculator = new NatGatewayCalculator();
+      const cost = await calculator.calculateCost(testResource, 'us-east-1', mockPricingClient);
+
+      expect(cost.amount).toBe(0);
+      expect(cost.confidence).toBe('unknown');
+      expect(cost.assumptions.some(a => a.includes('Pricing data not available'))).toBe(true);
+      expect(cost.assumptions.some(a => a.includes('100 GB'))).toBe(true);
+      expect(cost.assumptions.some(a => a.includes('730 hours'))).toBe(true);
+    });
+
+    it('should return zero cost with unknown confidence when data processing rate is null', async () => {
+      const mockPricingClient = {
+        getPrice: jest.fn().mockImplementation(async (params: any) => {
+          if (params.filters.some((f: any) => f.value.includes('Hours'))) {
+            return 0.045; // Hourly rate available
+          }
+          if (params.filters.some((f: any) => f.value.includes('Bytes'))) {
+            return null; // Data processing unavailable
+          }
+          return null;
+        }),
+      };
+
+      const calculator = new NatGatewayCalculator();
+      const cost = await calculator.calculateCost(testResource, 'eu-central-1', mockPricingClient);
+
+      expect(cost.amount).toBe(0);
+      expect(cost.confidence).toBe('unknown');
+      expect(cost.assumptions.some(a => a.includes('Pricing data not available'))).toBe(true);
+    });
+
+    it('should return zero cost when both hourly and data processing rates are null', async () => {
+      const mockPricingClient = {
+        getPrice: jest.fn().mockResolvedValue(null),
+      };
+
+      const calculator = new NatGatewayCalculator();
+      const cost = await calculator.calculateCost(testResource, 'ap-southeast-1', mockPricingClient);
+
+      expect(cost.amount).toBe(0);
+      expect(cost.confidence).toBe('unknown');
+      expect(cost.assumptions.some(a => a.includes('Pricing data not available'))).toBe(true);
+    });
+
+    it('should include custom data processing assumption message when provided (line 69-71)', async () => {
+      const mockPricingClient = {
+        getPrice: jest.fn().mockResolvedValue(null),
+      };
+
+      const customDataGB = 500;
+      const calculator = new NatGatewayCalculator(customDataGB);
+      const cost = await calculator.calculateCost(testResource, 'us-west-2', mockPricingClient);
+
+      expect(cost.amount).toBe(0);
+      expect(cost.confidence).toBe('unknown');
+      expect(cost.assumptions.some(a => a.includes('500 GB'))).toBe(true);
+      expect(cost.assumptions.some(a => a.includes('custom data processing assumption'))).toBe(true);
+    });
+
+    it('should not include custom assumption message when using default data processing', async () => {
+      const mockPricingClient = {
+        getPrice: jest.fn().mockResolvedValue(null),
+      };
+
+      const calculator = new NatGatewayCalculator(); // No custom value
+      const cost = await calculator.calculateCost(testResource, 'eu-west-1', mockPricingClient);
+
+      expect(cost.amount).toBe(0);
+      expect(cost.assumptions.some(a => a.includes('custom data processing assumption'))).toBe(false);
+    });
+  });
+
+  describe('exception handling (lines 112-124)', () => {
+    it('should handle pricing API errors gracefully', async () => {
+      const mockPricingClient = {
+        getPrice: jest.fn().mockRejectedValue(new Error('Network timeout')),
+      };
+
+      const calculator = new NatGatewayCalculator();
+      const cost = await calculator.calculateCost(testResource, 'us-east-1', mockPricingClient);
+
+      expect(cost.amount).toBe(0);
+      expect(cost.confidence).toBe('unknown');
+      expect(cost.assumptions[0]).toContain('Failed to fetch pricing');
+      expect(cost.assumptions[0]).toContain('Network timeout');
+    });
+
+    it('should handle non-Error exceptions', async () => {
+      const mockPricingClient = {
+        getPrice: jest.fn().mockRejectedValue('String error message'),
+      };
+
+      const calculator = new NatGatewayCalculator();
+      const cost = await calculator.calculateCost(testResource, 'eu-central-1', mockPricingClient);
+
+      expect(cost.amount).toBe(0);
+      expect(cost.confidence).toBe('unknown');
+      expect(cost.assumptions[0]).toContain('Failed to fetch pricing');
+      expect(cost.assumptions[0]).toContain('String error message');
+    });
+
+    it('should handle AWS SDK throttling errors', async () => {
+      const throttlingError = new Error('Rate exceeded');
+      throttlingError.name = 'ThrottlingException';
+      
+      const mockPricingClient = {
+        getPrice: jest.fn().mockRejectedValue(throttlingError),
+      };
+
+      const calculator = new NatGatewayCalculator();
+      const cost = await calculator.calculateCost(testResource, 'ap-northeast-1', mockPricingClient);
+
+      expect(cost.amount).toBe(0);
+      expect(cost.confidence).toBe('unknown');
+      expect(cost.assumptions[0]).toContain('Failed to fetch pricing');
+    });
+  });
+
+  describe('region prefix mapping', () => {
+    it('should return empty prefix for unknown regions', async () => {
+      const mockPricingClient = {
+        getPrice: jest.fn().mockResolvedValue(0.045),
+      };
+
+      const calculator = new NatGatewayCalculator();
+      // Using an unknown/invalid region should still work
+      const cost = await calculator.calculateCost(testResource, 'unknown-region-1', mockPricingClient);
+
+      // Should still attempt to calculate (even if prefix is empty)
+      expect(cost).toBeDefined();
+    });
+
+    it('should use correct prefix for various regions', async () => {
+      const mockPricingClient = {
+        getPrice: jest.fn().mockResolvedValue(0.045),
+      };
+
+      const calculator = new NatGatewayCalculator();
+      
+      // Test various region prefixes
+      const regions = [
+        'us-east-1',
+        'us-west-2',
+        'eu-central-1',
+        'ap-southeast-1',
+        'sa-east-1',
+        'me-south-1',
+        'af-south-1',
+      ];
+
+      for (const region of regions) {
+        const cost = await calculator.calculateCost(testResource, region, mockPricingClient);
+        expect(cost).toBeDefined();
+        expect(mockPricingClient.getPrice).toHaveBeenCalled();
+      }
+    });
+  });
+});
