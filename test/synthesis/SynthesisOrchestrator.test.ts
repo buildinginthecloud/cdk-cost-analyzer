@@ -271,6 +271,43 @@ describe('SynthesisOrchestrator', () => {
       expect(mockProc.kill).toHaveBeenCalledWith('SIGKILL');
     });
 
+    it('should handle forceKill outer catch when proc.kill throws (lines 128-129)', async () => {
+      const mockProc = new EventEmitter() as any;
+      mockProc.stdout = new EventEmitter();
+      mockProc.stderr = new EventEmitter();
+      mockProc.pid = 12345;
+      mockProc.killed = false;
+      // Make proc.kill throw on SIGKILL to trigger the outer catch (line 128-129)
+      mockProc.kill = jest.fn().mockImplementation((signal: string) => {
+        if (signal === 'SIGKILL') {
+          throw new Error('kill failed');
+        }
+      });
+      mockProc.removeAllListeners = jest.fn();
+      mockProc.stdout.removeAllListeners = jest.fn();
+      mockProc.stderr.removeAllListeners = jest.fn();
+
+      mockSpawn.mockReturnValue(mockProc);
+
+      const resultPromise = orchestrator.synthesize({
+        cdkAppPath: '/test/project',
+      });
+
+      // Trigger timeout (SIGTERM)
+      jest.advanceTimersByTime(15000);
+      await Promise.resolve();
+
+      // Trigger forceKill — proc.kill('SIGKILL') will throw, hitting outer catch
+      jest.advanceTimersByTime(1000);
+      await Promise.resolve();
+
+      const result = await resultPromise;
+
+      expect(result.success).toBe(false);
+      expect(mockProc.kill).toHaveBeenCalledWith('SIGTERM');
+      expect(mockProc.kill).toHaveBeenCalledWith('SIGKILL');
+    });
+
     it('should handle forceKill when process.kill throws (line 122-125)', async () => {
       const originalKill = process.kill;
       process.kill = jest.fn().mockImplementation(() => {

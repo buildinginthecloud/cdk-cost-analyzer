@@ -99,13 +99,8 @@ export class SynthesisOrchestrator {
       let stdout = '';
       let stderr = '';
       let isResolved = false;
-      let killTimeout: NodeJS.Timeout | null = null;
 
       const cleanup = (): void => {
-        if (killTimeout) {
-          clearTimeout(killTimeout);
-          killTimeout = null;
-        }
         // Remove all listeners to prevent memory leaks
         proc.removeAllListeners();
         proc.stdout?.removeAllListeners();
@@ -138,7 +133,7 @@ export class SynthesisOrchestrator {
           proc.kill('SIGTERM');
           
           // Force kill after 1 second if still running
-          killTimeout = setTimeout(() => {
+          setTimeout(() => {
             forceKill();
           }, 1000);
 
