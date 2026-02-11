@@ -239,7 +239,7 @@ describe('SynthesisOrchestrator', () => {
       expect(mockProc.kill).toHaveBeenCalledWith('SIGTERM');
     });
 
-    it('should attempt SIGTERM on timeout (lines 132-152)', async () => {
+    it('should force kill if process does not respond to SIGTERM (lines 115-129)', async () => {
       const mockProc = new EventEmitter() as any;
       mockProc.stdout = new EventEmitter();
       mockProc.stderr = new EventEmitter();
@@ -260,10 +260,15 @@ describe('SynthesisOrchestrator', () => {
       jest.advanceTimersByTime(15000);
       await Promise.resolve();
 
+      // Fast-forward for force kill timeout
+      jest.advanceTimersByTime(1000);
+      await Promise.resolve();
+
       await resultPromise;
 
-      // Should have attempted SIGTERM for graceful termination
+      // Should have attempted SIGTERM first, then SIGKILL
       expect(mockProc.kill).toHaveBeenCalledWith('SIGTERM');
+      expect(mockProc.kill).toHaveBeenCalledWith('SIGKILL');
     });
 
     it('should handle forceKill when process.kill throws (line 122-125)', async () => {

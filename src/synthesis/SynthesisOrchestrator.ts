@@ -141,8 +141,11 @@ export class SynthesisOrchestrator {
           killTimeout = setTimeout(() => {
             forceKill();
           }, 1000);
-          
-          cleanup();
+
+          // Only remove event listeners, don't clear killTimeout
+          proc.removeAllListeners();
+          proc.stdout?.removeAllListeners();
+          proc.stderr?.removeAllListeners();
           reject(
             new SynthesisError(
               'CDK synthesis timed out after 15 seconds',
