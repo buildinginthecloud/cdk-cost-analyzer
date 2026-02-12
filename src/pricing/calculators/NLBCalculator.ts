@@ -1,6 +1,6 @@
 import { ResourceWithId } from '../../diff/types';
 import { ResourceCostCalculator, MonthlyCost, PricingClient } from '../types';
-import { normalizeRegion } from '../RegionMapper';
+import { normalizeRegion, getRegionPrefix } from '../RegionMapper';
 
 export class NLBCalculator implements ResourceCostCalculator {
   private readonly DEFAULT_NEW_CONNECTIONS_PER_SECOND = 25;
@@ -41,13 +41,15 @@ export class NLBCalculator implements ResourceCostCalculator {
     }
 
     try {
+      const regionPrefix = getRegionPrefix(region);
+      
       // Get hourly rate
       const hourlyRate = await pricingClient.getPrice({
         serviceCode: 'AWSELB',
         region: normalizeRegion(region),
         filters: [
           { field: 'productFamily', value: 'Load Balancer-Network' },
-          { field: 'usagetype', value: `${this.getRegionPrefix(region)}-LoadBalancerUsage` },
+          { field: 'usagetype', value: `${regionPrefix}-LoadBalancerUsage` },
         ],
       });
 
@@ -57,7 +59,7 @@ export class NLBCalculator implements ResourceCostCalculator {
         region: normalizeRegion(region),
         filters: [
           { field: 'productFamily', value: 'Load Balancer-Network' },
-          { field: 'usagetype', value: `${this.getRegionPrefix(region)}-LCUUsage` },
+          { field: 'usagetype', value: `${regionPrefix}-LCUUsage` },
         ],
       });
 
@@ -119,27 +121,5 @@ export class NLBCalculator implements ResourceCostCalculator {
         assumptions: [`Failed to fetch pricing: ${error instanceof Error ? error.message : String(error)}`],
       };
     }
-  }
-
-
-  private getRegionPrefix(region: string): string {
-    const prefixMap: Record<string, string> = {
-      'us-east-1': 'USE1',
-      'us-east-2': 'USE2',
-      'us-west-1': 'USW1',
-      'us-west-2': 'USW2',
-      'eu-west-1': 'EUW1',
-      'eu-west-2': 'EUW2',
-      'eu-west-3': 'EUW3',
-      'eu-central-1': 'EUC1',
-      'eu-north-1': 'EUN1',
-      'ap-south-1': 'APS1',
-      'ap-southeast-1': 'APS2',
-      'ap-southeast-2': 'APS3',
-      'ap-northeast-1': 'APN1',
-      'ap-northeast-2': 'APN2',
-    };
-
-    return prefixMap[region] || '';
   }
 }

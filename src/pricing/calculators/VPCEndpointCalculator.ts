@@ -1,6 +1,6 @@
 import { ResourceWithId } from '../../diff/types';
 import { ResourceCostCalculator, MonthlyCost, PricingClient } from '../types';
-import { normalizeRegion } from '../RegionMapper';
+import { normalizeRegion, getRegionPrefix } from '../RegionMapper';
 
 export class VPCEndpointCalculator implements ResourceCostCalculator {
   private readonly DEFAULT_DATA_PROCESSED_GB = 100;
@@ -42,13 +42,15 @@ export class VPCEndpointCalculator implements ResourceCostCalculator {
 
     // Interface endpoints have hourly and data processing costs
     try {
+      const regionPrefix = getRegionPrefix(region);
+      
       // Get hourly rate per endpoint
       const hourlyRate = await pricingClient.getPrice({
         serviceCode: 'AmazonVPC',
         region: normalizeRegion(region),
         filters: [
           { field: 'productFamily', value: 'VpcEndpoint' },
-          { field: 'usagetype', value: `${this.getRegionPrefix(region)}VpcEndpoint-Hours` },
+          { field: 'usagetype', value: `${regionPrefix}VpcEndpoint-Hours` },
         ],
       });
 
@@ -58,7 +60,7 @@ export class VPCEndpointCalculator implements ResourceCostCalculator {
         region: normalizeRegion(region),
         filters: [
           { field: 'productFamily', value: 'VpcEndpoint' },
-          { field: 'usagetype', value: `${this.getRegionPrefix(region)}VpcEndpoint-Bytes` },
+          { field: 'usagetype', value: `${regionPrefix}VpcEndpoint-Bytes` },
         ],
       });
 
@@ -97,27 +99,5 @@ export class VPCEndpointCalculator implements ResourceCostCalculator {
         assumptions: [`Failed to fetch pricing: ${error instanceof Error ? error.message : String(error)}`],
       };
     }
-  }
-
-
-  private getRegionPrefix(region: string): string {
-    const prefixMap: Record<string, string> = {
-      'us-east-1': 'USE1',
-      'us-east-2': 'USE2',
-      'us-west-1': 'USW1',
-      'us-west-2': 'USW2',
-      'eu-west-1': 'EUW1',
-      'eu-west-2': 'EUW2',
-      'eu-west-3': 'EUW3',
-      'eu-central-1': 'EUC1',
-      'eu-north-1': 'EUN1',
-      'ap-south-1': 'APS1',
-      'ap-southeast-1': 'APS2',
-      'ap-southeast-2': 'APS3',
-      'ap-northeast-1': 'APN1',
-      'ap-northeast-2': 'APN2',
-    };
-
-    return prefixMap[region] || '';
   }
 }
