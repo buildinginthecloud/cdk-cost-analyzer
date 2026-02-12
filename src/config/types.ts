@@ -65,6 +65,24 @@ export interface UsageAssumptionsConfig {
   vpcEndpoint?: {
     dataProcessedGB?: number;
   };
+  /**
+   * SNS (Simple Notification Service) usage assumptions.
+   * These values are used to estimate monthly costs for SNS topics.
+   *
+   * @see https://aws.amazon.com/sns/pricing/
+   */
+  sns?: {
+    /** Number of publish requests per month (default: 1,000,000) */
+    monthlyPublishes?: number;
+    /** Number of HTTP/S deliveries per month (default: 1,000,000) */
+    httpDeliveries?: number;
+    /** Number of email deliveries per month (default: 0) */
+    emailDeliveries?: number;
+    /** Number of SMS deliveries per month (default: 0) */
+    smsDeliveries?: number;
+    /** Number of mobile push deliveries per month (default: 0) */
+    mobilePushDeliveries?: number;
+  };
 }
 
 export interface SynthesisConfig {

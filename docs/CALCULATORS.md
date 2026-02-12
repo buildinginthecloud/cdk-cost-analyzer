@@ -583,6 +583,71 @@ Total: $1.03/month
 - WebSocket connections billed per minute
 - Message size up to 128 KB
 
+### AWS::SNS::Topic
+
+**Description:** Simple Notification Service for pub/sub messaging
+
+**Cost Components:**
+- Publish requests: Per million requests (first 1M free)
+- HTTP/S deliveries: Per million deliveries
+- Email deliveries: Per 100,000 deliveries
+- SMS deliveries: Per message (varies by country)
+- Mobile push deliveries: Per million deliveries
+
+**Default Assumptions:**
+- 1 million publish requests per month
+- 1 million HTTP/S deliveries per month
+- 0 email deliveries per month
+- 0 SMS deliveries per month
+- 0 mobile push deliveries per month
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  sns:
+    monthlyPublishes: 1000000
+    httpDeliveries: 1000000
+    emailDeliveries: 0
+    smsDeliveries: 0
+    mobilePushDeliveries: 0
+```
+
+**Example:**
+```
+Publish requests: 2M publishes - 1M free = 1M × $0.50/1M = $0.50
+HTTP/S deliveries: 1M × $0.60/1M = $0.60
+Total: $1.10/month
+```
+
+**Example with multiple delivery types:**
+```yaml
+usageAssumptions:
+  sns:
+    monthlyPublishes: 5000000
+    httpDeliveries: 2000000
+    emailDeliveries: 100000
+    smsDeliveries: 10000
+    mobilePushDeliveries: 500000
+```
+
+```
+Publish requests: 5M - 1M free = 4M × $0.50/1M = $2.00
+HTTP/S deliveries: 2M × $0.60/1M = $1.20
+Email deliveries: 100K × $2.00/100K = $2.00
+SMS deliveries: 10K × $0.00645 = $64.50 (US rate)
+Mobile push: 500K × $0.50/1M = $0.25
+Total: $69.95/month
+```
+
+**Notes:**
+- First 1 million publish requests free per month
+- SMS pricing varies significantly by destination country
+- US SMS rate used as fallback ($0.00645/message)
+- Mobile push includes APNS (iOS), GCM/FCM (Android), ADM (Amazon)
+- Data transfer costs not included
+- SNS FIFO topics may have different pricing
+- Large message payloads (>64KB) count as multiple requests
+
 ## Container Resources
 
 ### AWS::ECS::Service
@@ -695,6 +760,14 @@ usageAssumptions:
     websocket:
       messagesPerMonth: 5000000
       connectionMinutes: 500000
+  
+  # Messaging
+  sns:
+    monthlyPublishes: 5000000
+    httpDeliveries: 2000000
+    emailDeliveries: 100000
+    smsDeliveries: 10000
+    mobilePushDeliveries: 500000
   
   # Containers
   ecs:
