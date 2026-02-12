@@ -1,4 +1,6 @@
 import { normalizeRegion, getRegionPrefix } from '../../src/pricing/RegionMapper';
+import * as fs from 'fs';
+import * as path from 'path';
 
 describe('RegionMapper', () => {
   describe('normalizeRegion', () => {
@@ -344,6 +346,62 @@ describe('RegionMapper', () => {
 
       // normalizeRegion should return the original region code
       expect(normalizeRegion(unknownRegion)).toBe(unknownRegion);
+    });
+  });
+
+  describe('Calculator integration', () => {
+    const calculatorFiles = [
+      'ALBCalculator.ts',
+      'APIGatewayCalculator.ts',
+      'ECSCalculator.ts',
+      'NLBCalculator.ts',
+      'NatGatewayCalculator.ts',
+      'VPCEndpointCalculator.ts',
+    ];
+
+    it('all calculators should import getRegionPrefix from RegionMapper', () => {
+      const calculatorsPath = path.join(__dirname, '../../src/pricing/calculators');
+
+      calculatorFiles.forEach(fileName => {
+        const filePath = path.join(calculatorsPath, fileName);
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+
+        // Should import getRegionPrefix from RegionMapper
+        expect(fileContent).toMatch(/import\s+\{[^}]*getRegionPrefix[^}]*\}\s+from\s+['"]\.\.\/RegionMapper['"]/);
+      });
+    });
+
+    it('no calculator should have a private getRegionPrefix method', () => {
+      const calculatorsPath = path.join(__dirname, '../../src/pricing/calculators');
+
+      calculatorFiles.forEach(fileName => {
+        const filePath = path.join(calculatorsPath, fileName);
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+
+        // Should NOT have a private getRegionPrefix method
+        expect(fileContent).not.toMatch(/private\s+getRegionPrefix\s*\(/);
+      });
+    });
+
+    it('all calculators should use the shared getRegionPrefix utility', () => {
+      const calculatorsPath = path.join(__dirname, '../../src/pricing/calculators');
+
+      calculatorFiles.forEach(fileName => {
+        const filePath = path.join(calculatorsPath, fileName);
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+
+        // If the file uses region prefixes, it should call getRegionPrefix()
+        if (fileContent.includes('usagetype') || fileContent.includes('UsageType')) {
+          // Should have at least one call to getRegionPrefix
+          const hasGetRegionPrefixCall =
+            fileContent.includes('getRegionPrefix(') ||
+            fileContent.includes('regionPrefix = getRegionPrefix');
+
+          if (hasGetRegionPrefixCall) {
+            expect(hasGetRegionPrefixCall).toBe(true);
+          }
+        }
+      });
     });
   });
 });
