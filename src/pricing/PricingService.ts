@@ -13,6 +13,7 @@ import { NatGatewayCalculator } from './calculators/NatGatewayCalculator';
 import { NLBCalculator } from './calculators/NLBCalculator';
 import { RDSCalculator } from './calculators/RDSCalculator';
 import { S3Calculator } from './calculators/S3Calculator';
+import { SQSCalculator } from './calculators/SQSCalculator';
 import { VPCEndpointCalculator } from './calculators/VPCEndpointCalculator';
 import { PricingClient } from './PricingClient';
 import {
@@ -84,6 +85,7 @@ export class PricingService implements IPricingService {
       new ElastiCacheCalculator(),
       new AutoScalingGroupCalculator(),
       new LaunchTemplateCalculator(),
+      new SQSCalculator(config),
     ];
   }
 

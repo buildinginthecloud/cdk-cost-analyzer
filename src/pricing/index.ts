@@ -7,6 +7,7 @@ export { LambdaCalculator } from './calculators/LambdaCalculator';
 export { RDSCalculator } from './calculators/RDSCalculator';
 export { CloudFrontCalculator } from './calculators/CloudFrontCalculator';
 export { ElastiCacheCalculator } from './calculators/ElastiCacheCalculator';
+export { SQSCalculator } from './calculators/SQSCalculator';
 export {
   LaunchTemplateCalculator,
   LaunchTemplateConfig,

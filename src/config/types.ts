@@ -65,6 +65,16 @@ export interface UsageAssumptionsConfig {
   vpcEndpoint?: {
     dataProcessedGB?: number;
   };
+  /**
+   * SQS usage assumptions for cost estimation.
+   * Applies to both Standard and FIFO queues.
+   *
+   * @see https://aws.amazon.com/sqs/pricing/
+   */
+  sqs?: {
+    /** Number of requests per month (default: 1,000,000) */
+    monthlyRequests?: number;
+  };
 }
 
 export interface SynthesisConfig {
