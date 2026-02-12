@@ -2,15 +2,47 @@ import { describe, it, expect } from '@jest/globals';
 import * as fc from 'fast-check';
 import { analyzeSingleTemplate } from '../../src/api';
 
+// Mock PricingClient to avoid real AWS API calls
+jest.mock('../../src/pricing/PricingClient', () => {
+  return {
+    PricingClient: jest.fn().mockImplementation(() => {
+      return {
+        getPrice: jest.fn().mockImplementation((params) => {
+          const serviceCode = params?.serviceCode || 'AmazonEC2';
+          const filters = params?.filters || [];
+
+          // Handle Lambda special cases (has different prices for requests vs compute)
+          if (serviceCode === 'AWSLambda') {
+            const groupFilter = filters.find((f: any) => f.field === 'group');
+            if (groupFilter?.value === 'AWS-Lambda-Requests') {
+              return Promise.resolve(0.20); // per 1M requests
+            }
+            if (groupFilter?.value === 'AWS-Lambda-Duration') {
+              return Promise.resolve(0.0000166667); // per GB-second
+            }
+          }
+
+          const prices: Record<string, number> = {
+            AmazonEC2: 0.0116,
+            AmazonS3: 0.023,
+            AWSLambda: 0.0000166667,
+            AmazonDynamoDB: 0.25,
+          };
+
+          return Promise.resolve(prices[serviceCode] || 0.01);
+        }),
+        destroy: jest.fn(),
+      };
+    }),
+  };
+});
+
 /**
  * Property-based tests for single template analysis
  * These tests verify universal properties that should hold across randomized inputs
- * 
- * NOTE: These tests are currently skipped because they make real AWS Pricing API calls
- * which require valid AWS credentials. They should be run in CI with proper credentials
- * or refactored to use mocked pricing clients like other property tests.
+ * using mocked pricing to avoid real AWS API calls.
  */
-describe.skip('Single Template Analysis - Property Tests', () => {
+describe('Single Template Analysis - Property Tests', () => {
   /**
    * Property 1: Template Processing Completeness
    * For any valid CloudFormation template, analyzing it should calculate costs
@@ -68,9 +100,9 @@ describe.skip('Single Template Analysis - Property Tests', () => {
             expect(result.costBreakdown.assumptions).toBeDefined();
           },
         ),
-        { numRuns: 10 }, // Run 50 iterations
+        { numRuns: 10 },
       );
-    }, 60000); // 60 second timeout for property test
+    }, 60000);
   });
 
   /**
