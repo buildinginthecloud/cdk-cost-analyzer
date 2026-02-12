@@ -81,6 +81,7 @@ const project = new typescript.TypeScriptProject({
         // Enable experimental VM modules for AWS SDK v3 dynamic imports
         customExportConditions: ['node', 'node-addons'],
       },
+      testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.test\\.ts$'],
     },
   },
   sampleCode: false,
@@ -160,6 +161,7 @@ const project = new typescript.TypeScriptProject({
   scripts: {
     'test:watch': 'NODE_OPTIONS="--experimental-vm-modules" jest --watch',
     'test:silent': 'NODE_OPTIONS="--experimental-vm-modules" jest --silent',
+    'test:integration': 'RUN_INTEGRATION_TESTS=true NODE_OPTIONS="--experimental-vm-modules" jest --testPathPattern="\\.integration\\.test\\.ts$"',
     'ci:local': 'npm ci --prefix examples/single-stack && npm ci --prefix examples/multi-stack && npm run lint && npm run test:silent',
     'validate:workflows': 'node tools/workflows/validate-workflows.js',
   },

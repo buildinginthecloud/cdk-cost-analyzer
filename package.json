@@ -26,6 +26,7 @@
     "prepare": "npx projen prepare",
     "release": "npx projen release",
     "test": "npx projen test",
+    "test:integration": "npx projen test:integration",
     "test:silent": "npx projen test:silent",
     "test:watch": "npx projen test:watch",
     "unbump": "npx projen unbump",
@@ -97,6 +98,10 @@
         "node-addons"
       ]
     },
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "\\.integration\\.test\\.ts$"
+    ],
     "testMatch": [
       "<rootDir>/@(src|test)/**/*(*.)@(spec|test).ts?(x)",
       "<rootDir>/@(src|test)/**/__tests__/**/*.ts?(x)",
@@ -114,10 +119,8 @@
     ],
     "coverageDirectory": "coverage",
     "coveragePathIgnorePatterns": [
-      "/node_modules/"
-    ],
-    "testPathIgnorePatterns": [
-      "/node_modules/"
+      "/node_modules/",
+      "\\.integration\\.test\\.ts$"
     ],
     "watchPathIgnorePatterns": [
       "/node_modules/"

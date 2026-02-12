@@ -229,6 +229,14 @@
         }
       ]
     },
+    "test:integration": {
+      "name": "test:integration",
+      "steps": [
+        {
+          "exec": "RUN_INTEGRATION_TESTS=true NODE_OPTIONS=\"--experimental-vm-modules\" jest --testPathPattern=\"\\.integration\\.test\\.ts$\""
+        }
+      ]
+    },
     "test:silent": {
       "name": "test:silent",
       "steps": [
