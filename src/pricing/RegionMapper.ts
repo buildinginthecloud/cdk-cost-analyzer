@@ -34,6 +34,9 @@ const REGION_MAP: Record<string, string> = {
   'me-central-1': 'Middle East (UAE)',
   'af-south-1': 'Africa (Cape Town)',
   'il-central-1': 'Israel (Tel Aviv)',
+  'us-gov-west-1': 'AWS GovCloud (US-West)',
+  'us-gov-east-1': 'AWS GovCloud (US-East)',
+  'eu-isoe-west-1': 'EU ISOE West',
 };
 
 /**

@@ -22,6 +22,15 @@ describe('RegionMapper', () => {
       expect(normalizeRegion('ap-south-1')).toBe('Asia Pacific (Mumbai)');
     });
 
+    it('returns human-readable name for GovCloud regions', () => {
+      expect(normalizeRegion('us-gov-west-1')).toBe('AWS GovCloud (US-West)');
+      expect(normalizeRegion('us-gov-east-1')).toBe('AWS GovCloud (US-East)');
+    });
+
+    it('returns human-readable name for EU Sovereign Cloud regions', () => {
+      expect(normalizeRegion('eu-isoe-west-1')).toBe('EU ISOE West');
+    });
+
     it('returns the original region code for unknown regions', () => {
       expect(normalizeRegion('unknown-region-1')).toBe('unknown-region-1');
       expect(normalizeRegion('test-region')).toBe('test-region');
