@@ -275,4 +275,75 @@ describe('RegionMapper', () => {
       );
     });
   });
+
+  describe('Region map consistency', () => {
+    it('should have normalizeRegion mapping for all regions that have prefix mappings', () => {
+      // All regions that have prefix mappings (from getRegionPrefix tests)
+      const allRegionsWithPrefixes = [
+        // US Regions
+        'us-east-1', 'us-east-2', 'us-west-1', 'us-west-2',
+        // EU Regions
+        'eu-west-1', 'eu-west-2', 'eu-west-3', 'eu-central-1', 'eu-central-2',
+        'eu-north-1', 'eu-south-1', 'eu-south-2',
+        // Asia Pacific Regions
+        'ap-south-1', 'ap-south-2', 'ap-southeast-1', 'ap-southeast-2',
+        'ap-southeast-3', 'ap-southeast-4', 'ap-southeast-5',
+        'ap-northeast-1', 'ap-northeast-2', 'ap-northeast-3', 'ap-east-1',
+        // Canada Regions
+        'ca-central-1', 'ca-west-1',
+        // South America Regions
+        'sa-east-1',
+        // Middle East Regions
+        'me-south-1', 'me-central-1',
+        // Africa Regions
+        'af-south-1',
+        // Israel Regions
+        'il-central-1',
+        // GovCloud Regions
+        'us-gov-west-1', 'us-gov-east-1',
+        // EU Sovereign Cloud
+        'eu-isoe-west-1',
+      ];
+
+      // Verify each region has both a prefix and a normalized name
+      allRegionsWithPrefixes.forEach(region => {
+        const prefix = getRegionPrefix(region);
+        const normalized = normalizeRegion(region);
+
+        // Should have a prefix
+        expect(prefix).toBeTruthy();
+        expect(prefix).not.toBe('');
+
+        // Should have a normalized name (not fall back to the region code)
+        expect(normalized).toBeTruthy();
+        expect(normalized).not.toBe(region);
+      });
+    });
+
+    it('should return consistent results for all AWS commercial regions', () => {
+      // Test that all major commercial regions work consistently
+      const commercialRegions = [
+        'us-east-1', 'us-west-2', 'eu-west-1', 'eu-central-1',
+        'ap-southeast-1', 'ap-northeast-1',
+      ];
+
+      commercialRegions.forEach(region => {
+        const prefix = getRegionPrefix(region);
+        const normalized = normalizeRegion(region);
+
+        expect(prefix).toMatch(/^[A-Z]{3,4}\d$/); // Format like USE1, EUW1, APS3
+        expect(normalized).toContain('('); // Should be human-readable with parentheses
+      });
+    });
+
+    it('should handle unknown regions gracefully in both functions', () => {
+      const unknownRegion = 'unknown-region-99';
+
+      // getRegionPrefix should return empty string
+      expect(getRegionPrefix(unknownRegion)).toBe('');
+
+      // normalizeRegion should return the original region code
+      expect(normalizeRegion(unknownRegion)).toBe(unknownRegion);
+    });
+  });
 });
