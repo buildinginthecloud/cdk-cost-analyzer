@@ -130,6 +130,99 @@ Total: $2.31/month
 - Cross-region replication costs not included
 - Lifecycle policies not considered
 
+### AWS::EFS::FileSystem
+
+**Description:** Amazon Elastic File System for scalable, shared file storage
+
+**Cost Components:**
+- Standard Storage: GB-month for frequently accessed data
+- Infrequent Access (IA) Storage: GB-month for infrequently accessed data
+- IA Requests: Data transferred to/from IA storage
+- Provisioned Throughput: MB/s-month (if configured)
+
+**Default Assumptions:**
+- 100 GB total storage
+- 0% in Infrequent Access storage class
+- Bursting throughput mode (no provisioned throughput cost)
+- 10% of IA data accessed per month (for IA request cost estimation)
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  efs:
+    storageSizeGb: 100
+    infrequentAccessPercentage: 0
+```
+
+**Pricing Model:**
+| Component | Price (us-east-1) |
+|-----------|-------------------|
+| Standard Storage | $0.30/GB-month |
+| Infrequent Access Storage | $0.016/GB-month |
+| IA Requests | $0.01/GB transferred |
+| Provisioned Throughput | $6.00/MB/s-month |
+
+**Example (Standard Storage Only):**
+```
+Storage: 100 GB × $0.30/GB = $30.00/month
+```
+
+**Example (With Infrequent Access - 50%):**
+```
+Standard storage: 50 GB × $0.30/GB = $15.00
+IA storage: 50 GB × $0.016/GB = $0.80
+IA requests: 5 GB × $0.01/GB = $0.05
+Total: $15.85/month
+```
+
+**Example (With Provisioned Throughput):**
+```
+Storage: 100 GB × $0.30/GB = $30.00
+Provisioned: 10 MB/s × $6.00/MB/s = $60.00
+Total: $90.00/month
+```
+
+**Storage Class Detection:**
+
+The calculator automatically detects Infrequent Access usage from CloudFormation template:
+
+```yaml
+# CloudFormation template with lifecycle policy
+Resources:
+  MyFileSystem:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      LifecyclePolicies:
+        - TransitionToIA: AFTER_30_DAYS
+```
+
+When `TransitionToIA` is detected, the calculator applies the configured `infrequentAccessPercentage` to estimate IA storage costs. Without a lifecycle policy, all storage is calculated at Standard rates.
+
+**Throughput Mode Detection:**
+
+The calculator detects provisioned throughput from CloudFormation template:
+
+```yaml
+# CloudFormation template with provisioned throughput
+Resources:
+  MyFileSystem:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      ThroughputMode: provisioned
+      ProvisionedThroughputInMibps: 10
+```
+
+When `ThroughputMode: provisioned` is detected with a `ProvisionedThroughputInMibps` value, the provisioned throughput cost is added to the total.
+
+**Notes:**
+- EFS One Zone storage class not currently supported (uses Standard pricing)
+- Archive storage class not calculated
+- Data transfer costs not included
+- Mount target costs not included (no charge)
+- Backup costs not included
+- Actual storage used may vary from assumptions
+- IA request cost assumes 10% of IA data is accessed monthly
+
 ## Database Resources
 
 ### AWS::RDS::DBInstance
@@ -645,6 +738,10 @@ usageAssumptions:
     getRequests: 100000
     putRequests: 10000
   
+  efs:
+    storageSizeGb: 500
+    infrequentAccessPercentage: 30  # 30% in Infrequent Access
+  
   # Database
   rds:
     hoursPerMonth: 730
@@ -721,6 +818,10 @@ const result = await analyzeCosts({
     lambda: {
       invocationsPerMonth: 5000000,
       averageDurationMs: 500,
+    },
+    efs: {
+      storageSizeGb: 200,
+      infrequentAccessPercentage: 25,
     },
   },
 });
