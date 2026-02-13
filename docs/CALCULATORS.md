@@ -648,6 +648,70 @@ Total: $69.95/month
 - SNS FIFO topics may have different pricing
 - Large message payloads (>64KB) count as multiple requests
 
+### AWS::StepFunctions::StateMachine
+
+**Description:** AWS Step Functions state machine for serverless workflow orchestration
+
+**Workflow Types:**
+
+Step Functions supports two workflow types with different pricing models:
+
+| Workflow Type | Best For | Pricing Model |
+|---------------|----------|---------------|
+| STANDARD | Long-running, durable workflows | Per state transition |
+| EXPRESS | High-volume, short-duration workflows | Per request + duration |
+
+**Cost Components:**
+
+**Standard Workflows:**
+- State transitions: $0.025 per 1,000 state transitions
+
+**Express Workflows:**
+- Requests: $1.00 per million requests
+- Duration: $0.00001667 per GB-second
+
+**Default Assumptions:**
+- 10,000 workflow executions per month
+- 10 state transitions per execution (Standard workflows)
+- 1,000ms average execution duration (Express workflows)
+- 64MB memory allocation per execution (Express workflows)
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  stepFunctions:
+    monthlyExecutions: 10000        # Executions per month
+    stateTransitionsPerExecution: 10 # State transitions per execution (Standard)
+    averageDurationMs: 1000          # Average duration in ms (Express)
+```
+
+**Example (Standard Workflow):**
+```
+Executions: 10,000
+State transitions per execution: 10
+Total transitions: 100,000
+Cost: 100,000 × ($0.025 / 1,000) = $2.50/month
+```
+
+**Example (Express Workflow):**
+```
+Executions: 10,000
+Request cost: 10,000 × ($1.00 / 1,000,000) = $0.01
+Duration: 64MB memory × 1 second × 10,000 = 625 GB-seconds
+Duration cost: 625 × $0.00001667 = $0.01
+Total: $0.02/month
+```
+
+**Notes:**
+- Workflow type detected from `Type` property in CloudFormation template
+- Defaults to STANDARD if Type property is not specified
+- Standard workflows are billed per state transition (includes retries)
+- Express workflows are billed per request and per GB-second of duration
+- Express workflows have a maximum duration of 5 minutes
+- Standard workflows can run for up to 1 year
+- First 4,000 state transitions per month are free tier eligible (Standard)
+- Activity polling and callbacks may incur additional charges
+
 ## Container Resources
 
 ### AWS::ECS::Service
@@ -760,7 +824,7 @@ usageAssumptions:
     websocket:
       messagesPerMonth: 5000000
       connectionMinutes: 500000
-  
+
   # Messaging
   sns:
     monthlyPublishes: 5000000
@@ -768,7 +832,12 @@ usageAssumptions:
     emailDeliveries: 100000
     smsDeliveries: 10000
     mobilePushDeliveries: 500000
-  
+
+  stepFunctions:
+    monthlyExecutions: 50000           # Executions per month
+    stateTransitionsPerExecution: 15   # State transitions per execution (Standard)
+    averageDurationMs: 2000            # Average duration in ms (Express)
+
   # Containers
   ecs:
     fargate:
@@ -794,6 +863,11 @@ const result = await analyzeCosts({
     lambda: {
       invocationsPerMonth: 5000000,
       averageDurationMs: 500,
+    },
+    stepFunctions: {
+      monthlyExecutions: 50000,
+      stateTransitionsPerExecution: 15,
+      averageDurationMs: 2000,
     },
   },
 });

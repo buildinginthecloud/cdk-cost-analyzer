@@ -14,6 +14,7 @@ import { NLBCalculator } from './calculators/NLBCalculator';
 import { RDSCalculator } from './calculators/RDSCalculator';
 import { S3Calculator } from './calculators/S3Calculator';
 import { SNSCalculator } from './calculators/SNSCalculator';
+import { StepFunctionsCalculator } from './calculators/StepFunctionsCalculator';
 import { VPCEndpointCalculator } from './calculators/VPCEndpointCalculator';
 import { PricingClient } from './PricingClient';
 import {
@@ -91,6 +92,11 @@ export class PricingService implements IPricingService {
         usageAssumptions?.sns?.emailDeliveries,
         usageAssumptions?.sns?.smsDeliveries,
         usageAssumptions?.sns?.mobilePushDeliveries,
+      ),
+      new StepFunctionsCalculator(
+        usageAssumptions?.stepFunctions?.monthlyExecutions,
+        usageAssumptions?.stepFunctions?.stateTransitionsPerExecution,
+        usageAssumptions?.stepFunctions?.averageDurationMs,
       ),
     ];
   }

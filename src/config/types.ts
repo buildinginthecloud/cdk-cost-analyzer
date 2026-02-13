@@ -83,6 +83,22 @@ export interface UsageAssumptionsConfig {
     /** Number of mobile push deliveries per month (default: 0) */
     mobilePushDeliveries?: number;
   };
+  /**
+   * Step Functions usage assumptions for cost estimation.
+   *
+   * Standard workflows are charged per state transition.
+   * Express workflows are charged per request and per GB-second of duration.
+   *
+   * @see https://aws.amazon.com/step-functions/pricing/
+   */
+  stepFunctions?: {
+    /** Number of workflow executions per month (default: 10,000) */
+    monthlyExecutions?: number;
+    /** Number of state transitions per execution (default: 10, for Standard workflows) */
+    stateTransitionsPerExecution?: number;
+    /** Average execution duration in milliseconds (default: 1000, for Express workflows) */
+    averageDurationMs?: number;
+  };
 }
 
 export interface SynthesisConfig {

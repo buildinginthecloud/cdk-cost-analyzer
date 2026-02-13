@@ -13,4 +13,8 @@ export {
   LaunchTemplateConfig,
   EbsVolumeConfig,
 } from './calculators/LaunchTemplateCalculator';
+export {
+  StepFunctionsCalculator,
+  StepFunctionsWorkflowType,
+} from './calculators/StepFunctionsCalculator';
 export * from './types';
