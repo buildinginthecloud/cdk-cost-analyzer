@@ -4,6 +4,7 @@
     ".gitattributes",
     ".github/pull_request_template.md",
     ".github/workflows/build.yml",
+    ".github/workflows/e2e.yml",
     ".github/workflows/release.yml",
     ".github/workflows/test.yml",
     ".github/workflows/upgrade-main.yml",

@@ -59,4 +59,5 @@ junit.xml
 !/.eslintrc.json
 !/.mergify.yml
 !/.github/workflows/test.yml
+!/.github/workflows/e2e.yml
 !/.projenrc.ts

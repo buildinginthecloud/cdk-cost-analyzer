@@ -257,6 +257,115 @@ if (project.github) {
   });
 }
 
+// Add E2E smoke test workflow
+if (project.github) {
+  const e2eWorkflow = project.github.addWorkflow('e2e');
+
+  e2eWorkflow.on({
+    pullRequest: {},
+    push: { branches: ['main'] },
+    workflowDispatch: {},
+  });
+
+  e2eWorkflow.addJob('e2e', {
+    runsOn: ['ubuntu-latest'],
+    permissions: {},
+    steps: [
+      {
+        name: 'Checkout',
+        uses: 'actions/checkout@v5',
+      },
+      {
+        name: 'Setup Node.js',
+        uses: 'actions/setup-node@v5',
+        with: {
+          'node-version': '20.18.1',
+        },
+      },
+      {
+        name: 'Install dependencies',
+        run: 'npm install',
+      },
+      {
+        name: 'Build cdk-cost-analyzer',
+        run: 'npm run build',
+      },
+      {
+        name: 'Install single-stack dependencies',
+        run: 'npm ci',
+        workingDirectory: 'examples/single-stack',
+      },
+      {
+        name: 'Synthesize single-stack',
+        run: 'npm run synth',
+        workingDirectory: 'examples/single-stack',
+      },
+      {
+        name: 'Run cdk-cost-analyzer on single-stack (text output)',
+        run: 'node ../../dist/cli/index.js cdk.out --output text',
+        workingDirectory: 'examples/single-stack',
+      },
+      {
+        name: 'Run cdk-cost-analyzer on single-stack (json output)',
+        run: 'node ../../dist/cli/index.js cdk.out --output json > cost-report.json',
+        workingDirectory: 'examples/single-stack',
+      },
+      {
+        name: 'Validate single-stack JSON output',
+        run: [
+          'if [ ! -f cost-report.json ]; then',
+          '  echo "Error: cost-report.json not found"',
+          '  exit 1',
+          'fi',
+          'if [ ! -s cost-report.json ]; then',
+          '  echo "Error: cost-report.json is empty"',
+          '  exit 1',
+          'fi',
+          'echo "Single-stack JSON output validated"',
+          'cat cost-report.json',
+        ].join('\n'),
+        workingDirectory: 'examples/single-stack',
+      },
+      {
+        name: 'Install multi-stack dependencies',
+        run: 'npm ci',
+        workingDirectory: 'examples/multi-stack',
+      },
+      {
+        name: 'Synthesize multi-stack',
+        run: 'npm run synth',
+        workingDirectory: 'examples/multi-stack',
+      },
+      {
+        name: 'Run cdk-cost-analyzer on multi-stack (text output)',
+        run: 'node ../../dist/cli/index.js cdk.out --output text',
+        workingDirectory: 'examples/multi-stack',
+      },
+      {
+        name: 'Run cdk-cost-analyzer on multi-stack (json output)',
+        run: 'node ../../dist/cli/index.js cdk.out --output json > cost-report.json',
+        workingDirectory: 'examples/multi-stack',
+      },
+      {
+        name: 'Validate multi-stack JSON output',
+        run: [
+          'if [ ! -f cost-report.json ]; then',
+          '  echo "Error: cost-report.json not found"',
+          '  exit 1',
+          'fi',
+          'if [ ! -s cost-report.json ]; then',
+          '  echo "Error: cost-report.json is empty"',
+          '  exit 1',
+          'fi',
+          'echo "Multi-stack JSON output validated"',
+          'cat cost-report.json',
+        ].join('\n'),
+        workingDirectory: 'examples/multi-stack',
+      },
+    ],
+  });
+}
+
 // Add a task for installing act (optional)
 project.addTask('install:act', {
   description: 'Install act for local GitHub Actions testing',
