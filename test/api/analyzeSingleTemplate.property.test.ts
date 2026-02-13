@@ -52,7 +52,7 @@ describe('Single Template Analysis - Property Tests', () => {
     it('should always return a complete result structure for valid templates', async () => {
       await fc.assert(
         fc.asyncProperty(
-          fc.array(
+          fc.uniqueArray(
             fc.record({
               logicalId: fc.string({ minLength: 1, maxLength: 50 }).filter(
                 (s) => !['__proto__', 'constructor', 'prototype'].includes(s),
@@ -64,7 +64,7 @@ describe('Single Template Analysis - Property Tests', () => {
                 'AWS::EC2::Instance',
               ),
             }),
-            { minLength: 1, maxLength: 10 },
+            { minLength: 1, maxLength: 10, selector: (item) => item.logicalId },
           ),
           async (resources) => {
             // Generate a valid CloudFormation template
@@ -116,7 +116,7 @@ describe('Single Template Analysis - Property Tests', () => {
     it('should always include complete resource cost information', async () => {
       await fc.assert(
         fc.asyncProperty(
-          fc.array(
+          fc.uniqueArray(
             fc.record({
               logicalId: fc.string({ minLength: 1, maxLength: 50 }).filter(
                 (s) => !['__proto__', 'constructor', 'prototype'].includes(s),
@@ -127,7 +127,7 @@ describe('Single Template Analysis - Property Tests', () => {
                 'AWS::EC2::Instance',
               ),
             }),
-            { minLength: 1, maxLength: 5 },
+            { minLength: 1, maxLength: 5, selector: (item) => item.logicalId },
           ),
           async (resources) => {
             const template: any = {
@@ -241,7 +241,7 @@ describe('Single Template Analysis - Property Tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.record({
-            resources: fc.array(
+            resources: fc.uniqueArray(
               fc.record({
                 logicalId: fc.string({ minLength: 1, maxLength: 50 }).filter(
                   (s) => !['__proto__', 'constructor', 'prototype'].includes(s),
@@ -251,7 +251,7 @@ describe('Single Template Analysis - Property Tests', () => {
                   'AWS::DynamoDB::Table',
                 ),
               }),
-              { minLength: 1, maxLength: 5 },
+              { minLength: 1, maxLength: 5, selector: (item) => item.logicalId },
             ),
             region: fc.constantFrom('us-east-1', 'eu-west-1', 'ap-southeast-1'),
             format: fc.constantFrom('text', 'json', 'markdown'),
