@@ -1,0 +1,41 @@
+import { CostAnalysisResult } from '../api/types';
+import { ThresholdEvaluation } from '../threshold/types';
+export interface PipelineOptions {
+    baseTemplate?: string;
+    targetTemplate?: string;
+    baseBranch?: string;
+    targetBranch?: string;
+    cdkAppPath?: string;
+    outputPath?: string;
+    configPath?: string;
+    region?: string;
+    synthesize?: boolean;
+    environment?: string;
+}
+export interface PipelineResult {
+    costAnalysis: CostAnalysisResult;
+    thresholdStatus: ThresholdEvaluation;
+    synthesisInfo?: SynthesisInfo;
+    configUsed: ConfigSummary;
+}
+export interface SynthesisInfo {
+    baseStackCount: number;
+    targetStackCount: number;
+    baseSynthesisTime: number;
+    targetSynthesisTime: number;
+}
+export interface ConfigSummary {
+    configPath?: string;
+    thresholds?: {
+        warning?: number;
+        error?: number;
+        environment?: string;
+    };
+    usageAssumptions?: Record<string, unknown>;
+    excludedResourceTypes?: string[];
+    synthesisEnabled: boolean;
+}
+export declare class PipelineError extends Error {
+    stage: string;
+    constructor(message: string, stage: string);
+}

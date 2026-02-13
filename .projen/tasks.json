@@ -24,6 +24,14 @@
         }
       ]
     },
+    "build:action": {
+      "name": "build:action",
+      "steps": [
+        {
+          "exec": "ncc build src/action/index.ts -o dist/action --minify"
+        }
+      ]
+    },
     "bump": {
       "name": "bump",
       "description": "Bumps version based on latest git tag and generates a changelog entry",
@@ -177,7 +185,12 @@
     },
     "post-compile": {
       "name": "post-compile",
-      "description": "Runs after successful compilation"
+      "description": "Runs after successful compilation",
+      "steps": [
+        {
+          "exec": "npm run build:action"
+        }
+      ]
     },
     "post-upgrade": {
       "name": "post-upgrade",
@@ -285,7 +298,7 @@
           "exec": "npm install"
         },
         {
-          "exec": "npm update @stylistic/eslint-plugin @types/jest @types/js-yaml @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser commit-and-tag-version constructs eslint-import-resolver-typescript eslint-plugin-import eslint fast-check husky jest jest-junit lint-staged projen ts-jest ts-node typescript @aws-sdk/client-pricing commander js-yaml"
+          "exec": "npm update @stylistic/eslint-plugin @types/jest @types/js-yaml @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser @vercel/ncc commit-and-tag-version constructs eslint-import-resolver-typescript eslint-plugin-import eslint fast-check husky jest jest-junit lint-staged projen ts-jest ts-node typescript @actions/core @actions/github @aws-sdk/client-pricing commander js-yaml"
         },
         {
           "exec": "npx projen"

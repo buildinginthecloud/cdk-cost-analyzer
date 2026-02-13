@@ -30,6 +30,11 @@
       "type": "build"
     },
     {
+      "name": "@vercel/ncc",
+      "version": "^0.38.1",
+      "type": "build"
+    },
+    {
       "name": "commit-and-tag-version",
       "version": "^12",
       "type": "build"
@@ -91,6 +96,16 @@
     {
       "name": "typescript",
       "type": "build"
+    },
+    {
+      "name": "@actions/core",
+      "version": "^1.10.1",
+      "type": "runtime"
+    },
+    {
+      "name": "@actions/github",
+      "version": "^6.0.0",
+      "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-pricing",

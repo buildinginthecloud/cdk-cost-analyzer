@@ -1,0 +1,50 @@
+name: 'CDK Cost Analyzer'
+description: 'Analyze AWS CDK infrastructure changes and post cost impact summaries to pull requests'
+author: 'Building in the Cloud'
+branding:
+  icon: 'dollar-sign'
+  color: 'green'
+
+inputs:
+  path:
+    description: 'Path to CDK app directory'
+    required: false
+    default: './'
+  github-token:
+    description: 'GitHub token for API access (required for PR comments)'
+    required: true
+  aws-region:
+    description: 'AWS region for pricing data'
+    required: false
+    default: 'us-east-1'
+  config-path:
+    description: 'Path to cdk-cost-analyzer configuration file'
+    required: false
+  comment-strategy:
+    description: 'Comment update strategy: new, update, or delete-and-new'
+    required: false
+    default: 'update'
+  debug:
+    description: 'Enable debug logging'
+    required: false
+    default: 'false'
+
+outputs:
+  total-delta:
+    description: 'Total monthly cost delta'
+  currency:
+    description: 'Currency code (e.g., USD)'
+  added-count:
+    description: 'Number of added resources'
+  removed-count:
+    description: 'Number of removed resources'
+  modified-count:
+    description: 'Number of modified resources'
+  threshold-passed:
+    description: 'Whether the cost threshold check passed'
+  threshold-level:
+    description: 'Threshold level triggered (none, warning, or error)'
+
+runs:
+  using: 'node20'
+  main: 'dist/action/index.js'

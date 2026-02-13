@@ -275,6 +275,7 @@ describe('Repository Structure - Property Tests', () => {
       '.github', // GitHub Actions workflows
       '.husky', // Git hooks
       '.mergify.yml', // Mergify configuration
+      'action.yml', // GitHub Action metadata
       'tools', // Development tools and utilities
     ]);
 
