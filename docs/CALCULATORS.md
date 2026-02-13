@@ -761,6 +761,54 @@ Total: $0.02/month
 - First 4,000 state transitions per month are free tier eligible (Standard)
 - Activity polling and callbacks may incur additional charges
 
+## Security Resources
+
+### AWS::SecretsManager::Secret
+
+**Description:** AWS Secrets Manager for credential and secret storage
+
+**Cost Components:**
+- Secret storage: $0.40 per secret per month
+- API calls: $0.05 per 10,000 API calls
+
+**Default Assumptions:**
+- 10,000 API calls per month (GetSecretValue, DescribeSecret, etc.)
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  secretsManager:
+    monthlyApiCalls: 10000
+```
+
+**Example:**
+```
+Secret storage: 1 secret × $0.40 = $0.40/month
+API calls: 10,000 calls × $0.05/10K = $0.05/month
+Total: $0.45/month
+```
+
+**Example with higher API volume:**
+```yaml
+usageAssumptions:
+  secretsManager:
+    monthlyApiCalls: 50000
+```
+
+```
+Secret storage: 1 secret × $0.40 = $0.40/month
+API calls: 50,000 calls × $0.05/10K = $0.25/month
+Total: $0.65/month
+```
+
+**Notes:**
+- No free tier for Secrets Manager
+- Automatic rotation is included in the base secret cost
+- Cross-region replication incurs additional storage costs (not calculated)
+- API call pricing includes GetSecretValue, DescribeSecret, ListSecrets, and other operations
+- Deletion protection can prevent accidental secret deletion
+- Secrets can be rotated automatically using Lambda functions (Lambda costs separate)
+
 ## Container Resources
 
 ### AWS::ECS::Service
@@ -891,6 +939,10 @@ usageAssumptions:
     stateTransitionsPerExecution: 15   # State transitions per execution (Standard)
     averageDurationMs: 2000            # Average duration in ms (Express)
 
+  # Security
+  secretsManager:
+    monthlyApiCalls: 50000  # API calls per month
+
   # Containers
   ecs:
     fargate:
@@ -921,6 +973,9 @@ const result = await analyzeCosts({
       monthlyExecutions: 50000,
       stateTransitionsPerExecution: 15,
       averageDurationMs: 2000,
+    },
+    secretsManager: {
+      monthlyApiCalls: 50000,
     },
   },
 });

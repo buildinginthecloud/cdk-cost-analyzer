@@ -109,6 +109,15 @@ export interface UsageAssumptionsConfig {
     /** Average execution duration in milliseconds (default: 1000, for Express workflows) */
     averageDurationMs?: number;
   };
+  /**
+   * Secrets Manager usage assumptions for cost estimation.
+   *
+   * @see https://aws.amazon.com/secrets-manager/pricing/
+   */
+  secretsManager?: {
+    /** Number of API calls per month (default: 10,000) */
+    monthlyApiCalls?: number;
+  };
 }
 
 export interface SynthesisConfig {

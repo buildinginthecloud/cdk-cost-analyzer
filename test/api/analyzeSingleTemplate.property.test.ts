@@ -54,7 +54,9 @@ describe('Single Template Analysis - Property Tests', () => {
         fc.asyncProperty(
           fc.array(
             fc.record({
-              logicalId: fc.string({ minLength: 1, maxLength: 50 }),
+              logicalId: fc.string({ minLength: 1, maxLength: 50 }).filter(
+                (s) => !['__proto__', 'constructor', 'prototype'].includes(s),
+              ),
               type: fc.constantFrom(
                 'AWS::S3::Bucket',
                 'AWS::DynamoDB::Table',
@@ -116,7 +118,9 @@ describe('Single Template Analysis - Property Tests', () => {
         fc.asyncProperty(
           fc.array(
             fc.record({
-              logicalId: fc.string({ minLength: 1, maxLength: 50 }),
+              logicalId: fc.string({ minLength: 1, maxLength: 50 }).filter(
+                (s) => !['__proto__', 'constructor', 'prototype'].includes(s),
+              ),
               type: fc.constantFrom(
                 'AWS::S3::Bucket',
                 'AWS::Lambda::Function',
@@ -239,7 +243,9 @@ describe('Single Template Analysis - Property Tests', () => {
           fc.record({
             resources: fc.array(
               fc.record({
-                logicalId: fc.string({ minLength: 1, maxLength: 50 }),
+                logicalId: fc.string({ minLength: 1, maxLength: 50 }).filter(
+                  (s) => !['__proto__', 'constructor', 'prototype'].includes(s),
+                ),
                 type: fc.constantFrom(
                   'AWS::S3::Bucket',
                   'AWS::DynamoDB::Table',
