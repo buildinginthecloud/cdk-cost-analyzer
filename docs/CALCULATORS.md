@@ -9,6 +9,7 @@ This document provides detailed information about all supported AWS resource typ
 - [Storage Resources](#storage-resources)
 - [Database Resources](#database-resources)
 - [Networking Resources](#networking-resources)
+- [Messaging Resources](#messaging-resources)
 - [Content Delivery Resources](#content-delivery-resources)
 - [Serverless Resources](#serverless-resources)
 - [Container Resources](#container-resources)
@@ -385,6 +386,54 @@ Monthly Cost: $0.00 (no charge)
 - Interface endpoints for most other services
 - Each endpoint per AZ incurs separate charges
 - Data transfer within same region not charged
+
+## Messaging Resources
+
+### AWS::SQS::Queue
+
+**Description:** Amazon Simple Queue Service for message queuing
+
+**Cost Components:**
+- Request pricing: Per million requests
+
+**Queue Types:**
+- **Standard Queue**: $0.40 per million requests (first 1 million free)
+- **FIFO Queue**: $0.50 per million requests (first 1 million free)
+
+**Default Assumptions:**
+- 1 million requests per month
+- Standard queue (unless FifoQueue property is true)
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  sqs:
+    monthlyRequests: 1000000
+```
+
+**Example (Standard Queue):**
+```
+Requests: 1M × $0.40/1M = $0.40
+Total: $0.40/month
+```
+
+**Example (FIFO Queue):**
+```
+Requests: 1M × $0.50/1M = $0.50
+Total: $0.50/month
+```
+
+**Detection:**
+- Queue type is detected from the `FifoQueue` CloudFormation property
+- If `FifoQueue: true` is set, FIFO pricing is applied
+- Otherwise, standard queue pricing is used
+
+**Notes:**
+- First 1 million requests free per month (not factored into estimates)
+- FIFO queues provide exactly-once processing
+- Data transfer costs not included
+- Long polling and batch operations count as single requests
+- Dead-letter queue costs calculated separately
 
 ## Content Delivery Resources
 
@@ -801,6 +850,10 @@ usageAssumptions:
   
   vpcEndpoint:
     dataProcessedGB: 200
+  
+  # Messaging
+  sqs:
+    monthlyRequests: 5000000
   
   # Content Delivery
   cloudFront:

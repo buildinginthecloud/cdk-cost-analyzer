@@ -8,6 +8,7 @@ export { RDSCalculator } from './calculators/RDSCalculator';
 export { CloudFrontCalculator } from './calculators/CloudFrontCalculator';
 export { ElastiCacheCalculator } from './calculators/ElastiCacheCalculator';
 export { SNSCalculator, SNSCostBreakdown } from './calculators/SNSCalculator';
+export { SQSCalculator } from './calculators/SQSCalculator';
 export {
   LaunchTemplateCalculator,
   LaunchTemplateConfig,
