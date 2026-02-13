@@ -14,6 +14,7 @@ import { NatGatewayCalculator } from './calculators/NatGatewayCalculator';
 import { NLBCalculator } from './calculators/NLBCalculator';
 import { RDSCalculator } from './calculators/RDSCalculator';
 import { S3Calculator } from './calculators/S3Calculator';
+import { SecretsManagerCalculator } from './calculators/SecretsManagerCalculator';
 import { SNSCalculator } from './calculators/SNSCalculator';
 import { SQSCalculator } from './calculators/SQSCalculator';
 import { StepFunctionsCalculator } from './calculators/StepFunctionsCalculator';
@@ -104,6 +105,9 @@ export class PricingService implements IPricingService {
         usageAssumptions?.stepFunctions?.monthlyExecutions,
         usageAssumptions?.stepFunctions?.stateTransitionsPerExecution,
         usageAssumptions?.stepFunctions?.averageDurationMs,
+      ),
+      new SecretsManagerCalculator(
+        usageAssumptions?.secretsManager?.monthlyApiCalls,
       ),
     ];
   }
