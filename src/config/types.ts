@@ -77,6 +77,50 @@ export interface UsageAssumptionsConfig {
     /** Percentage of storage in Infrequent Access class (default: 0, range: 0-100) */
     infrequentAccessPercentage?: number;
   };
+  /**
+   * SNS (Simple Notification Service) usage assumptions.
+   * These values are used to estimate monthly costs for SNS topics.
+   *
+   * @see https://aws.amazon.com/sns/pricing/
+   */
+  sns?: {
+    /** Number of publish requests per month (default: 1,000,000) */
+    monthlyPublishes?: number;
+    /** Number of HTTP/S deliveries per month (default: 1,000,000) */
+    httpDeliveries?: number;
+    /** Number of email deliveries per month (default: 0) */
+    emailDeliveries?: number;
+    /** Number of SMS deliveries per month (default: 0) */
+    smsDeliveries?: number;
+    /** Number of mobile push deliveries per month (default: 0) */
+    mobilePushDeliveries?: number;
+  };
+  /**
+   * SQS usage assumptions for cost estimation.
+   * Applies to both Standard and FIFO queues.
+   *
+   * @see https://aws.amazon.com/sqs/pricing/
+   */
+  sqs?: {
+    /** Number of requests per month (default: 1,000,000) */
+    monthlyRequests?: number;
+  };
+  /**
+   * Step Functions usage assumptions for cost estimation.
+   *
+   * Standard workflows are charged per state transition.
+   * Express workflows are charged per request and per GB-second of duration.
+   *
+   * @see https://aws.amazon.com/step-functions/pricing/
+   */
+  stepFunctions?: {
+    /** Number of workflow executions per month (default: 10,000) */
+    monthlyExecutions?: number;
+    /** Number of state transitions per execution (default: 10, for Standard workflows) */
+    stateTransitionsPerExecution?: number;
+    /** Average execution duration in milliseconds (default: 1000, for Express workflows) */
+    averageDurationMs?: number;
+  };
 }
 
 export interface SynthesisConfig {

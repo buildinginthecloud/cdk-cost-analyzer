@@ -9,6 +9,7 @@ This document provides detailed information about all supported AWS resource typ
 - [Storage Resources](#storage-resources)
 - [Database Resources](#database-resources)
 - [Networking Resources](#networking-resources)
+- [Messaging Resources](#messaging-resources)
 - [Content Delivery Resources](#content-delivery-resources)
 - [Serverless Resources](#serverless-resources)
 - [Container Resources](#container-resources)
@@ -479,6 +480,54 @@ Monthly Cost: $0.00 (no charge)
 - Each endpoint per AZ incurs separate charges
 - Data transfer within same region not charged
 
+## Messaging Resources
+
+### AWS::SQS::Queue
+
+**Description:** Amazon Simple Queue Service for message queuing
+
+**Cost Components:**
+- Request pricing: Per million requests
+
+**Queue Types:**
+- **Standard Queue**: $0.40 per million requests (first 1 million free)
+- **FIFO Queue**: $0.50 per million requests (first 1 million free)
+
+**Default Assumptions:**
+- 1 million requests per month
+- Standard queue (unless FifoQueue property is true)
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  sqs:
+    monthlyRequests: 1000000
+```
+
+**Example (Standard Queue):**
+```
+Requests: 1M × $0.40/1M = $0.40
+Total: $0.40/month
+```
+
+**Example (FIFO Queue):**
+```
+Requests: 1M × $0.50/1M = $0.50
+Total: $0.50/month
+```
+
+**Detection:**
+- Queue type is detected from the `FifoQueue` CloudFormation property
+- If `FifoQueue: true` is set, FIFO pricing is applied
+- Otherwise, standard queue pricing is used
+
+**Notes:**
+- First 1 million requests free per month (not factored into estimates)
+- FIFO queues provide exactly-once processing
+- Data transfer costs not included
+- Long polling and batch operations count as single requests
+- Dead-letter queue costs calculated separately
+
 ## Content Delivery Resources
 
 ### AWS::CloudFront::Distribution
@@ -676,6 +725,135 @@ Total: $1.03/month
 - WebSocket connections billed per minute
 - Message size up to 128 KB
 
+### AWS::SNS::Topic
+
+**Description:** Simple Notification Service for pub/sub messaging
+
+**Cost Components:**
+- Publish requests: Per million requests (first 1M free)
+- HTTP/S deliveries: Per million deliveries
+- Email deliveries: Per 100,000 deliveries
+- SMS deliveries: Per message (varies by country)
+- Mobile push deliveries: Per million deliveries
+
+**Default Assumptions:**
+- 1 million publish requests per month
+- 1 million HTTP/S deliveries per month
+- 0 email deliveries per month
+- 0 SMS deliveries per month
+- 0 mobile push deliveries per month
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  sns:
+    monthlyPublishes: 1000000
+    httpDeliveries: 1000000
+    emailDeliveries: 0
+    smsDeliveries: 0
+    mobilePushDeliveries: 0
+```
+
+**Example:**
+```
+Publish requests: 2M publishes - 1M free = 1M × $0.50/1M = $0.50
+HTTP/S deliveries: 1M × $0.60/1M = $0.60
+Total: $1.10/month
+```
+
+**Example with multiple delivery types:**
+```yaml
+usageAssumptions:
+  sns:
+    monthlyPublishes: 5000000
+    httpDeliveries: 2000000
+    emailDeliveries: 100000
+    smsDeliveries: 10000
+    mobilePushDeliveries: 500000
+```
+
+```
+Publish requests: 5M - 1M free = 4M × $0.50/1M = $2.00
+HTTP/S deliveries: 2M × $0.60/1M = $1.20
+Email deliveries: 100K × $2.00/100K = $2.00
+SMS deliveries: 10K × $0.00645 = $64.50 (US rate)
+Mobile push: 500K × $0.50/1M = $0.25
+Total: $69.95/month
+```
+
+**Notes:**
+- First 1 million publish requests free per month
+- SMS pricing varies significantly by destination country
+- US SMS rate used as fallback ($0.00645/message)
+- Mobile push includes APNS (iOS), GCM/FCM (Android), ADM (Amazon)
+- Data transfer costs not included
+- SNS FIFO topics may have different pricing
+- Large message payloads (>64KB) count as multiple requests
+
+### AWS::StepFunctions::StateMachine
+
+**Description:** AWS Step Functions state machine for serverless workflow orchestration
+
+**Workflow Types:**
+
+Step Functions supports two workflow types with different pricing models:
+
+| Workflow Type | Best For | Pricing Model |
+|---------------|----------|---------------|
+| STANDARD | Long-running, durable workflows | Per state transition |
+| EXPRESS | High-volume, short-duration workflows | Per request + duration |
+
+**Cost Components:**
+
+**Standard Workflows:**
+- State transitions: $0.025 per 1,000 state transitions
+
+**Express Workflows:**
+- Requests: $1.00 per million requests
+- Duration: $0.00001667 per GB-second
+
+**Default Assumptions:**
+- 10,000 workflow executions per month
+- 10 state transitions per execution (Standard workflows)
+- 1,000ms average execution duration (Express workflows)
+- 64MB memory allocation per execution (Express workflows)
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  stepFunctions:
+    monthlyExecutions: 10000        # Executions per month
+    stateTransitionsPerExecution: 10 # State transitions per execution (Standard)
+    averageDurationMs: 1000          # Average duration in ms (Express)
+```
+
+**Example (Standard Workflow):**
+```
+Executions: 10,000
+State transitions per execution: 10
+Total transitions: 100,000
+Cost: 100,000 × ($0.025 / 1,000) = $2.50/month
+```
+
+**Example (Express Workflow):**
+```
+Executions: 10,000
+Request cost: 10,000 × ($1.00 / 1,000,000) = $0.01
+Duration: 64MB memory × 1 second × 10,000 = 625 GB-seconds
+Duration cost: 625 × $0.00001667 = $0.01
+Total: $0.02/month
+```
+
+**Notes:**
+- Workflow type detected from `Type` property in CloudFormation template
+- Defaults to STANDARD if Type property is not specified
+- Standard workflows are billed per state transition (includes retries)
+- Express workflows are billed per request and per GB-second of duration
+- Express workflows have a maximum duration of 5 minutes
+- Standard workflows can run for up to 1 year
+- First 4,000 state transitions per month are free tier eligible (Standard)
+- Activity polling and callbacks may incur additional charges
+
 ## Container Resources
 
 ### AWS::ECS::Service
@@ -770,6 +948,10 @@ usageAssumptions:
   vpcEndpoint:
     dataProcessedGB: 200
   
+  # Messaging
+  sqs:
+    monthlyRequests: 5000000
+  
   # Content Delivery
   cloudFront:
     dataTransferGB: 1000
@@ -792,7 +974,20 @@ usageAssumptions:
     websocket:
       messagesPerMonth: 5000000
       connectionMinutes: 500000
-  
+
+  # Messaging
+  sns:
+    monthlyPublishes: 5000000
+    httpDeliveries: 2000000
+    emailDeliveries: 100000
+    smsDeliveries: 10000
+    mobilePushDeliveries: 500000
+
+  stepFunctions:
+    monthlyExecutions: 50000           # Executions per month
+    stateTransitionsPerExecution: 15   # State transitions per execution (Standard)
+    averageDurationMs: 2000            # Average duration in ms (Express)
+
   # Containers
   ecs:
     fargate:
@@ -822,6 +1017,11 @@ const result = await analyzeCosts({
     efs: {
       storageSizeGb: 200,
       infrequentAccessPercentage: 25,
+    },
+    stepFunctions: {
+      monthlyExecutions: 50000,
+      stateTransitionsPerExecution: 15,
+      averageDurationMs: 2000,
     },
   },
 });
