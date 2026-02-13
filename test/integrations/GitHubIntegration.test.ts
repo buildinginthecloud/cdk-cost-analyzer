@@ -92,9 +92,10 @@ describe('GitHubIntegration', () => {
 
     describe('with strategy "update"', () => {
       it('should create comment when no existing comment found', async () => {
-        // Mock listComments - no existing comment
+        // Mock listComments - no existing comment (empty page)
         mockFetch.mockResolvedValueOnce({
           ok: true,
+          status: 200,
           json: () => Promise.resolve([]),
         });
 
@@ -114,7 +115,7 @@ describe('GitHubIntegration', () => {
         expect(mockFetch).toHaveBeenCalledTimes(2);
         expect(mockFetch).toHaveBeenNthCalledWith(
           1,
-          'https://api.github.com/repos/owner/repo/issues/123/comments',
+          'https://api.github.com/repos/owner/repo/issues/123/comments?page=1&per_page=100',
           expect.objectContaining({ method: 'GET' }),
         );
         expect(mockFetch).toHaveBeenNthCalledWith(
@@ -260,8 +261,10 @@ describe('GitHubIntegration', () => {
     });
 
     it('should return null when no comment with marker found', async () => {
+      // First page has comments, but no marker
       mockFetch.mockResolvedValueOnce({
         ok: true,
+        status: 200,
         json: () => Promise.resolve([
           {
             id: 123,
@@ -269,6 +272,13 @@ describe('GitHubIntegration', () => {
             user: { login: 'user1', type: 'User' },
           },
         ]),
+      });
+
+      // Second page is empty (pagination ends)
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve([]),
       });
 
       const integration = new GitHubIntegration({

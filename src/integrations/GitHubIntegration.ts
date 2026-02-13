@@ -76,35 +76,46 @@ export class GitHubIntegration implements IGitHubIntegration {
 
   /**
    * Find an existing cost analyzer comment on a PR.
+   * Supports pagination for PRs with many comments.
    */
   async findExistingComment(
     owner: string,
     repo: string,
     prNumber: number,
   ): Promise<GitHubComment | null> {
-    const url = `${this.config.apiUrl}/repos/${owner}/${repo}/issues/${prNumber}/comments`;
-
     try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: this.getHeaders(),
-      });
+      let page = 1;
+      const perPage = 100;
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new GitHubAPIError(
-          `Failed to list comments: ${response.statusText} - ${errorText}`,
-          response.status,
-        );
-      }
+      while (true) {
+        const url = `${this.config.apiUrl}/repos/${owner}/${repo}/issues/${prNumber}/comments?page=${page}&per_page=${perPage}`;
 
-      const comments = await response.json() as GitHubComment[];
+        const response = await this.fetchWithRetry(url, {
+          method: 'GET',
+          headers: this.getHeaders(),
+        });
 
-      // Find comment with our marker
-      for (const comment of comments) {
-        if (comment.body && comment.body.includes(COMMENT_MARKER)) {
-          return comment;
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new GitHubAPIError(
+            this.sanitizeError(`Failed to list comments: ${response.statusText} - ${errorText}`),
+            response.status,
+          );
         }
+
+        const comments = await response.json() as GitHubComment[];
+
+        if (comments.length === 0) {
+          break;
+        }
+
+        // Find comment with our marker
+        const found = comments.find(c => c.body?.includes(COMMENT_MARKER));
+        if (found) {
+          return found;
+        }
+
+        page++;
       }
 
       return null;
@@ -113,7 +124,7 @@ export class GitHubIntegration implements IGitHubIntegration {
         throw error;
       }
       throw new GitHubAPIError(
-        `Failed to connect to GitHub API: ${error instanceof Error ? error.message : String(error)}`,
+        this.sanitizeError(`Failed to connect to GitHub API: ${error instanceof Error ? error.message : String(error)}`),
       );
     }
   }
@@ -130,7 +141,7 @@ export class GitHubIntegration implements IGitHubIntegration {
     const url = `${this.config.apiUrl}/repos/${owner}/${repo}/issues/comments/${commentId}`;
 
     try {
-      const response = await fetch(url, {
+      const response = await this.fetchWithRetry(url, {
         method: 'PATCH',
         headers: this.getHeaders(),
         body: JSON.stringify({ body: comment }),
@@ -139,7 +150,7 @@ export class GitHubIntegration implements IGitHubIntegration {
       if (!response.ok) {
         const errorText = await response.text();
         throw new GitHubAPIError(
-          `Failed to update comment: ${response.statusText} - ${errorText}`,
+          this.sanitizeError(`Failed to update comment: ${response.statusText} - ${errorText}`),
           response.status,
         );
       }
@@ -148,7 +159,7 @@ export class GitHubIntegration implements IGitHubIntegration {
         throw error;
       }
       throw new GitHubAPIError(
-        `Failed to connect to GitHub API: ${error instanceof Error ? error.message : String(error)}`,
+        this.sanitizeError(`Failed to connect to GitHub API: ${error instanceof Error ? error.message : String(error)}`),
       );
     }
   }
@@ -164,7 +175,7 @@ export class GitHubIntegration implements IGitHubIntegration {
     const url = `${this.config.apiUrl}/repos/${owner}/${repo}/issues/comments/${commentId}`;
 
     try {
-      const response = await fetch(url, {
+      const response = await this.fetchWithRetry(url, {
         method: 'DELETE',
         headers: this.getHeaders(),
       });
@@ -172,7 +183,7 @@ export class GitHubIntegration implements IGitHubIntegration {
       if (!response.ok) {
         const errorText = await response.text();
         throw new GitHubAPIError(
-          `Failed to delete comment: ${response.statusText} - ${errorText}`,
+          this.sanitizeError(`Failed to delete comment: ${response.statusText} - ${errorText}`),
           response.status,
         );
       }
@@ -181,7 +192,7 @@ export class GitHubIntegration implements IGitHubIntegration {
         throw error;
       }
       throw new GitHubAPIError(
-        `Failed to connect to GitHub API: ${error instanceof Error ? error.message : String(error)}`,
+        this.sanitizeError(`Failed to connect to GitHub API: ${error instanceof Error ? error.message : String(error)}`),
       );
     }
   }
@@ -197,8 +208,16 @@ export class GitHubIntegration implements IGitHubIntegration {
   ): Promise<void> {
     const url = `${this.config.apiUrl}/repos/${owner}/${repo}/issues/${prNumber}/comments`;
 
+    // Check comment size (GitHub limit: 65536 characters)
+    const MAX_COMMENT_SIZE = 65536;
+    if (comment.length > MAX_COMMENT_SIZE) {
+      throw new GitHubAPIError(
+        `Comment exceeds GitHub's maximum size of ${MAX_COMMENT_SIZE} characters (actual: ${comment.length})`,
+      );
+    }
+
     try {
-      const response = await fetch(url, {
+      const response = await this.fetchWithRetry(url, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify({ body: comment }),
@@ -207,7 +226,7 @@ export class GitHubIntegration implements IGitHubIntegration {
       if (!response.ok) {
         const errorText = await response.text();
         throw new GitHubAPIError(
-          `Failed to post comment: ${response.statusText} - ${errorText}`,
+          this.sanitizeError(`Failed to post comment: ${response.statusText} - ${errorText}`),
           response.status,
         );
       }
@@ -216,7 +235,7 @@ export class GitHubIntegration implements IGitHubIntegration {
         throw error;
       }
       throw new GitHubAPIError(
-        `Failed to connect to GitHub API: ${error instanceof Error ? error.message : String(error)}`,
+        this.sanitizeError(`Failed to connect to GitHub API: ${error instanceof Error ? error.message : String(error)}`),
       );
     }
   }
@@ -231,5 +250,55 @@ export class GitHubIntegration implements IGitHubIntegration {
       'Content-Type': 'application/json',
       'X-GitHub-Api-Version': '2022-11-28',
     };
+  }
+
+  /**
+   * Fetch with retry logic for rate limiting.
+   */
+  private async fetchWithRetry(
+    url: string,
+    options: RequestInit,
+    retries = 3,
+  ): Promise<Response> {
+    for (let attempt = 0; attempt < retries; attempt++) {
+      const response = await fetch(url, options);
+
+      // Handle rate limiting
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('retry-after');
+        const resetTime = response.headers.get('x-ratelimit-reset');
+
+        let delayMs = 1000 * (attempt + 1); // Exponential backoff default
+
+        if (retryAfter) {
+          delayMs = parseInt(retryAfter) * 1000;
+        } else if (resetTime) {
+          const resetDate = new Date(parseInt(resetTime) * 1000);
+          delayMs = Math.max(0, resetDate.getTime() - Date.now());
+        }
+
+        if (attempt < retries - 1) {
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+          continue;
+        }
+      }
+
+      // Handle other 5xx errors with retry
+      if (response.status >= 500 && response.status < 600 && attempt < retries - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+        continue;
+      }
+
+      return response;
+    }
+
+    throw new GitHubAPIError('Maximum retry attempts exceeded');
+  }
+
+  /**
+   * Sanitize error messages to prevent token leakage.
+   */
+  private sanitizeError(error: string): string {
+    return error.replace(new RegExp(this.config.token, 'g'), '***');
   }
 }

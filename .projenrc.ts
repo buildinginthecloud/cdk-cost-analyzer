@@ -33,6 +33,8 @@ const project = new typescript.TypeScriptProject({
 
   // Dependencies
   deps: [
+    '@actions/core@^1.10.1',
+    '@actions/github@^6.0.0',
     '@aws-sdk/client-pricing@^3.705.0',
     'commander@^12.1.0',
     'js-yaml@^4.1.0',
@@ -41,6 +43,7 @@ const project = new typescript.TypeScriptProject({
   devDeps: [
     '@types/js-yaml@^4.0.9',
     '@types/node@^22.10.1',
+    '@vercel/ncc@^0.38.1',
     'fast-check@^3.23.1',
     'husky@^9.0.0',
     'lint-staged@^15.0.0',
@@ -121,6 +124,7 @@ const project = new typescript.TypeScriptProject({
   gitignore: [
     'node_modules/',
     'dist/',
+    '!dist/action/',  // Keep GitHub Action bundle in git
     '*.log',
     '.DS_Store',
     'coverage/',
@@ -164,6 +168,7 @@ const project = new typescript.TypeScriptProject({
     'test:integration': 'RUN_INTEGRATION_TESTS=true NODE_OPTIONS="--experimental-vm-modules" jest --testPathPattern="\\.integration\\.test\\.ts$"',
     'ci:local': 'npm ci --prefix examples/single-stack && npm ci --prefix examples/multi-stack && npm run lint && npm run test:silent',
     'validate:workflows': 'node tools/workflows/validate-workflows.js',
+    'build:action': 'ncc build src/action/index.ts -o dist/action --minify',
   },
 });
 
@@ -201,6 +206,9 @@ project.addTask('lint', {
 
 // Ensure build task compiles TypeScript
 project.compileTask.reset('tsc --build');
+
+// Add post-compile task to build GitHub Action bundle
+project.postCompileTask.exec('npm run build:action');
 
 // Add a test-only workflow since we disabled the build workflow
 if (project.github) {

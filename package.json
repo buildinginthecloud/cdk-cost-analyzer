@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "npx projen build",
+    "build:action": "npx projen build:action",
     "bump": "npx projen bump",
     "ci:local": "npx projen ci:local",
     "clobber": "npx projen clobber",
@@ -47,6 +48,7 @@
     "@types/node": "^22.10.1",
     "@typescript-eslint/eslint-plugin": "^8",
     "@typescript-eslint/parser": "^8",
+    "@vercel/ncc": "^0.38.1",
     "commit-and-tag-version": "^12",
     "constructs": "^10.0.0",
     "eslint": "^9",
@@ -63,6 +65,8 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^6.0.0",
     "@aws-sdk/client-pricing": "^3.705.0",
     "commander": "^12.1.0",
     "js-yaml": "^4.1.0"

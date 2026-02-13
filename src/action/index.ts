@@ -6,6 +6,8 @@
  * and posts formatted comments to pull requests.
  */
 
+import * as core from '@actions/core';
+import * as github from '@actions/github';
 import * as fs from 'fs';
 import * as path from 'path';
 import { PipelineOrchestrator } from '../pipeline/PipelineOrchestrator';
@@ -13,60 +15,6 @@ import { GitHubIntegration } from '../integrations/GitHubIntegration';
 import { CommentStrategy } from '../integrations/types';
 import { GitHubActionReporter } from '../reporter/GitHubActionReporter';
 import { Logger } from '../utils/Logger';
-
-/**
- * Get action input from environment variable.
- * GitHub Actions sets INPUT_<NAME> for each input.
- */
-function getInput(name: string, required: boolean = false): string | undefined {
-  const envName = `INPUT_${name.toUpperCase().replace(/-/g, '_')}`;
-  const value = process.env[envName] || '';
-
-  if (required && !value) {
-    throw new Error(`Input required and not supplied: ${name}`);
-  }
-
-  return value || undefined;
-}
-
-/**
- * Set action output by writing to GITHUB_OUTPUT file.
- */
-function setOutput(name: string, value: string): void {
-  const outputFile = process.env.GITHUB_OUTPUT;
-  if (outputFile) {
-    fs.appendFileSync(outputFile, `${name}=${value}\n`);
-  }
-}
-
-/**
- * Set action to failed status.
- */
-function setFailed(message: string): void {
-  console.error(`::error::${message}`);
-  process.exit(1);
-}
-
-/**
- * Log a warning message.
- */
-function warning(message: string): void {
-  console.log(`::warning::${message}`);
-}
-
-/**
- * Log an info message.
- */
-function info(message: string): void {
-  console.log(message);
-}
-
-/**
- * Log a debug message.
- */
-function debug(message: string): void {
-  console.log(`::debug::${message}`);
-}
 
 /**
  * Detect CDK app directory by looking for cdk.json.
@@ -92,37 +40,62 @@ function detectCdkApp(startPath: string): string | undefined {
 }
 
 /**
- * Parse PR number from GitHub event.
+ * Parse PR number from GitHub context.
+ * Only returns number for pull_request events.
  */
 function getPRNumber(): number | undefined {
-  const eventPath = process.env.GITHUB_EVENT_PATH;
-  if (!eventPath || !fs.existsSync(eventPath)) {
-    return undefined;
+  const context = github.context;
+
+  // Only accept pull_request events
+  if (context.eventName === 'pull_request' && context.payload.pull_request) {
+    return context.payload.pull_request.number;
   }
 
-  try {
-    const event = JSON.parse(fs.readFileSync(eventPath, 'utf-8'));
-    return event.pull_request?.number || event.issue?.number;
-  } catch {
-    return undefined;
-  }
+  return undefined;
 }
 
 /**
- * Parse repository owner and name from GITHUB_REPOSITORY.
+ * Parse repository owner and name from GitHub context.
  */
 function parseRepository(): { owner: string; repo: string } | undefined {
-  const repository = process.env.GITHUB_REPOSITORY;
-  if (!repository) {
-    return undefined;
+  const context = github.context;
+
+  if (context.repo.owner && context.repo.repo) {
+    return {
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+    };
   }
 
-  const [owner, repo] = repository.split('/');
-  if (!owner || !repo) {
-    return undefined;
+  return undefined;
+}
+
+/**
+ * Validate and sanitize input path to prevent path traversal.
+ */
+function validatePath(inputPath: string): string {
+  const workspace = process.env.GITHUB_WORKSPACE || process.cwd();
+  const resolved = path.resolve(workspace, inputPath);
+
+  // Ensure path is within workspace
+  if (!resolved.startsWith(workspace)) {
+    throw new Error(`Path '${inputPath}' is outside workspace. Potential path traversal attack.`);
   }
 
-  return { owner, repo };
+  return resolved;
+}
+
+/**
+ * Validate comment strategy input.
+ */
+function validateCommentStrategy(value: string): CommentStrategy {
+  const validStrategies: CommentStrategy[] = ['new', 'update', 'delete-and-new'];
+  if (!validStrategies.includes(value as CommentStrategy)) {
+    throw new Error(
+      `Invalid comment-strategy: '${value}'. Must be one of: ${validStrategies.join(', ')}`
+    );
+  }
+  return value as CommentStrategy;
 }
 
 /**
@@ -130,47 +103,44 @@ function parseRepository(): { owner: string; repo: string } | undefined {
  */
 async function run(): Promise<void> {
   try {
-    // Parse inputs
-    const inputPath = getInput('path') || './';
-    const githubToken = getInput('github-token', true)!;
-    const awsRegion = getInput('aws-region') || 'us-east-1';
-    const configPath = getInput('config-path');
-    const commentStrategy = (getInput('comment-strategy') || 'update') as CommentStrategy;
-    const debugMode = getInput('debug') === 'true';
+    // Parse and validate inputs
+    const rawInputPath = core.getInput('path') || './';
+    const inputPath = validatePath(rawInputPath);
+    const githubToken = core.getInput('github-token', { required: true });
+    const awsRegion = core.getInput('aws-region') || 'us-east-1';
+    const configPath = core.getInput('config-path');
+    const rawCommentStrategy = core.getInput('comment-strategy') || 'update';
+    const commentStrategy = validateCommentStrategy(rawCommentStrategy);
+    const debugMode = core.getBooleanInput('debug');
 
     // Enable debug logging if requested
     if (debugMode) {
       Logger.setDebugEnabled(true);
-      debug('Debug logging enabled');
+      core.debug('Debug logging enabled');
     }
 
-    info('Starting CDK Cost Analysis...');
+    core.info('Starting CDK Cost Analysis...');
 
     // Validate GitHub context
     const repoInfo = parseRepository();
     if (!repoInfo) {
-      setFailed('Could not determine repository from GITHUB_REPOSITORY environment variable');
+      core.setFailed('Could not determine repository from GitHub context');
       return;
     }
 
     const prNumber = getPRNumber();
     if (!prNumber) {
-      warning('Not running in a pull request context. Skipping PR comment.');
+      core.warning('Not running in a pull_request event. Skipping PR comment.');
     }
 
     // Detect or use provided CDK app path
-    const workspacePath = process.env.GITHUB_WORKSPACE || process.cwd();
-    const basePath = path.isAbsolute(inputPath)
-      ? inputPath
-      : path.join(workspacePath, inputPath);
-
-    let cdkAppPath = detectCdkApp(basePath);
+    let cdkAppPath = detectCdkApp(inputPath);
 
     if (!cdkAppPath) {
-      warning(`Could not detect CDK app in ${basePath}. Using provided path.`);
-      cdkAppPath = basePath;
+      core.warning(`Could not detect CDK app in ${inputPath}. Using provided path.`);
+      cdkAppPath = inputPath;
     } else {
-      info(`Detected CDK app at: ${cdkAppPath}`);
+      core.info(`Detected CDK app at: ${cdkAppPath}`);
     }
 
     // Check if synthesis is needed
@@ -178,13 +148,13 @@ async function run(): Promise<void> {
     const needsSynthesis = !fs.existsSync(cdkOutDir);
 
     if (needsSynthesis) {
-      info('CDK output not found. Synthesis will be performed.');
+      core.info('CDK output not found. Synthesis will be performed.');
     }
 
     // Run cost analysis
     const orchestrator = new PipelineOrchestrator();
 
-    info(`Running cost analysis for region: ${awsRegion}`);
+    core.info(`Running cost analysis for region: ${awsRegion}`);
 
     const result = await orchestrator.runPipelineAnalysis({
       synthesize: needsSynthesis,
@@ -193,38 +163,60 @@ async function run(): Promise<void> {
       configPath: configPath,
     });
 
+    // Calculate base and target costs
+    const baseCost = result.costAnalysis.removedResources.reduce(
+      (sum, r) => sum + r.monthlyCost.amount,
+      0
+    ) + result.costAnalysis.modifiedResources.reduce(
+      (sum, r) => sum + r.oldMonthlyCost.amount,
+      0
+    );
+
+    const targetCost = result.costAnalysis.addedResources.reduce(
+      (sum, r) => sum + r.monthlyCost.amount,
+      0
+    ) + result.costAnalysis.modifiedResources.reduce(
+      (sum, r) => sum + r.newMonthlyCost.amount,
+      0
+    );
+
     // Generate GitHub-formatted report
     const reporter = new GitHubActionReporter();
-    const report = reporter.generateReport({
+    const costDelta = {
       totalDelta: result.costAnalysis.totalDelta,
       currency: result.costAnalysis.currency,
       addedCosts: result.costAnalysis.addedResources,
       removedCosts: result.costAnalysis.removedResources,
       modifiedCosts: result.costAnalysis.modifiedResources,
-    });
+    };
+    const report = reporter.generateReport(
+      costDelta,
+      baseCost,
+      targetCost,
+    );
 
     // Output to console
     console.log('\n' + report + '\n');
 
     // Set outputs
-    setOutput('total-delta', result.costAnalysis.totalDelta.toString());
-    setOutput('currency', result.costAnalysis.currency);
-    setOutput('added-count', result.costAnalysis.addedResources.length.toString());
-    setOutput('removed-count', result.costAnalysis.removedResources.length.toString());
-    setOutput('modified-count', result.costAnalysis.modifiedResources.length.toString());
-    setOutput('threshold-passed', result.thresholdStatus.passed.toString());
-    setOutput('threshold-level', result.thresholdStatus.level);
+    core.setOutput('total-delta', result.costAnalysis.totalDelta.toString());
+    core.setOutput('currency', result.costAnalysis.currency);
+    core.setOutput('added-count', result.costAnalysis.addedResources.length.toString());
+    core.setOutput('removed-count', result.costAnalysis.removedResources.length.toString());
+    core.setOutput('modified-count', result.costAnalysis.modifiedResources.length.toString());
+    core.setOutput('threshold-passed', result.thresholdStatus.passed.toString());
+    core.setOutput('threshold-level', result.thresholdStatus.level);
 
     // Post comment to PR if in PR context
     if (prNumber) {
-      info(`Posting cost analysis to PR #${prNumber}...`);
+      core.info(`Posting cost analysis to PR #${prNumber}...`);
 
-      const github = new GitHubIntegration({
+      const integration = new GitHubIntegration({
         token: githubToken,
         apiUrl: process.env.GITHUB_API_URL || 'https://api.github.com',
       });
 
-      await github.postPRComment(
+      await integration.postPRComment(
         repoInfo.owner,
         repoInfo.repo,
         prNumber,
@@ -232,25 +224,25 @@ async function run(): Promise<void> {
         commentStrategy,
       );
 
-      info('Cost analysis posted to pull request');
+      core.info('Cost analysis posted to pull request');
     }
 
     // Check threshold status
     if (result.thresholdStatus.level === 'error' && !result.thresholdStatus.passed) {
-      setFailed(`Cost threshold exceeded: ${result.thresholdStatus.message}`);
+      core.setFailed(`Cost threshold exceeded: ${result.thresholdStatus.message}`);
       return;
     }
 
     if (result.thresholdStatus.level === 'warning' && !result.thresholdStatus.passed) {
-      warning(`Cost threshold warning: ${result.thresholdStatus.message}`);
+      core.warning(`Cost threshold warning: ${result.thresholdStatus.message}`);
     }
 
-    info('Cost analysis completed successfully');
+    core.info('Cost analysis completed successfully');
   } catch (error) {
     if (error instanceof Error) {
-      setFailed(error.message);
+      core.setFailed(error.message);
     } else {
-      setFailed(String(error));
+      core.setFailed(String(error));
     }
   }
 }

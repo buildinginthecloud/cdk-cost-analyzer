@@ -198,7 +198,6 @@ export class GitHubActionReporter {
    * Format cost delta with sign.
    */
   private formatDelta(amount: number, currency: string): string {
-    const sign = amount > 0 ? '+' : amount < 0 ? '' : '';
     const formatted = this.formatCurrency(Math.abs(amount), currency);
     if (amount === 0) {
       return formatted;
