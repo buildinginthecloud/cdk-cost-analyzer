@@ -95,7 +95,6 @@ describe('PricingService - Property Tests', () => {
   it('should handle unsupported resource types gracefully', () => {
     const unsupportedTypes = [
       'AWS::Route53::HostedZone',
-      'AWS::SNS::Topic',
       'AWS::SQS::Queue',
       'AWS::CloudWatch::Alarm',
       'AWS::IAM::Role',
@@ -138,7 +137,6 @@ describe('PricingService - Property Tests', () => {
 
     const unsupportedTypes = [
       'AWS::Route53::HostedZone',
-      'AWS::SNS::Topic',
       'AWS::SQS::Queue',
       'Custom::MyResource',
     ];
