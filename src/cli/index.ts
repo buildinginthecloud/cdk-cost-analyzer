@@ -5,7 +5,10 @@ import * as path from 'path';
 import { Command } from 'commander';
 import { analyzeCosts, analyzeSingleTemplate } from '../api';
 import { GitLabIntegration } from '../integrations/GitLabIntegration';
+import { GitHubIntegration } from '../integrations/GitHubIntegration';
+import { CommentStrategy } from '../integrations/types';
 import { PipelineOrchestrator } from '../pipeline/PipelineOrchestrator';
+import { GitHubActionReporter } from '../reporter/GitHubActionReporter';
 import { Logger } from '../utils/Logger';
 
 // Read version from package.json
@@ -134,6 +137,8 @@ program
   .option('--environment <env>', 'Environment name for threshold selection')
   .option('--format <format>', 'Output format: text|json|markdown', 'text')
   .option('--post-to-gitlab', 'Post results to GitLab merge request')
+  .option('--post-to-github', 'Post results to GitHub pull request')
+  .option('--comment-strategy <strategy>', 'Comment update strategy: new|update|delete-and-new', 'update')
   .option('--debug', 'Enable verbose debug logging for pricing API calls')
   .action(async (options: {
     base?: string;
@@ -145,6 +150,8 @@ program
     environment?: string;
     format: string;
     postToGitlab?: boolean;
+    postToGithub?: boolean;
+    commentStrategy?: string;
     debug?: boolean;
   }) => {
     try {
@@ -250,6 +257,61 @@ program
             console.log('Results posted to GitLab merge request');
           } catch (error) {
             console.error(`Warning: Failed to post to GitLab: ${error instanceof Error ? error.message : String(error)}`);
+          }
+        }
+      }
+
+      // Post to GitHub if requested
+      if (options.postToGithub) {
+        const githubToken = process.env.GITHUB_TOKEN;
+        const githubRepository = process.env.GITHUB_REPOSITORY;
+        const githubEventPath = process.env.GITHUB_EVENT_PATH;
+
+        if (!githubToken || !githubRepository) {
+          console.error('Warning: GitHub environment variables not found. Skipping GitHub post.');
+          console.error('Required: GITHUB_TOKEN, GITHUB_REPOSITORY');
+        } else {
+          try {
+            // Parse repository owner and name
+            const [owner, repo] = githubRepository.split('/');
+
+            // Get PR number from event payload
+            let prNumber: number | undefined;
+            if (githubEventPath && fs.existsSync(githubEventPath)) {
+              const eventPayload = JSON.parse(fs.readFileSync(githubEventPath, 'utf-8'));
+              prNumber = eventPayload.pull_request?.number || eventPayload.issue?.number;
+            }
+
+            // Also check GITHUB_PR_NUMBER for direct setting
+            if (!prNumber && process.env.GITHUB_PR_NUMBER) {
+              prNumber = parseInt(process.env.GITHUB_PR_NUMBER, 10);
+            }
+
+            if (!prNumber) {
+              console.error('Warning: Could not determine PR number. Skipping GitHub post.');
+              console.error('Set GITHUB_PR_NUMBER environment variable or ensure running in a PR context.');
+            } else {
+              const github = new GitHubIntegration({
+                token: githubToken,
+                apiUrl: process.env.GITHUB_API_URL || 'https://api.github.com',
+              });
+
+              // Generate GitHub-specific report with trend indicators
+              const githubReporter = new GitHubActionReporter();
+              const comment = githubReporter.generateReport({
+                totalDelta: result.costAnalysis.totalDelta,
+                currency: result.costAnalysis.currency,
+                addedCosts: result.costAnalysis.addedResources,
+                removedCosts: result.costAnalysis.removedResources,
+                modifiedCosts: result.costAnalysis.modifiedResources,
+              });
+
+              const strategy = (options.commentStrategy || 'update') as CommentStrategy;
+              await github.postPRComment(owner, repo, prNumber, comment, strategy);
+              console.log('Results posted to GitHub pull request');
+            }
+          } catch (error) {
+            console.error(`Warning: Failed to post to GitHub: ${error instanceof Error ? error.message : String(error)}`);
           }
         }
       }
