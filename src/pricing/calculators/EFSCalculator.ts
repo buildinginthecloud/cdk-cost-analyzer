@@ -33,6 +33,16 @@ export class EFSCalculator implements ResourceCostCalculator {
     pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     try {
+      // Guard against undefined properties
+      if (!resource.properties) {
+        return {
+          amount: 0,
+          currency: 'USD',
+          confidence: 'unknown',
+          assumptions: ['Resource properties are undefined'],
+        };
+      }
+
       const regionPrefix = getRegionPrefix(region);
       const storageSizeGb = this.customStorageSizeGb ?? this.DEFAULT_STORAGE_SIZE_GB;
       const iaPercentage = this.customInfrequentAccessPercentage ?? this.DEFAULT_IA_PERCENTAGE;
