@@ -66,6 +66,18 @@ export interface UsageAssumptionsConfig {
     dataProcessedGB?: number;
   };
   /**
+   * EFS (Elastic File System) usage assumptions for cost estimation.
+   * These values are used to estimate monthly costs for EFS file systems.
+   *
+   * @see https://aws.amazon.com/efs/pricing/
+   */
+  efs?: {
+    /** Total storage size in GB (default: 100) */
+    storageSizeGb?: number;
+    /** Percentage of storage in Infrequent Access class (default: 0, range: 0-100) */
+    infrequentAccessPercentage?: number;
+  };
+  /**
    * SNS (Simple Notification Service) usage assumptions.
    * These values are used to estimate monthly costs for SNS topics.
    *

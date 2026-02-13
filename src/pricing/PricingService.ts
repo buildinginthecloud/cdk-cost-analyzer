@@ -6,6 +6,7 @@ import { CloudFrontCalculator } from './calculators/CloudFrontCalculator';
 import { DynamoDBCalculator } from './calculators/DynamoDBCalculator';
 import { EC2Calculator } from './calculators/EC2Calculator';
 import { ECSCalculator } from './calculators/ECSCalculator';
+import { EFSCalculator } from './calculators/EFSCalculator';
 import { ElastiCacheCalculator } from './calculators/ElastiCacheCalculator';
 import { LambdaCalculator } from './calculators/LambdaCalculator';
 import { LaunchTemplateCalculator } from './calculators/LaunchTemplateCalculator';
@@ -88,6 +89,10 @@ export class PricingService implements IPricingService {
       new ElastiCacheCalculator(),
       new AutoScalingGroupCalculator(),
       new LaunchTemplateCalculator(),
+      new EFSCalculator(
+        usageAssumptions?.efs?.storageSizeGb,
+        usageAssumptions?.efs?.infrequentAccessPercentage,
+      ),
       new SNSCalculator(
         usageAssumptions?.sns?.monthlyPublishes,
         usageAssumptions?.sns?.httpDeliveries,
