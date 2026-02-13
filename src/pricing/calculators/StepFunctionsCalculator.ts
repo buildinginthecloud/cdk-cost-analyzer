@@ -49,7 +49,7 @@ export class StepFunctionsCalculator implements ResourceCostCalculator {
   }
 
   private async calculateStandardWorkflowCost(
-    resource: ResourceWithId,
+    _resource: ResourceWithId,
     region: string,
     pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
@@ -140,7 +140,7 @@ export class StepFunctionsCalculator implements ResourceCostCalculator {
   }
 
   private async calculateExpressWorkflowCost(
-    resource: ResourceWithId,
+    _resource: ResourceWithId,
     region: string,
     pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
