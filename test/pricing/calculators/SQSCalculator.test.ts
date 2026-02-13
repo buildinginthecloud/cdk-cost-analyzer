@@ -1,7 +1,7 @@
 // Jest imports are global
-import { SQSCalculator } from '../../src/pricing/calculators/SQSCalculator';
-import { PricingClient } from '../../src/pricing/types';
-import { CostAnalyzerConfig } from '../../src/config/types';
+import { SQSCalculator } from '../../../src/pricing/calculators/SQSCalculator';
+import { PricingClient } from '../../../src/pricing/types';
+import { CostAnalyzerConfig } from '../../../src/config/types';
 
 describe('SQSCalculator', () => {
   const calculator = new SQSCalculator();
