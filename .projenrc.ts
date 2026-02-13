@@ -302,12 +302,12 @@ if (project.github) {
       },
       {
         name: 'Run cdk-cost-analyzer on single-stack (text output)',
-        run: 'node ../../dist/cli/index.js cdk.out --output text',
+        run: 'node ../../dist/cli/index.js analyze cdk.out/SingleStackExample.template.json --format text',
         workingDirectory: 'examples/single-stack',
       },
       {
         name: 'Run cdk-cost-analyzer on single-stack (json output)',
-        run: 'node ../../dist/cli/index.js cdk.out --output json > cost-report.json',
+        run: 'node ../../dist/cli/index.js analyze cdk.out/SingleStackExample.template.json --format json > cost-report.json',
         workingDirectory: 'examples/single-stack',
       },
       {
@@ -337,13 +337,13 @@ if (project.github) {
         workingDirectory: 'examples/multi-stack',
       },
       {
-        name: 'Run cdk-cost-analyzer on multi-stack (text output)',
-        run: 'node ../../dist/cli/index.js cdk.out --output text',
+        name: 'Run cdk-cost-analyzer on multi-stack NetworkingStack (text output)',
+        run: 'node ../../dist/cli/index.js analyze cdk.out/NetworkingStack.template.json --format text',
         workingDirectory: 'examples/multi-stack',
       },
       {
-        name: 'Run cdk-cost-analyzer on multi-stack (json output)',
-        run: 'node ../../dist/cli/index.js cdk.out --output json > cost-report.json',
+        name: 'Run cdk-cost-analyzer on multi-stack NetworkingStack (json output)',
+        run: 'node ../../dist/cli/index.js analyze cdk.out/NetworkingStack.template.json --format json > cost-report.json',
         workingDirectory: 'examples/multi-stack',
       },
       {
