@@ -1,4 +1,4 @@
-import { Reporter, ServiceBreakdown } from '../../src/reporter/Reporter';
+import { Reporter } from '../../src/reporter/Reporter';
 import { SingleTemplateReporter } from '../../src/reporter/SingleTemplateReporter';
 import { CostDelta } from '../../src/pricing/types';
 import { SingleTemplateCostResult } from '../../src/api/single-template-types';
