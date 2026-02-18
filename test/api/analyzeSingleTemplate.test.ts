@@ -100,7 +100,7 @@ describe('analyzeSingleTemplate API', () => {
       format: 'markdown',
     });
 
-    expect(result.summary).toContain('# Single Template Cost Analysis');
+    expect(result.summary).toContain('# 💰 Single Template Cost Analysis');
     expect(result.summary).toContain('## Summary');
   });
 
