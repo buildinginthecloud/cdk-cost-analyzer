@@ -327,7 +327,7 @@ describe('Markdown Formatting', () => {
     const thresholdExceededOptions = {
       thresholdStatus: {
         passed: false,
-        level: 'error',
+        level: 'error' as const,
         threshold: 100,
         delta: 150.50,
         message: 'Cost delta exceeds error threshold',
@@ -359,7 +359,7 @@ describe('Markdown Formatting', () => {
       const passedOptions = {
         thresholdStatus: {
           passed: true,
-          level: 'warning',
+          level: 'warning' as const,
           threshold: 200,
           delta: 150.50,
           message: 'Within threshold',
