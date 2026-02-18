@@ -573,67 +573,6 @@ export class Reporter implements IReporter {
     return lines;
   }
 
-  private formatConfigSummaryMarkdown(config: any): string[] {
-    const lines: string[] = [];
-    lines.push('<details>');
-    lines.push('<summary><strong>Configuration Summary</strong></summary>');
-    lines.push('');
-
-    if (config.configPath) {
-      lines.push(`**Configuration File:** \`${config.configPath}\``);
-    } else {
-      lines.push('**Configuration File:** Using defaults');
-    }
-    lines.push('');
-
-    if (config.thresholds) {
-      lines.push('**Thresholds:**');
-      if (config.thresholds.environment) {
-        lines.push(`- Environment: ${config.thresholds.environment}`);
-      }
-      if (config.thresholds.warning !== undefined) {
-        lines.push(`- Warning: $${config.thresholds.warning.toFixed(2)}/month`);
-      }
-      if (config.thresholds.error !== undefined) {
-        lines.push(`- Error: $${config.thresholds.error.toFixed(2)}/month`);
-      }
-      lines.push('');
-    }
-
-    if (
-      config.excludedResourceTypes &&
-      config.excludedResourceTypes.length > 0
-    ) {
-      lines.push('**Excluded Resource Types:**');
-      for (const type of config.excludedResourceTypes) {
-        lines.push(`- \`${type}\``);
-      }
-      lines.push('');
-    }
-
-    if (
-      config.usageAssumptions &&
-      Object.keys(config.usageAssumptions).length > 0
-    ) {
-      lines.push('**Custom Usage Assumptions:**');
-      for (const [resourceType, assumptions] of Object.entries(
-        config.usageAssumptions,
-      )) {
-        lines.push(`- **${resourceType}:**`);
-        const assumptionObj = assumptions as Record<string, any>;
-        for (const [key, value] of Object.entries(assumptionObj)) {
-          lines.push(`  - ${key}: ${value}`);
-        }
-      }
-      lines.push('');
-    }
-
-    lines.push('</details>');
-    lines.push('');
-
-    return lines;
-  }
-
   private formatThresholdStatusMarkdown(
     threshold: any,
     costDelta: CostDelta,
