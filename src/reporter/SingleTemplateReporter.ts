@@ -40,6 +40,26 @@ export class SingleTemplateReporter {
   }
 
   /**
+   * Get trend indicator emoji based on cost value
+   */
+  getTrendIndicator(amount: number): string {
+    if (amount > 0) return '↗️';
+    if (amount < 0) return '↘️';
+    return '➡️';
+  }
+
+  /**
+   * Extract AWS service name from resource type (e.g., AWS::EC2::Instance -> EC2)
+   */
+  extractServiceName(resourceType: string): string {
+    const parts = resourceType.split('::');
+    if (parts.length >= 2) {
+      return parts[1];
+    }
+    return resourceType;
+  }
+
+  /**
    * Generate JSON format report
    */
   private generateJsonReport(result: SingleTemplateCostResult): string {
@@ -137,41 +157,75 @@ export class SingleTemplateReporter {
     let report = '';
 
     // Header
-    report += '# Single Template Cost Analysis\n\n';
+    report += '# 💰 Single Template Cost Analysis\n\n';
 
     // Summary
     report += '## Summary\n\n';
     report += `**Total Monthly Cost:** $${result.totalMonthlyCost.toFixed(2)} ${result.currency}\n\n`;
-    report += `- **Analysis Date:** ${result.metadata.analyzedAt.toISOString()}\n`;
-    report += `- **Region:** ${result.metadata.region}\n`;
-    report += `- **Template Hash:** ${result.metadata.templateHash}\n\n`;
+    report += '| Metric | Value |\n';
+    report += '|--------|-------|\n';
+    report += `| Analysis Date | ${result.metadata.analyzedAt.toISOString()} |\n`;
+    report += `| Region | ${result.metadata.region} |\n`;
+    report += `| Template Hash | \`${result.metadata.templateHash}\` |\n\n`;
 
     // Resource counts
-    report += '## Resource Overview\n\n';
-    report += `- **Total Resources:** ${result.metadata.resourceCount}\n`;
-    report += `- **Supported Resources:** ${result.metadata.supportedResourceCount}\n`;
-    report += `- **Unsupported Resources:** ${result.metadata.unsupportedResourceCount}\n\n`;
+    report += '## 📊 Resource Overview\n\n';
+    report += '| Category | Count |\n';
+    report += '|----------|-------|\n';
+    report += `| Total Resources | ${result.metadata.resourceCount} |\n`;
+    report += `| Supported Resources | ${result.metadata.supportedResourceCount} |\n`;
+    report += `| Unsupported Resources | ${result.metadata.unsupportedResourceCount} |\n\n`;
 
     // Cost breakdown by confidence
     if (result.costBreakdown.byConfidenceLevel.length > 0) {
-      report += '## Cost Confidence Breakdown\n\n';
+      report += '## 🎯 Cost Confidence Breakdown\n\n';
       report += '| Confidence | Resources | Cost | Percentage |\n';
       report += '|------------|-----------|------|------------|\n';
 
       for (const conf of result.costBreakdown.byConfidenceLevel) {
         const percentage = ((conf.totalCost / result.totalMonthlyCost) * 100).toFixed(1);
-        report += `| ${conf.confidence} | ${conf.count} | $${conf.totalCost.toFixed(2)} | ${percentage}% |\n`;
+        const emoji = conf.confidence === 'high' ? '✅' : conf.confidence === 'medium' ? '⚠️' : conf.confidence === 'low' ? '❓' : '❌';
+        report += `| ${emoji} ${conf.confidence} | ${conf.count} | $${conf.totalCost.toFixed(2)} | ${percentage}% |\n`;
       }
       report += '\n';
     }
 
-    // Resource breakdown by type
+    // Cost breakdown by service
     if (options.showBreakdown && options.groupByType) {
-      report += '## Cost Breakdown by Resource Type\n\n';
+      report += '## 📈 Cost Breakdown by Service\n\n';
+
+      // Group by service first
+      const serviceMap = new Map<string, { totalCost: number; resources: Array<{ logicalId: string; type: string; monthlyCost: any }> }>();
+      
+      for (const typeGroup of result.costBreakdown.byResourceType) {
+        const service = this.extractServiceName(typeGroup.resourceType);
+        const existing = serviceMap.get(service) || { totalCost: 0, resources: [] };
+        existing.totalCost += typeGroup.totalCost;
+        existing.resources.push(...typeGroup.resources);
+        serviceMap.set(service, existing);
+      }
+
+      // Convert to array and sort by cost
+      const services = Array.from(serviceMap.entries())
+        .map(([service, data]) => ({ service, ...data }))
+        .sort((a, b) => b.totalCost - a.totalCost);
+
+      report += '| Service | Cost | Percentage | Trend |\n';
+      report += '|---------|------|------------|-------|\n';
+
+      for (const svc of services) {
+        const percentage = ((svc.totalCost / result.totalMonthlyCost) * 100).toFixed(1);
+        const trend = this.getTrendIndicator(svc.totalCost);
+        report += `| ${svc.service} | $${svc.totalCost.toFixed(2)} | ${percentage}% | ${trend} |\n`;
+      }
+      report += '\n';
+
+      // Detailed breakdown by resource type
+      report += '### Detailed Resource Breakdown\n\n';
 
       for (const typeGroup of result.costBreakdown.byResourceType) {
         const percentage = ((typeGroup.totalCost / result.totalMonthlyCost) * 100).toFixed(1);
-        report += `### ${typeGroup.resourceType}\n\n`;
+        report += `#### \`${typeGroup.resourceType}\`\n\n`;
         report += `- **Count:** ${typeGroup.count}\n`;
         report += `- **Total Cost:** $${typeGroup.totalCost.toFixed(2)} (${percentage}%)\n\n`;
 
@@ -182,24 +236,26 @@ export class SingleTemplateReporter {
         const sortedResources = this.sortResources(typeGroup.resources, options.sortBy);
         for (const resource of sortedResources) {
           const conf = resource.monthlyCost.confidence;
-          report += `| ${resource.logicalId} | $${resource.monthlyCost.amount.toFixed(2)} | ${conf} |\n`;
+          const emoji = conf === 'high' ? '✅' : conf === 'medium' ? '⚠️' : conf === 'low' ? '❓' : '❌';
+          report += `| ${resource.logicalId} | $${resource.monthlyCost.amount.toFixed(2)} | ${emoji} ${conf} |\n`;
         }
         report += '\n';
       }
     }
 
-    // Assumptions
+    // Assumptions (collapsible)
     if (options.showAssumptions && result.costBreakdown.assumptions.length > 0) {
-      report += '## Cost Calculation Assumptions\n\n';
+      report += '<details>\n';
+      report += '<summary><strong>📋 Cost Calculation Assumptions</strong></summary>\n\n';
       for (const assumption of result.costBreakdown.assumptions) {
         report += `- ${assumption}\n`;
       }
-      report += '\n';
+      report += '\n</details>\n\n';
     }
 
-    // Legend
+    // Footer
     report += '---\n\n';
-    report += '*Confidence levels: high (✓), medium (~), low (?), unknown/unsupported (✗)*\n';
+    report += '*Powered by [cdk-cost-analyzer](https://github.com/buildinginthecloud/cdk-cost-analyzer) | Confidence levels: ✅ high, ⚠️ medium, ❓ low, ❌ unknown*\n';
 
     return report;
   }
