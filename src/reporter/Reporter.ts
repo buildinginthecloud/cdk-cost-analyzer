@@ -47,7 +47,7 @@ export class Reporter implements IReporter {
       return newAmount > 0 ? '+∞%' : '0%';
     }
     const percentage = ((newAmount - oldAmount) / oldAmount) * 100;
-    const sign = percentage > 0 ? '+' : '';
+    const sign = percentage >= 0 ? '+' : '';
     return `${sign}${percentage.toFixed(1)}%`;
   }
 
