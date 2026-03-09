@@ -1,5 +1,12 @@
 import { Reporter } from '../../src/reporter/Reporter';
 import { SingleTemplateReporter } from '../../src/reporter/SingleTemplateReporter';
+import {
+  getTrendIndicator,
+  getPercentageChange,
+  extractServiceName,
+  groupCostsByService,
+  calculateTotalCosts,
+} from '../../src/reporter/markdownUtils';
 import { CostDelta } from '../../src/pricing/types';
 import { SingleTemplateCostResult } from '../../src/api/single-template-types';
 
@@ -72,57 +79,57 @@ describe('Markdown Formatting', () => {
 
   describe('getTrendIndicator', () => {
     it('should return up arrow for positive amounts', () => {
-      expect(reporter.getTrendIndicator(100)).toBe('↗️');
-      expect(reporter.getTrendIndicator(0.01)).toBe('↗️');
+      expect(getTrendIndicator(100)).toBe('↗️');
+      expect(getTrendIndicator(0.01)).toBe('↗️');
     });
 
     it('should return down arrow for negative amounts', () => {
-      expect(reporter.getTrendIndicator(-100)).toBe('↘️');
-      expect(reporter.getTrendIndicator(-0.01)).toBe('↘️');
+      expect(getTrendIndicator(-100)).toBe('↘️');
+      expect(getTrendIndicator(-0.01)).toBe('↘️');
     });
 
     it('should return right arrow for zero', () => {
-      expect(reporter.getTrendIndicator(0)).toBe('➡️');
+      expect(getTrendIndicator(0)).toBe('➡️');
     });
   });
 
   describe('getPercentageChange', () => {
     it('should calculate positive percentage change', () => {
-      expect(reporter.getPercentageChange(100, 150)).toBe('+50.0%');
-      expect(reporter.getPercentageChange(100, 200)).toBe('+100.0%');
+      expect(getPercentageChange(100, 150)).toBe('+50.0%');
+      expect(getPercentageChange(100, 200)).toBe('+100.0%');
     });
 
     it('should calculate negative percentage change', () => {
-      expect(reporter.getPercentageChange(100, 50)).toBe('-50.0%');
-      expect(reporter.getPercentageChange(200, 100)).toBe('-50.0%');
+      expect(getPercentageChange(100, 50)).toBe('-50.0%');
+      expect(getPercentageChange(200, 100)).toBe('-50.0%');
     });
 
     it('should return 0% for no change', () => {
-      expect(reporter.getPercentageChange(100, 100)).toBe('+0.0%');
+      expect(getPercentageChange(100, 100)).toBe('0%');
     });
 
     it('should handle zero old amount', () => {
-      expect(reporter.getPercentageChange(0, 100)).toBe('+∞%');
-      expect(reporter.getPercentageChange(0, 0)).toBe('0%');
+      expect(getPercentageChange(0, 100)).toBe('+∞%');
+      expect(getPercentageChange(0, 0)).toBe('0%');
     });
   });
 
   describe('extractServiceName', () => {
     it('should extract service name from AWS resource type', () => {
-      expect(reporter.extractServiceName('AWS::EC2::Instance')).toBe('EC2');
-      expect(reporter.extractServiceName('AWS::S3::Bucket')).toBe('S3');
-      expect(reporter.extractServiceName('AWS::Lambda::Function')).toBe('Lambda');
-      expect(reporter.extractServiceName('AWS::RDS::DBInstance')).toBe('RDS');
+      expect(extractServiceName('AWS::EC2::Instance')).toBe('EC2');
+      expect(extractServiceName('AWS::S3::Bucket')).toBe('S3');
+      expect(extractServiceName('AWS::Lambda::Function')).toBe('Lambda');
+      expect(extractServiceName('AWS::RDS::DBInstance')).toBe('RDS');
     });
 
     it('should return original string for non-standard format', () => {
-      expect(reporter.extractServiceName('CustomResource')).toBe('CustomResource');
+      expect(extractServiceName('CustomResource')).toBe('CustomResource');
     });
   });
 
   describe('groupCostsByService', () => {
     it('should group costs by AWS service', () => {
-      const breakdown = reporter.groupCostsByService(sampleCostDelta);
+      const breakdown = groupCostsByService(sampleCostDelta);
 
       expect(breakdown).toBeInstanceOf(Array);
       expect(breakdown.length).toBeGreaterThan(0);
@@ -147,7 +154,7 @@ describe('Markdown Formatting', () => {
     });
 
     it('should sort by absolute cost impact', () => {
-      const breakdown = reporter.groupCostsByService(sampleCostDelta);
+      const breakdown = groupCostsByService(sampleCostDelta);
 
       // Should be sorted by absolute value of totalCost descending
       for (let i = 0; i < breakdown.length - 1; i++) {
@@ -166,14 +173,14 @@ describe('Markdown Formatting', () => {
         modifiedCosts: [],
       };
 
-      const breakdown = reporter.groupCostsByService(emptyCostDelta);
+      const breakdown = groupCostsByService(emptyCostDelta);
       expect(breakdown).toEqual([]);
     });
   });
 
   describe('calculateTotalCosts', () => {
     it('should calculate before and after costs', () => {
-      const totals = reporter.calculateTotalCosts(sampleCostDelta);
+      const totals = calculateTotalCosts(sampleCostDelta);
 
       // Before: OldFunction (10) + UpdatedInstance old cost (150) = 160
       expect(totals.before).toBe(160);
@@ -191,7 +198,7 @@ describe('Markdown Formatting', () => {
         modifiedCosts: [],
       };
 
-      const totals = reporter.calculateTotalCosts(addedOnly);
+      const totals = calculateTotalCosts(addedOnly);
       expect(totals.before).toBe(0);
       expect(totals.after).toBe(125);
     });
@@ -205,7 +212,7 @@ describe('Markdown Formatting', () => {
         modifiedCosts: [],
       };
 
-      const totals = reporter.calculateTotalCosts(removedOnly);
+      const totals = calculateTotalCosts(removedOnly);
       expect(totals.before).toBe(10);
       expect(totals.after).toBe(0);
     });
@@ -508,18 +515,16 @@ describe('SingleTemplateReporter Markdown Formatting', () => {
 
   const reporter = new SingleTemplateReporter();
 
-  describe('getTrendIndicator', () => {
+  describe('shared utility functions', () => {
     it('should return correct trend indicators', () => {
-      expect(reporter.getTrendIndicator(100)).toBe('↗️');
-      expect(reporter.getTrendIndicator(-50)).toBe('↘️');
-      expect(reporter.getTrendIndicator(0)).toBe('➡️');
+      expect(getTrendIndicator(100)).toBe('↗️');
+      expect(getTrendIndicator(-50)).toBe('↘️');
+      expect(getTrendIndicator(0)).toBe('➡️');
     });
-  });
 
-  describe('extractServiceName', () => {
     it('should extract service name from resource type', () => {
-      expect(reporter.extractServiceName('AWS::EC2::Instance')).toBe('EC2');
-      expect(reporter.extractServiceName('AWS::S3::Bucket')).toBe('S3');
+      expect(extractServiceName('AWS::EC2::Instance')).toBe('EC2');
+      expect(extractServiceName('AWS::S3::Bucket')).toBe('S3');
     });
   });
 
