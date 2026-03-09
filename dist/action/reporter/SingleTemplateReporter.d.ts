@@ -13,6 +13,14 @@ export declare class SingleTemplateReporter {
      */
     generateReport(result: SingleTemplateCostResult, format: 'text' | 'json' | 'markdown', options?: SingleTemplateReportOptions): string;
     /**
+     * Get trend indicator emoji based on cost value
+     */
+    getTrendIndicator(amount: number): string;
+    /**
+     * Extract AWS service name from resource type (e.g., AWS::EC2::Instance -> EC2)
+     */
+    extractServiceName(resourceType: string): string;
+    /**
      * Generate JSON format report
      */
     private generateJsonReport;
