@@ -28,11 +28,11 @@ describe('Markdown Reporter', () => {
 
       const report = reporter.generateReport(costDelta, 'markdown');
 
-      expect(report).toContain('# CDK Cost Analysis Report');
-      expect(report).toContain('**Total Cost Delta:** +$100.50');
-      expect(report).toContain('## Added Resources');
-      expect(report).toContain('| Logical ID | Type | Monthly Cost |');
-      expect(report).toContain('| MyInstance | AWS::EC2::Instance | $100.50 |');
+      expect(report).toContain('# 💰 Cost Impact Analysis');
+      expect(report).toContain('**Monthly Cost Change:** +$100.50');
+      expect(report).toContain('## 📈 Added Resources');
+      expect(report).toContain('| Resource | Type | Monthly Cost |');
+      expect(report).toContain('| MyInstance | `AWS::EC2::Instance` | $100.50 |');
     });
 
     it('should generate markdown report with removed resources', () => {
@@ -57,9 +57,9 @@ describe('Markdown Reporter', () => {
 
       const report = reporter.generateReport(costDelta, 'markdown');
 
-      expect(report).toContain('**Total Cost Delta:** -$50.25');
-      expect(report).toContain('## Removed Resources');
-      expect(report).toContain('| OldBucket | AWS::S3::Bucket | $50.25 |');
+      expect(report).toContain('**Monthly Cost Change:** -$50.25');
+      expect(report).toContain('## 📉 Removed Resources');
+      expect(report).toContain('| OldBucket | `AWS::S3::Bucket` | $50.25 |');
     });
 
     it('should generate markdown report with modified resources', () => {
@@ -97,10 +97,10 @@ describe('Markdown Reporter', () => {
 
       const report = reporter.generateReport(costDelta, 'markdown');
 
-      expect(report).toContain('**Total Cost Delta:** +$25.00');
-      expect(report).toContain('## Modified Resources');
-      expect(report).toContain('| Logical ID | Type | Old Cost | New Cost | Delta |');
-      expect(report).toContain('| MyFunction | AWS::Lambda::Function | $50.00 | $75.00 | +$25.00 |');
+      expect(report).toContain('**Monthly Cost Change:** +$25.00');
+      expect(report).toContain('## 🔄 Modified Resources');
+      expect(report).toContain('| Resource | Type | Before | After | Change |');
+      expect(report).toContain('| MyFunction | `AWS::Lambda::Function` | $50.00 | $75.00 | +$25.00 (+50.0%) ↗️ |');
     });
 
     it('should generate markdown tables with proper formatting', () => {
@@ -135,7 +135,7 @@ describe('Markdown Reporter', () => {
 
       const report = reporter.generateReport(costDelta, 'markdown');
 
-      expect(report).toContain('|------------|------|--------------|');
+      expect(report).toContain('|----------|------|--------------|');
       expect(report.split('|').length).toBeGreaterThan(10);
     });
 
@@ -200,8 +200,8 @@ describe('Markdown Reporter', () => {
 
       const report = reporter.generateReport(costDelta, 'markdown');
 
-      expect(report).toContain('# CDK Cost Analysis Report');
-      expect(report).toContain('**Total Cost Delta:** $0.00');
+      expect(report).toContain('# 💰 Cost Impact Analysis');
+      expect(report).toContain('**Monthly Cost Change:** $0.00');
     });
 
     it('should generate valid markdown structure', () => {

@@ -4,6 +4,13 @@ import {
   ResourceCost,
   ModifiedResourceCost,
 } from '../pricing/types';
+import { ConfigSummary } from '../pipeline/types';
+import {
+  getTrendIndicator,
+  getPercentageChange,
+  groupCostsByService,
+  calculateTotalCosts,
+} from './markdownUtils';
 
 export class Reporter implements IReporter {
   generateReport(
@@ -136,41 +143,24 @@ export class Reporter implements IReporter {
   ): string {
     const lines: string[] = [];
 
-    lines.push('# CDK Cost Analysis Report');
+    const totalCosts = calculateTotalCosts(costDelta);
+    const trendIndicator = getTrendIndicator(costDelta.totalDelta);
+
+    lines.push('# 💰 Cost Impact Analysis');
     lines.push('');
-
-    // Add configuration summary if provided
-    if (options?.configSummary) {
-      lines.push(...this.formatConfigSummaryMarkdown(options.configSummary));
-      lines.push('');
-    }
-
-    // Add threshold status if provided
-    if (options?.thresholdStatus) {
-      lines.push(
-        ...this.formatThresholdStatusMarkdown(
-          options.thresholdStatus,
-          costDelta,
-        ),
-      );
-      lines.push('');
-    }
-
-    // Show total cost delta
-    lines.push(
-      `**Total Cost Delta:** ${this.formatDelta(costDelta.totalDelta, costDelta.currency)}`,
-    );
+    lines.push(`**Monthly Cost Change:** ${this.formatDelta(costDelta.totalDelta, costDelta.currency)} ${trendIndicator}`);
     lines.push('');
 
     // If multi-stack, show per-stack breakdowns
     if (options?.multiStack && options?.stacks && options.stacks.length > 1) {
       lines.push('## Per-Stack Cost Breakdown');
       lines.push('');
-      lines.push('| Stack | Cost Delta |');
-      lines.push('|-------|------------|');
+      lines.push('| Stack | Cost Delta | Trend |');
+      lines.push('|-------|------------|-------|');
       for (const stack of options.stacks) {
+        const stackTrend = getTrendIndicator(stack.costDelta.totalDelta);
         lines.push(
-          `| ${stack.stackName} | ${this.formatDelta(stack.costDelta.totalDelta, stack.costDelta.currency)} |`,
+          `| ${stack.stackName} | ${this.formatDelta(stack.costDelta.totalDelta, stack.costDelta.currency)} | ${stackTrend} |`,
         );
       }
       lines.push('');
@@ -189,11 +179,23 @@ export class Reporter implements IReporter {
       lines.push('');
     }
 
-    if (costDelta.addedCosts.length > 0) {
-      lines.push('## Added Resources');
+    // Add threshold status if provided
+    if (options?.thresholdStatus) {
+      lines.push(
+        ...this.formatThresholdStatusMarkdown(
+          options.thresholdStatus,
+          costDelta,
+        ),
+      );
       lines.push('');
-      lines.push('| Logical ID | Type | Monthly Cost |');
-      lines.push('|------------|------|--------------|');
+    }
+
+    // Added Resources
+    if (costDelta.addedCosts.length > 0) {
+      lines.push('## 📈 Added Resources');
+      lines.push('');
+      lines.push('| Resource | Type | Monthly Cost |');
+      lines.push('|----------|------|--------------|');
 
       const sortedAdded = [...costDelta.addedCosts].sort(
         (a, b) => b.monthlyCost.amount - a.monthlyCost.amount,
@@ -201,17 +203,45 @@ export class Reporter implements IReporter {
 
       for (const resource of sortedAdded) {
         lines.push(
-          `| ${resource.logicalId} | ${resource.type} | ${this.formatCurrency(resource.monthlyCost.amount, costDelta.currency)} |`,
+          `| ${resource.logicalId} | \`${resource.type}\` | ${this.formatCurrency(resource.monthlyCost.amount, costDelta.currency)} |`,
         );
       }
       lines.push('');
     }
 
-    if (costDelta.removedCosts.length > 0) {
-      lines.push('## Removed Resources');
+    // Modified Resources
+    if (costDelta.modifiedCosts.length > 0) {
+      lines.push('## 🔄 Modified Resources');
       lines.push('');
-      lines.push('| Logical ID | Type | Monthly Cost |');
-      lines.push('|------------|------|--------------|');
+      lines.push('| Resource | Type | Before | After | Change |');
+      lines.push('|----------|------|--------|-------|--------|');
+
+      const sortedModified = [...costDelta.modifiedCosts].sort(
+        (a, b) => Math.abs(b.costDelta) - Math.abs(a.costDelta),
+      );
+
+      for (const resource of sortedModified) {
+        const trend = getTrendIndicator(resource.costDelta);
+        const percentChange = getPercentageChange(
+          resource.oldMonthlyCost.amount,
+          resource.newMonthlyCost.amount,
+        );
+        lines.push(
+          `| ${resource.logicalId} | \`${resource.type}\` | ` +
+            `${this.formatCurrency(resource.oldMonthlyCost.amount, costDelta.currency)} | ` +
+            `${this.formatCurrency(resource.newMonthlyCost.amount, costDelta.currency)} | ` +
+            `${this.formatDelta(resource.costDelta, costDelta.currency)} (${percentChange}) ${trend} |`,
+        );
+      }
+      lines.push('');
+    }
+
+    // Removed Resources
+    if (costDelta.removedCosts.length > 0) {
+      lines.push('## 📉 Removed Resources');
+      lines.push('');
+      lines.push('| Resource | Type | Monthly Savings |');
+      lines.push('|----------|------|-----------------|');
 
       const sortedRemoved = [...costDelta.removedCosts].sort(
         (a, b) => b.monthlyCost.amount - a.monthlyCost.amount,
@@ -219,32 +249,49 @@ export class Reporter implements IReporter {
 
       for (const resource of sortedRemoved) {
         lines.push(
-          `| ${resource.logicalId} | ${resource.type} | ${this.formatCurrency(resource.monthlyCost.amount, costDelta.currency)} |`,
+          `| ${resource.logicalId} | \`${resource.type}\` | ${this.formatCurrency(resource.monthlyCost.amount, costDelta.currency)} |`,
         );
       }
       lines.push('');
     }
 
-    if (costDelta.modifiedCosts.length > 0) {
-      lines.push('## Modified Resources');
+    // Total Monthly Cost
+    lines.push('## 💵 Total Monthly Cost');
+    lines.push('');
+    lines.push('| Metric | Value |');
+    lines.push('|--------|-------|');
+    lines.push(`| Before | ${this.formatCurrency(totalCosts.before, costDelta.currency)} |`);
+    lines.push(`| After | ${this.formatCurrency(totalCosts.after, costDelta.currency)} |`);
+    lines.push(`| Change | ${this.formatDelta(costDelta.totalDelta, costDelta.currency)} ${trendIndicator} |`);
+    lines.push('');
+
+    // Cost Breakdown by Service
+    const serviceBreakdown = groupCostsByService(costDelta);
+    if (serviceBreakdown.length > 0) {
+      lines.push('## 📊 Cost Breakdown by Service');
       lines.push('');
-      lines.push('| Logical ID | Type | Old Cost | New Cost | Delta |');
-      lines.push('|------------|------|----------|----------|-------|');
+      lines.push('| Service | Resources | Cost Impact | Trend |');
+      lines.push('|---------|-----------|-------------|-------|');
 
-      const sortedModified = [...costDelta.modifiedCosts].sort(
-        (a, b) => Math.abs(b.costDelta) - Math.abs(a.costDelta),
-      );
-
-      for (const resource of sortedModified) {
+      for (const service of serviceBreakdown) {
+        const serviceTrend = getTrendIndicator(service.totalCost);
         lines.push(
-          `| ${resource.logicalId} | ${resource.type} | ` +
-            `${this.formatCurrency(resource.oldMonthlyCost.amount, costDelta.currency)} | ` +
-            `${this.formatCurrency(resource.newMonthlyCost.amount, costDelta.currency)} | ` +
-            `${this.formatDelta(resource.costDelta, costDelta.currency)} |`,
+          `| ${service.service} | ${service.resourceCount} | ${this.formatDelta(service.totalCost, costDelta.currency)} | ${serviceTrend} |`,
         );
       }
       lines.push('');
     }
+
+    // Configuration & Assumptions (collapsible)
+    if (options?.configSummary) {
+      lines.push(...this.formatConfigSummaryMarkdown(options.configSummary));
+      lines.push('');
+    }
+
+    // Footer
+    lines.push('---');
+    lines.push('');
+    lines.push('*Powered by [cdk-cost-analyzer](https://github.com/buildinginthecloud/cdk-cost-analyzer) | [Configuration Reference](https://github.com/buildinginthecloud/cdk-cost-analyzer/blob/main/docs/CONFIGURATION.md)*');
 
     return lines.join('\n');
   }
@@ -360,10 +407,10 @@ export class Reporter implements IReporter {
     return lines;
   }
 
-  private formatConfigSummaryMarkdown(config: any): string[] {
+  private formatConfigSummaryMarkdown(config: ConfigSummary): string[] {
     const lines: string[] = [];
     lines.push('<details>');
-    lines.push('<summary><strong>Configuration Summary</strong></summary>');
+    lines.push('<summary><strong>📋 Configuration & Assumptions</strong></summary>');
     lines.push('');
 
     if (config.configPath) {
@@ -432,9 +479,10 @@ export class Reporter implements IReporter {
     }
 
     const passed = threshold.passed;
+    const statusEmoji = passed ? '✅' : '🚨';
     const status = passed ? 'PASSED' : 'EXCEEDED';
 
-    lines.push(`## Threshold Status: ${status}`);
+    lines.push(`## ${statusEmoji} Threshold Status: ${status}`);
     lines.push('');
 
     if (threshold.threshold !== undefined) {
@@ -448,13 +496,13 @@ export class Reporter implements IReporter {
     lines.push('');
 
     if (!passed) {
-      lines.push('### Action Required');
+      lines.push('### ⚠️ Action Required');
       lines.push('');
       lines.push(threshold.message);
       lines.push('');
 
       if (threshold.recommendations && threshold.recommendations.length > 0) {
-        lines.push('### Recommendations');
+        lines.push('### 💡 Recommendations');
         lines.push('');
         for (const rec of threshold.recommendations) {
           lines.push(`- ${rec}`);
@@ -465,13 +513,14 @@ export class Reporter implements IReporter {
       // Show top cost contributors
       const topContributors = this.getTopCostContributors(costDelta, 5);
       if (topContributors.length > 0) {
-        lines.push('### Top Cost Contributors');
+        lines.push('### 🔝 Top Cost Contributors');
         lines.push('');
-        lines.push('| Resource | Type | Impact |');
-        lines.push('|----------|------|--------|');
+        lines.push('| Resource | Type | Impact | Trend |');
+        lines.push('|----------|------|--------|-------|');
         for (const contributor of topContributors) {
+          const trend = getTrendIndicator(contributor.impact);
           lines.push(
-            `| ${contributor.logicalId} | ${contributor.type} | ${this.formatDelta(contributor.impact, costDelta.currency)} |`,
+            `| ${contributor.logicalId} | \`${contributor.type}\` | ${this.formatDelta(contributor.impact, costDelta.currency)} | ${trend} |`,
           );
         }
         lines.push('');
@@ -528,10 +577,10 @@ export class Reporter implements IReporter {
     const lines: string[] = [];
 
     if (costDelta.addedCosts.length > 0) {
-      lines.push('**Added Resources:**');
+      lines.push('**📈 Added Resources:**');
       lines.push('');
-      lines.push('| Logical ID | Type | Monthly Cost |');
-      lines.push('|------------|------|--------------|');
+      lines.push('| Resource | Type | Monthly Cost |');
+      lines.push('|----------|------|--------------|');
 
       const sortedAdded = [...costDelta.addedCosts].sort(
         (a, b) => b.monthlyCost.amount - a.monthlyCost.amount,
@@ -539,17 +588,17 @@ export class Reporter implements IReporter {
 
       for (const resource of sortedAdded) {
         lines.push(
-          `| ${resource.logicalId} | ${resource.type} | ${this.formatCurrency(resource.monthlyCost.amount, costDelta.currency)} |`,
+          `| ${resource.logicalId} | \`${resource.type}\` | ${this.formatCurrency(resource.monthlyCost.amount, costDelta.currency)} |`,
         );
       }
       lines.push('');
     }
 
     if (costDelta.removedCosts.length > 0) {
-      lines.push('**Removed Resources:**');
+      lines.push('**📉 Removed Resources:**');
       lines.push('');
-      lines.push('| Logical ID | Type | Monthly Cost |');
-      lines.push('|------------|------|--------------|');
+      lines.push('| Resource | Type | Monthly Savings |');
+      lines.push('|----------|------|-----------------|');
 
       const sortedRemoved = [...costDelta.removedCosts].sort(
         (a, b) => b.monthlyCost.amount - a.monthlyCost.amount,
@@ -557,28 +606,33 @@ export class Reporter implements IReporter {
 
       for (const resource of sortedRemoved) {
         lines.push(
-          `| ${resource.logicalId} | ${resource.type} | ${this.formatCurrency(resource.monthlyCost.amount, costDelta.currency)} |`,
+          `| ${resource.logicalId} | \`${resource.type}\` | ${this.formatCurrency(resource.monthlyCost.amount, costDelta.currency)} |`,
         );
       }
       lines.push('');
     }
 
     if (costDelta.modifiedCosts.length > 0) {
-      lines.push('**Modified Resources:**');
+      lines.push('**🔄 Modified Resources:**');
       lines.push('');
-      lines.push('| Logical ID | Type | Old Cost | New Cost | Delta |');
-      lines.push('|------------|------|----------|----------|-------|');
+      lines.push('| Resource | Type | Before | After | Change |');
+      lines.push('|----------|------|--------|-------|--------|');
 
       const sortedModified = [...costDelta.modifiedCosts].sort(
         (a, b) => Math.abs(b.costDelta) - Math.abs(a.costDelta),
       );
 
       for (const resource of sortedModified) {
+        const trend = getTrendIndicator(resource.costDelta);
+        const percentChange = getPercentageChange(
+          resource.oldMonthlyCost.amount,
+          resource.newMonthlyCost.amount,
+        );
         lines.push(
-          `| ${resource.logicalId} | ${resource.type} | ` +
+          `| ${resource.logicalId} | \`${resource.type}\` | ` +
             `${this.formatCurrency(resource.oldMonthlyCost.amount, costDelta.currency)} | ` +
             `${this.formatCurrency(resource.newMonthlyCost.amount, costDelta.currency)} | ` +
-            `${this.formatDelta(resource.costDelta, costDelta.currency)} |`,
+            `${this.formatDelta(resource.costDelta, costDelta.currency)} (${percentChange}) ${trend} |`,
         );
       }
       lines.push('');

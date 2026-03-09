@@ -709,9 +709,9 @@ describe('Reporter', () => {
     it('should generate markdown with tables', () => {
       const report = reporter.generateReport(sampleCostDelta, 'markdown');
 
-      expect(report).toContain('# CDK Cost Analysis Report');
-      expect(report).toContain('## Added Resources');
-      expect(report).toContain('| Logical ID | Type | Monthly Cost |');
+      expect(report).toContain('# 💰 Cost Impact Analysis');
+      expect(report).toContain('## 📈 Added Resources');
+      expect(report).toContain('| Resource | Type | Monthly Cost |');
       expect(report).toContain('NewInstance');
     });
   });
@@ -816,7 +816,7 @@ describe('Reporter', () => {
         const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
 
         expect(report).toContain('<details>');
-        expect(report).toContain('<summary><strong>Configuration Summary</strong></summary>');
+        expect(report).toContain('<summary><strong>📋 Configuration & Assumptions</strong></summary>');
         expect(report).toContain('</details>');
       });
 
@@ -963,7 +963,7 @@ describe('Reporter', () => {
 
         const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
 
-        expect(report).toContain('## Threshold Status: PASSED');
+        expect(report).toContain('## ✅ Threshold Status: PASSED');
         expect(report).toContain('**Threshold:** $200.00/month (warning)');
         expect(report).toContain('**Actual Delta:** +$150.50/month');
       });
@@ -975,8 +975,8 @@ describe('Reporter', () => {
 
         const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
 
-        expect(report).toContain('## Threshold Status: EXCEEDED');
-        expect(report).toContain('### Action Required');
+        expect(report).toContain('## 🚨 Threshold Status: EXCEEDED');
+        expect(report).toContain('### ⚠️ Action Required');
         expect(report).toContain('Cost delta exceeds error threshold');
       });
 
@@ -987,7 +987,7 @@ describe('Reporter', () => {
 
         const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
 
-        expect(report).toContain('### Recommendations');
+        expect(report).toContain('### 💡 Recommendations');
         expect(report).toContain('- Review the added resources for optimization opportunities');
         expect(report).toContain('- Consider using reserved instances for EC2');
         expect(report).toContain('- Request threshold override approval if changes are necessary');
@@ -1000,8 +1000,8 @@ describe('Reporter', () => {
 
         const report = reporter.generateReport(sampleCostDelta, 'markdown', options);
 
-        expect(report).toContain('### Top Cost Contributors');
-        expect(report).toContain('| Resource | Type | Impact |');
+        expect(report).toContain('### 🔝 Top Cost Contributors');
+        expect(report).toContain('| Resource | Type | Impact | Trend |');
         expect(report).toContain('NewInstance');
         expect(report).toContain('AWS::EC2::Instance');
       });
@@ -1223,7 +1223,7 @@ describe('Reporter', () => {
 
         const report = reporter.generateReport(totalWithRemoved, 'markdown', options);
 
-        expect(report).toContain('**Removed Resources:**');
+        expect(report).toContain('**📉 Removed Resources:**');
         expect(report).toContain('OldFunction');
       });
 
@@ -1302,7 +1302,7 @@ describe('Reporter', () => {
 
         const report = reporter.generateReport(totalWithModified, 'markdown', options);
 
-        expect(report).toContain('**Modified Resources:**');
+        expect(report).toContain('**🔄 Modified Resources:**');
         expect(report).toContain('UpdatedInstance');
         expect(report).toContain('$150.00');
         expect(report).toContain('$200.00');

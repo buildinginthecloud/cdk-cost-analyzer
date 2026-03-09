@@ -124,7 +124,7 @@ describe('SingleTemplateReporter', () => {
       const reporter = new SingleTemplateReporter();
       const report = reporter.generateReport(mockResult, 'markdown');
 
-      expect(report).toContain('# Single Template Cost Analysis');
+      expect(report).toContain('# 💰 Single Template Cost Analysis');
       expect(report).toContain('## Summary');
       expect(report).toContain('$123.45');
       expect(report).toContain('| MyBucket |');
