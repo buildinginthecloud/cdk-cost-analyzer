@@ -4,15 +4,13 @@ import {
   ResourceCost,
   ModifiedResourceCost,
 } from '../pricing/types';
-import { ConfigSummary } from '../pipeline/types';
-import {
-  getTrendIndicator,
-  getPercentageChange,
-  groupCostsByService,
-  calculateTotalCosts,
-} from './markdownUtils';
 
-export { ServiceBreakdown } from './markdownUtils';
+/** Service breakdown entry for cost grouping */
+export interface ServiceBreakdown {
+  service: string;
+  totalCost: number;
+  resourceCount: number;
+}
 
 export class Reporter implements IReporter {
   generateReport(
@@ -30,6 +28,107 @@ export class Reporter implements IReporter {
       default:
         throw new Error(`Unsupported report format: ${format}`);
     }
+  }
+
+  /**
+   * Get trend indicator emoji based on cost change direction
+   */
+  getTrendIndicator(amount: number): string {
+    if (amount > 0) return '↗️';
+    if (amount < 0) return '↘️';
+    return '➡️';
+  }
+
+  /**
+   * Calculate percentage change between old and new amounts
+   */
+  getPercentageChange(oldAmount: number, newAmount: number): string {
+    if (oldAmount === 0) {
+      return newAmount > 0 ? '+∞%' : '0%';
+    }
+    const percentage = ((newAmount - oldAmount) / oldAmount) * 100;
+    const sign = percentage >= 0 ? '+' : '';
+    return `${sign}${percentage.toFixed(1)}%`;
+  }
+
+  /**
+   * Group costs by AWS service (e.g., EC2, S3, Lambda)
+   */
+  groupCostsByService(costDelta: CostDelta): ServiceBreakdown[] {
+    const serviceMap = new Map<string, { totalCost: number; resourceCount: number }>();
+
+    // Process added costs
+    for (const resource of costDelta.addedCosts) {
+      const service = this.extractServiceName(resource.type);
+      const existing = serviceMap.get(service) || { totalCost: 0, resourceCount: 0 };
+      existing.totalCost += resource.monthlyCost.amount;
+      existing.resourceCount += 1;
+      serviceMap.set(service, existing);
+    }
+
+    // Process removed costs (negative impact)
+    for (const resource of costDelta.removedCosts) {
+      const service = this.extractServiceName(resource.type);
+      const existing = serviceMap.get(service) || { totalCost: 0, resourceCount: 0 };
+      existing.totalCost -= resource.monthlyCost.amount;
+      existing.resourceCount += 1;
+      serviceMap.set(service, existing);
+    }
+
+    // Process modified costs
+    for (const resource of costDelta.modifiedCosts) {
+      const service = this.extractServiceName(resource.type);
+      const existing = serviceMap.get(service) || { totalCost: 0, resourceCount: 0 };
+      existing.totalCost += resource.costDelta;
+      existing.resourceCount += 1;
+      serviceMap.set(service, existing);
+    }
+
+    // Convert to array and sort by absolute cost impact
+    return Array.from(serviceMap.entries())
+      .map(([service, data]) => ({
+        service,
+        totalCost: data.totalCost,
+        resourceCount: data.resourceCount,
+      }))
+      .sort((a, b) => Math.abs(b.totalCost) - Math.abs(a.totalCost));
+  }
+
+  /**
+   * Extract AWS service name from resource type (e.g., AWS::EC2::Instance -> EC2)
+   */
+  extractServiceName(resourceType: string): string {
+    const parts = resourceType.split('::');
+    if (parts.length >= 2) {
+      return parts[1];
+    }
+    return resourceType;
+  }
+
+  /**
+   * Calculate total costs before and after changes
+   */
+  calculateTotalCosts(costDelta: CostDelta): { before: number; after: number } {
+    let before = 0;
+    let after = 0;
+
+    // Added resources: before=0, after=cost
+    for (const resource of costDelta.addedCosts) {
+      after += resource.monthlyCost.amount;
+    }
+
+    // Removed resources: before=cost, after=0
+    for (const resource of costDelta.removedCosts) {
+      before += resource.monthlyCost.amount;
+    }
+
+    // Modified resources
+    for (const resource of costDelta.modifiedCosts) {
+      before += resource.oldMonthlyCost.amount;
+      after += resource.newMonthlyCost.amount;
+    }
+
+    return { before, after };
   }
 
   private generateTextReport(
@@ -146,8 +245,8 @@ export class Reporter implements IReporter {
     const lines: string[] = [];
 
     // Header with cost impact summary
-    const totalCosts = calculateTotalCosts(costDelta);
-    const trendIndicator = getTrendIndicator(costDelta.totalDelta);
+    const totalCosts = this.calculateTotalCosts(costDelta);
+    const trendIndicator = this.getTrendIndicator(costDelta.totalDelta);
     
     lines.push('# 💰 Cost Impact Analysis');
     lines.push('');
@@ -161,7 +260,7 @@ export class Reporter implements IReporter {
       lines.push('| Stack | Cost Delta | Trend |');
       lines.push('|-------|------------|-------|');
       for (const stack of options.stacks) {
-        const stackTrend = getTrendIndicator(stack.costDelta.totalDelta);
+        const stackTrend = this.getTrendIndicator(stack.costDelta.totalDelta);
         lines.push(
           `| ${stack.stackName} | ${this.formatDelta(stack.costDelta.totalDelta, stack.costDelta.currency)} | ${stackTrend} |`,
         );
@@ -224,8 +323,8 @@ export class Reporter implements IReporter {
       );
 
       for (const resource of sortedModified) {
-        const trend = getTrendIndicator(resource.costDelta);
-        const percentChange = getPercentageChange(
+        const trend = this.getTrendIndicator(resource.costDelta);
+        const percentChange = this.getPercentageChange(
           resource.oldMonthlyCost.amount,
           resource.newMonthlyCost.amount,
         );
@@ -272,7 +371,7 @@ export class Reporter implements IReporter {
     lines.push('');
 
     // Cost Breakdown by Service
-    const serviceBreakdown = groupCostsByService(costDelta);
+    const serviceBreakdown = this.groupCostsByService(costDelta);
     if (serviceBreakdown.length > 0) {
       lines.push('## 📊 Cost Breakdown by Service');
       lines.push('');
@@ -280,7 +379,7 @@ export class Reporter implements IReporter {
       lines.push('|---------|-----------|-------------|-------|');
 
       for (const service of serviceBreakdown) {
-        const serviceTrend = getTrendIndicator(service.totalCost);
+        const serviceTrend = this.getTrendIndicator(service.totalCost);
         lines.push(
           `| ${service.service} | ${service.resourceCount} | ${this.formatDelta(service.totalCost, costDelta.currency)} | ${serviceTrend} |`,
         );
@@ -302,7 +401,7 @@ export class Reporter implements IReporter {
     return lines.join('\n');
   }
 
-  private formatConfigSummaryMarkdownEnhanced(config: ConfigSummary): string[] {
+  private formatConfigSummaryMarkdownEnhanced(config: any): string[] {
     const lines: string[] = [];
     lines.push('<details>');
     lines.push('<summary><strong>📋 Configuration & Assumptions</strong></summary>');
@@ -524,7 +623,7 @@ export class Reporter implements IReporter {
         lines.push('| Resource | Type | Impact | Trend |');
         lines.push('|----------|------|--------|-------|');
         for (const contributor of topContributors) {
-          const trend = getTrendIndicator(contributor.impact);
+          const trend = this.getTrendIndicator(contributor.impact);
           lines.push(
             `| ${contributor.logicalId} | \`${contributor.type}\` | ${this.formatDelta(contributor.impact, costDelta.currency)} | ${trend} |`,
           );
@@ -629,8 +728,8 @@ export class Reporter implements IReporter {
       );
 
       for (const resource of sortedModified) {
-        const trend = getTrendIndicator(resource.costDelta);
-        const percentChange = getPercentageChange(
+        const trend = this.getTrendIndicator(resource.costDelta);
+        const percentChange = this.getPercentageChange(
           resource.oldMonthlyCost.amount,
           resource.newMonthlyCost.amount,
         );

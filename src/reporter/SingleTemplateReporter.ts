@@ -2,7 +2,6 @@ import {
   SingleTemplateCostResult,
   SingleTemplateReportOptions,
 } from '../api/single-template-types';
-import { getTrendIndicator, extractServiceName } from './markdownUtils';
 
 /**
  * Reporter for generating formatted output for single template cost analysis
@@ -10,7 +9,7 @@ import { getTrendIndicator, extractServiceName } from './markdownUtils';
 export class SingleTemplateReporter {
   /**
    * Generate a formatted report from single template analysis result
-   *
+   * 
    * @param result - The analysis result
    * @param format - Output format (text, json, or markdown)
    * @param options - Optional formatting preferences
@@ -38,6 +37,26 @@ export class SingleTemplateReporter {
       default:
         return this.generateTextReport(result, opts);
     }
+  }
+
+  /**
+   * Get trend indicator emoji based on cost value
+   */
+  getTrendIndicator(amount: number): string {
+    if (amount > 0) return '↗️';
+    if (amount < 0) return '↘️';
+    return '➡️';
+  }
+
+  /**
+   * Extract AWS service name from resource type (e.g., AWS::EC2::Instance -> EC2)
+   */
+  extractServiceName(resourceType: string): string {
+    const parts = resourceType.split('::');
+    if (parts.length >= 2) {
+      return parts[1];
+    }
+    return resourceType;
   }
 
   /**
@@ -179,7 +198,7 @@ export class SingleTemplateReporter {
       const serviceMap = new Map<string, { totalCost: number; resources: Array<{ logicalId: string; type: string; monthlyCost: any }> }>();
       
       for (const typeGroup of result.costBreakdown.byResourceType) {
-        const service = extractServiceName(typeGroup.resourceType);
+        const service = this.extractServiceName(typeGroup.resourceType);
         const existing = serviceMap.get(service) || { totalCost: 0, resources: [] };
         existing.totalCost += typeGroup.totalCost;
         existing.resources.push(...typeGroup.resources);
@@ -196,7 +215,7 @@ export class SingleTemplateReporter {
 
       for (const svc of services) {
         const percentage = ((svc.totalCost / result.totalMonthlyCost) * 100).toFixed(1);
-        const trend = getTrendIndicator(svc.totalCost);
+        const trend = this.getTrendIndicator(svc.totalCost);
         report += `| ${svc.service} | $${svc.totalCost.toFixed(2)} | ${percentage}% | ${trend} |\n`;
       }
       report += '\n';
