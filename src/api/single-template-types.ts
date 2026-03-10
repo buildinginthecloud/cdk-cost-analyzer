@@ -1,5 +1,6 @@
 import { ResourceCost } from '../pricing/types';
 import { UsageAssumptionsConfig, CacheConfig } from '../config/types';
+import { OptimizationResult } from '../optimization/types';
 
 /**
  * Configuration options for single template analysis
@@ -8,6 +9,7 @@ export interface AnalysisConfig {
   usageAssumptions?: UsageAssumptionsConfig;
   excludedResourceTypes?: string[];
   cacheConfig?: CacheConfig;
+  recommendations?: boolean;
 }
 
 /**
@@ -69,6 +71,7 @@ export interface SingleTemplateCostResult {
   costBreakdown: CostBreakdown;
   summary: string;
   metadata: AnalysisMetadata;
+  recommendations?: OptimizationResult;
 }
 
 /**

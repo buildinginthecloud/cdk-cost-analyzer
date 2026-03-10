@@ -17,6 +17,7 @@ export * from '../config';
 export * from '../synthesis';
 export * from '../threshold';
 export * from '../pipeline';
+export * from '../optimization';
 
 export async function analyzeCosts(options: AnalyzeOptions): Promise<CostAnalysisResult> {
   const region = options.region || 'eu-central-1';
