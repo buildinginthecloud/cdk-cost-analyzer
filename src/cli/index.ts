@@ -57,23 +57,17 @@ program
         format: options.format as 'text' | 'json' | 'markdown',
         config: {
           recommendations: options.recommendations,
+          minimumSavingsThreshold: options.minSavings,
         },
       });
 
-      // Output the results (summary already contains formatted output)
+      // Output the results
+      // For text/markdown, summary already includes recommendations via SingleTemplateReporter
       console.log(result.summary);
 
-      // Output recommendations if requested
-      if (options.recommendations && result.recommendations) {
-        const { formatRecommendationsText, formatRecommendationsMarkdown } = await import('../reporter/RecommendationReporter');
-        const format = options.format as string;
-        if (format === 'json') {
-          console.log(JSON.stringify(result.recommendations, null, 2));
-        } else if (format === 'markdown') {
-          console.log(formatRecommendationsMarkdown(result.recommendations, options.minSavings));
-        } else {
-          console.log(formatRecommendationsText(result.recommendations, options.minSavings));
-        }
+      // For JSON format, append recommendations as structured data
+      if (options.format === 'json' && options.recommendations && result.recommendations) {
+        console.log(JSON.stringify({ recommendations: result.recommendations }, null, 2));
       }
 
       process.exit(0);

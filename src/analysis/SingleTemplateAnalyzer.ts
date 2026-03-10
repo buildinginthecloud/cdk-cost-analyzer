@@ -84,7 +84,9 @@ export class SingleTemplateAnalyzer {
       // Run optimization analysis if requested
       let recommendations;
       if (config?.recommendations) {
-        const engine = new OptimizationEngine(createDefaultAnalyzers());
+        const engine = new OptimizationEngine(createDefaultAnalyzers(), {
+          minimumSavingsThreshold: config.minimumSavingsThreshold,
+        });
         recommendations = await engine.analyze(resources, resourceCosts, region);
       }
 
