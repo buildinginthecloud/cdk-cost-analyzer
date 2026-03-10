@@ -153,7 +153,7 @@ async function main() {
   console.log('='.repeat(80));
   console.log();
 
-  const templatePath = './demo/cdk.out.1/MyStack.template.json';
+  const templatePath = './examples/fixtures/demo-dev-v1.template.json';
   if (fs.existsSync(templatePath)) {
     try {
       const templateContent = fs.readFileSync(templatePath, 'utf-8');

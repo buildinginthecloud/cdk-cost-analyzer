@@ -10,7 +10,11 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    permissions: {}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      AWS_REGION: eu-central-1
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -22,6 +26,12 @@ jobs:
         run: npm install
       - name: Build cdk-cost-analyzer
         run: npm run build
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: github-e2e-tests
+          aws-region: ${{ env.AWS_REGION }}
       - name: Install single-stack dependencies
         run: npm ci
         working-directory: examples/single-stack
@@ -72,6 +82,24 @@ jobs:
           echo "Multi-stack JSON output validated"
           cat cost-report.json
         working-directory: examples/multi-stack
+      - name: Run cdk-cost-analyzer compare (text output)
+        run: node dist/cli/index.js compare examples/fixtures/demo-dev-v1.template.json examples/fixtures/demo-dev-v2.template.json --format text
+      - name: Run cdk-cost-analyzer compare (json output)
+        run: node dist/cli/index.js compare examples/fixtures/demo-dev-v1.template.json examples/fixtures/demo-dev-v2.template.json --format json > compare-report.json
+      - name: Validate compare JSON output
+        run: |-
+          if [ ! -f compare-report.json ]; then
+            echo "Error: compare-report.json not found"
+            exit 1
+          fi
+          if [ ! -s compare-report.json ]; then
+            echo "Error: compare-report.json is empty"
+            exit 1
+          fi
+          echo "Compare JSON output validated"
+          cat compare-report.json
+      - name: Run cdk-cost-analyzer analyze fixture with recommendations
+        run: node dist/cli/index.js analyze examples/fixtures/demo-dev-v3.template.json --recommendations --format text
   cost-report:
     runs-on: ubuntu-latest
     permissions:

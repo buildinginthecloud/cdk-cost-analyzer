@@ -275,10 +275,16 @@ if (project.github) {
     workflowDispatch: {},
   });
 
-  // Basic E2E tests (no AWS credentials needed - uses fallback pricing)
+  // E2E tests with real AWS pricing data via OIDC
   e2eWorkflow.addJob('e2e', {
     runsOn: ['ubuntu-latest'],
-    permissions: {},
+    permissions: {
+      idToken: projen.github.workflows.JobPermission.WRITE,
+      contents: projen.github.workflows.JobPermission.READ,
+    },
+    env: {
+      AWS_REGION: 'eu-central-1',
+    },
     steps: [
       {
         name: 'Checkout',
@@ -298,6 +304,15 @@ if (project.github) {
       {
         name: 'Build cdk-cost-analyzer',
         run: 'npm run build',
+      },
+      {
+        name: 'Configure AWS credentials',
+        uses: 'aws-actions/configure-aws-credentials@v4',
+        with: {
+          'role-to-assume': '${{ secrets.AWS_ROLE_ARN }}',
+          'role-session-name': 'github-e2e-tests',
+          'aws-region': '${{ env.AWS_REGION }}',
+        },
       },
       {
         name: 'Install single-stack dependencies',
@@ -370,6 +385,33 @@ if (project.github) {
           'cat cost-report.json',
         ].join('\n'),
         workingDirectory: 'examples/multi-stack',
+      },
+      {
+        name: 'Run cdk-cost-analyzer compare (text output)',
+        run: 'node dist/cli/index.js compare examples/fixtures/demo-dev-v1.template.json examples/fixtures/demo-dev-v2.template.json --format text',
+      },
+      {
+        name: 'Run cdk-cost-analyzer compare (json output)',
+        run: 'node dist/cli/index.js compare examples/fixtures/demo-dev-v1.template.json examples/fixtures/demo-dev-v2.template.json --format json > compare-report.json',
+      },
+      {
+        name: 'Validate compare JSON output',
+        run: [
+          'if [ ! -f compare-report.json ]; then',
+          '  echo "Error: compare-report.json not found"',
+          '  exit 1',
+          'fi',
+          'if [ ! -s compare-report.json ]; then',
+          '  echo "Error: compare-report.json is empty"',
+          '  exit 1',
+          'fi',
+          'echo "Compare JSON output validated"',
+          'cat compare-report.json',
+        ].join('\n'),
+      },
+      {
+        name: 'Run cdk-cost-analyzer analyze fixture with recommendations',
+        run: 'node dist/cli/index.js analyze examples/fixtures/demo-dev-v3.template.json --recommendations --format text',
       },
     ],
   });
