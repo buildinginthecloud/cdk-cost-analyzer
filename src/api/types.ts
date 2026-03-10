@@ -1,10 +1,12 @@
 import { ResourceCost, ModifiedResourceCost } from '../pricing/types';
+import { OptimizationResult } from '../optimization/types';
 
 export interface AnalyzeOptions {
   baseTemplate: string;
   targetTemplate: string;
   region?: string;
   format?: 'text' | 'json' | 'markdown';
+  recommendations?: boolean;
 }
 
 export interface CostAnalysisResult {
@@ -14,4 +16,5 @@ export interface CostAnalysisResult {
   removedResources: ResourceCost[];
   modifiedResources: ModifiedResourceCost[];
   summary: string;
+  recommendations?: OptimizationResult;
 }

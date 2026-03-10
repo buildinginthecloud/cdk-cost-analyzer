@@ -10,6 +10,7 @@ export * from '../config';
 export * from '../synthesis';
 export * from '../threshold';
 export * from '../pipeline';
+export * from '../optimization';
 export declare function analyzeCosts(options: AnalyzeOptions): Promise<CostAnalysisResult>;
 /**
  * Analyze a single CloudFormation template for estimated monthly costs

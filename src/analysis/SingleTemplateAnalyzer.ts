@@ -11,6 +11,8 @@ import {
   EnhancedResourceCost,
   AnalysisMetadata,
 } from '../api/single-template-types';
+import { OptimizationEngine } from '../optimization/OptimizationEngine';
+import { createDefaultAnalyzers } from '../optimization/defaults';
 
 /**
  * Service for analyzing costs in a single CloudFormation template
@@ -79,6 +81,13 @@ export class SingleTemplateAnalyzer {
       // Generate summary (placeholder - will be replaced by reporter)
       const summary = `Total monthly cost: $${totalMonthlyCost.toFixed(2)} USD`;
 
+      // Run optimization analysis if requested
+      let recommendations;
+      if (config?.recommendations) {
+        const engine = new OptimizationEngine(createDefaultAnalyzers());
+        recommendations = await engine.analyze(resources, resourceCosts, region);
+      }
+
       return {
         totalMonthlyCost,
         currency: 'USD',
@@ -86,6 +95,7 @@ export class SingleTemplateAnalyzer {
         costBreakdown,
         summary,
         metadata,
+        recommendations,
       };
     } finally {
       // Clean up pricing service resources

@@ -1,0 +1,17 @@
+export { OptimizationEngine } from './OptimizationEngine';
+export { createDefaultAnalyzers } from './defaults';
+export {
+  OptimizationAnalyzer,
+  OptimizationCategory,
+  OptimizationConfig,
+  OptimizationResult,
+  Recommendation,
+  RecommendationPriority,
+} from './types';
+export { GravitonMigrationAnalyzer } from './analyzers/GravitonMigrationAnalyzer';
+export { NATGatewayOptimizationAnalyzer } from './analyzers/NATGatewayOptimizationAnalyzer';
+export { StorageOptimizationAnalyzer } from './analyzers/StorageOptimizationAnalyzer';
+export { ReservedInstanceAnalyzer } from './analyzers/ReservedInstanceAnalyzer';
+export { SavingsPlansAnalyzer } from './analyzers/SavingsPlansAnalyzer';
+export { RightSizingAnalyzer } from './analyzers/RightSizingAnalyzer';
+export { SpotInstanceAnalyzer } from './analyzers/SpotInstanceAnalyzer';

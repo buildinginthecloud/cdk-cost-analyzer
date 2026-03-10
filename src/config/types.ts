@@ -1,9 +1,12 @@
+import { OptimizationConfig } from '../optimization/types';
+
 export interface CostAnalyzerConfig {
   thresholds?: ThresholdConfig;
   usageAssumptions?: UsageAssumptionsConfig;
   synthesis?: SynthesisConfig;
   exclusions?: ExclusionsConfig;
   cache?: CacheConfig;
+  optimization?: OptimizationConfig;
 }
 
 export interface ThresholdConfig {
