@@ -19,6 +19,11 @@ import { SNSCalculator } from './calculators/SNSCalculator';
 import { SQSCalculator } from './calculators/SQSCalculator';
 import { StepFunctionsCalculator } from './calculators/StepFunctionsCalculator';
 import { VPCEndpointCalculator } from './calculators/VPCEndpointCalculator';
+import { EKSCalculator } from './calculators/EKSCalculator';
+import { AuroraServerlessCalculator } from './calculators/AuroraServerlessCalculator';
+import { TransitGatewayCalculator } from './calculators/TransitGatewayCalculator';
+import { Route53Calculator } from './calculators/Route53Calculator';
+import { KinesisCalculator } from './calculators/KinesisCalculator';
 import { PricingClient } from './PricingClient';
 import {
   PricingService as IPricingService,
@@ -108,6 +113,26 @@ export class PricingService implements IPricingService {
       ),
       new SecretsManagerCalculator(
         usageAssumptions?.secretsManager?.monthlyApiCalls,
+      ),
+      new EKSCalculator(),
+      new AuroraServerlessCalculator(
+        usageAssumptions?.auroraServerless?.minACU,
+        usageAssumptions?.auroraServerless?.maxACU,
+        usageAssumptions?.auroraServerless?.storageGB,
+      ),
+      new TransitGatewayCalculator(
+        usageAssumptions?.transitGateway?.attachments,
+        usageAssumptions?.transitGateway?.monthlyDataGB,
+      ),
+      new Route53Calculator(
+        usageAssumptions?.route53?.monthlyQueries,
+      ),
+      new KinesisCalculator(
+        usageAssumptions?.kinesis?.shardCount,
+        usageAssumptions?.kinesis?.ingestionGB,
+        usageAssumptions?.kinesis?.retrievalGB,
+        usageAssumptions?.kinesis?.firehoseGB,
+        usageAssumptions?.kinesis?.kpus,
       ),
     ];
   }
