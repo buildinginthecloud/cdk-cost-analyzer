@@ -2,6 +2,12 @@
 npm run lint
 npm run test:silent
 
+# Rebuild GitHub Action bundle and stage it
+# This prevents self-mutation failures in CI when dist/action/ is out of sync
+echo "📦 Rebuilding GitHub Action bundle..."
+npm run build:action
+git add -f dist/action/
+
 # Validate GitHub Actions workflows if act is available
 if command -v act >/dev/null 2>&1; then
   echo "🔍 Validating GitHub Actions workflows..."
