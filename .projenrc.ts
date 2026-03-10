@@ -275,10 +275,16 @@ if (project.github) {
     workflowDispatch: {},
   });
 
-  // Basic E2E tests (no AWS credentials needed - uses fallback pricing)
+  // E2E tests with real AWS pricing data via OIDC
   e2eWorkflow.addJob('e2e', {
     runsOn: ['ubuntu-latest'],
-    permissions: {},
+    permissions: {
+      idToken: projen.github.workflows.JobPermission.WRITE,
+      contents: projen.github.workflows.JobPermission.READ,
+    },
+    env: {
+      AWS_REGION: 'eu-central-1',
+    },
     steps: [
       {
         name: 'Checkout',
@@ -298,6 +304,15 @@ if (project.github) {
       {
         name: 'Build cdk-cost-analyzer',
         run: 'npm run build',
+      },
+      {
+        name: 'Configure AWS credentials',
+        uses: 'aws-actions/configure-aws-credentials@v4',
+        with: {
+          'role-to-assume': '${{ secrets.AWS_ROLE_ARN }}',
+          'role-session-name': 'github-e2e-tests',
+          'aws-region': '${{ env.AWS_REGION }}',
+        },
       },
       {
         name: 'Install single-stack dependencies',

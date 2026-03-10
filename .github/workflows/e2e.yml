@@ -10,7 +10,11 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    permissions: {}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      AWS_REGION: eu-central-1
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -22,6 +26,12 @@ jobs:
         run: npm install
       - name: Build cdk-cost-analyzer
         run: npm run build
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: github-e2e-tests
+          aws-region: ${{ env.AWS_REGION }}
       - name: Install single-stack dependencies
         run: npm ci
         working-directory: examples/single-stack
