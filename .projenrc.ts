@@ -371,6 +371,33 @@ if (project.github) {
         ].join('\n'),
         workingDirectory: 'examples/multi-stack',
       },
+      {
+        name: 'Run cdk-cost-analyzer compare (text output)',
+        run: 'node dist/cli/index.js compare examples/fixtures/demo-dev-v1.template.json examples/fixtures/demo-dev-v2.template.json --format text',
+      },
+      {
+        name: 'Run cdk-cost-analyzer compare (json output)',
+        run: 'node dist/cli/index.js compare examples/fixtures/demo-dev-v1.template.json examples/fixtures/demo-dev-v2.template.json --format json > compare-report.json',
+      },
+      {
+        name: 'Validate compare JSON output',
+        run: [
+          'if [ ! -f compare-report.json ]; then',
+          '  echo "Error: compare-report.json not found"',
+          '  exit 1',
+          'fi',
+          'if [ ! -s compare-report.json ]; then',
+          '  echo "Error: compare-report.json is empty"',
+          '  exit 1',
+          'fi',
+          'echo "Compare JSON output validated"',
+          'cat compare-report.json',
+        ].join('\n'),
+      },
+      {
+        name: 'Run cdk-cost-analyzer analyze fixture with recommendations',
+        run: 'node dist/cli/index.js analyze examples/fixtures/demo-dev-v3.template.json --recommendations --format text',
+      },
     ],
   });
 
