@@ -7,11 +7,12 @@ This directory contains the documentation for CDK Cost Analyzer, published to Gi
 - **index.md** - Homepage with overview and quick start
 - **CONFIGURATION.md** - Configuration guide for thresholds, usage assumptions, and exclusions
 - **CI_CD.md** - CI/CD integration guide for GitHub Actions and GitLab CI
-- **CALCULATORS.md** - Resource calculator reference with cost calculation methods
+- **CALCULATORS.md** - Resource calculator reference with cost calculation methods (25+ resource types)
+- **RECOMMENDATIONS.md** - Cost optimization recommendations engine (7 analyzer categories)
 - **TROUBLESHOOTING.md** - Common issues and solutions
 - **DEVELOPMENT.md** - Local development, testing, and architecture
 - **RELEASE.md** - Release process documentation
-- **SINGLE-TEMPLATE-ANALYSIS.md** - Single template analysis guide
+- **SINGLE-TEMPLATE-ANALYSIS.md** - Single template analysis guide with recommendations
 - **NAT_GATEWAY_TESTING.md** - NAT Gateway testing and debugging guide
 
 ## GitHub Pages Setup

@@ -24,6 +24,22 @@ cdk-cost-analyzer analyze template.json --format markdown  # Documentation-frien
 cdk-cost-analyzer analyze template.json --debug
 ```
 
+### Cost Optimization Recommendations
+
+```bash
+# Include cost optimization recommendations in the output
+cdk-cost-analyzer analyze template.json --recommendations
+
+# Filter recommendations by minimum monthly savings (USD)
+cdk-cost-analyzer analyze template.json --recommendations --min-savings 50
+
+# Combine with output formats
+cdk-cost-analyzer analyze template.json --recommendations --format markdown
+cdk-cost-analyzer analyze template.json --recommendations --format json
+```
+
+See [RECOMMENDATIONS.md](RECOMMENDATIONS.md) for detailed documentation on the optimization engine and all 7 analyzer categories.
+
 ### With Configuration
 
 ```bash
@@ -66,6 +82,30 @@ const result = await analyzeSingleTemplate({
 
 console.log(result.summary);
 console.log(`Total cost: $${result.totalMonthlyCost.toFixed(2)}`);
+```
+
+### With Recommendations
+
+```typescript
+const result = await analyzeSingleTemplate({
+  template: templateContent,
+  region: 'us-east-1',
+  config: {
+    recommendations: true,
+    minimumSavingsThreshold: 25,
+  },
+});
+
+// Recommendations are included in result.summary for text/markdown formats
+console.log(result.summary);
+
+// Access structured recommendation data
+if (result.recommendations) {
+  console.log(`Potential savings: $${result.recommendations.totalEstimatedMonthlySavings}/month`);
+  for (const rec of result.recommendations.recommendations) {
+    console.log(`- [${rec.priority}] ${rec.title}: $${rec.estimatedMonthlySavings}/month`);
+  }
+}
 ```
 
 ### With Configuration
@@ -261,22 +301,25 @@ Error: AWS credentials not configured. Please set AWS credentials using one of:
 
 ## Supported Resource Types
 
-The analyzer supports 14+ AWS resource types including:
-- EC2 Instances
-- S3 Buckets
-- Lambda Functions
-- RDS Database Instances
-- DynamoDB Tables
-- ECS Services
-- API Gateway (REST, HTTP, WebSocket)
-- NAT Gateways
-- Application Load Balancers
-- Network Load Balancers
-- VPC Endpoints
-- CloudFront Distributions
-- ElastiCache Clusters
+The analyzer supports 25+ AWS resource types including:
 
-See [CALCULATORS.md](../docs/CALCULATORS.md) for complete list and calculation details.
+**Compute:** EC2 Instances, Launch Templates, Auto Scaling Groups, EKS Clusters, ECS Services, Lambda Functions
+
+**Database:** RDS Instances, Aurora Serverless (v1/v2), DynamoDB Tables, ElastiCache Clusters
+
+**Storage:** S3 Buckets, EFS File Systems, EBS Volumes (via Launch Templates)
+
+**Networking:** NAT Gateways, ALB, NLB, VPC Endpoints, Transit Gateways, Route 53 (Hosted Zones, Health Checks, Records)
+
+**API and Content Delivery:** API Gateway (REST, HTTP, WebSocket), CloudFront Distributions
+
+**Messaging:** SQS Queues, SNS Topics
+
+**Analytics:** Kinesis Data Streams, Kinesis Firehose, Kinesis Analytics
+
+**Other:** Step Functions, Secrets Manager
+
+See [CALCULATORS.md](CALCULATORS.md) for complete list and calculation details.
 
 ## Usage Assumptions
 

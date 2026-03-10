@@ -16,13 +16,14 @@ A TypeScript package that analyzes AWS CDK infrastructure changes and provides c
 
 - **Single Template Analysis** - Analyze individual CloudFormation templates for estimated monthly costs without comparison
 - **Template Comparison** - Parse and diff CloudFormation templates (JSON/YAML) to identify added, removed, and modified resources
-- **Cost Estimation** - Calculate monthly costs for AWS resources using real-time AWS Pricing API data
+- **Cost Estimation** - Calculate monthly costs for 25+ AWS resource types using real-time AWS Pricing API data
+- **Cost Optimization Recommendations** - Get actionable suggestions for Graviton migration, right-sizing, Reserved Instances, Savings Plans, storage optimization, NAT Gateway optimization, and Spot Instances
 - **Automatic CDK Synthesis** - Optionally synthesize CDK applications in CI/CD pipelines
 - **Cost Threshold Enforcement** - Fail pipelines when cost increases exceed configured thresholds
 - **Configuration Management** - Project-specific configuration for thresholds, usage assumptions, and exclusions
 - **Dual Interface** - Use as a CLI tool for quick analysis or import as a library for programmatic integration
 - **Clear Reporting** - Generate formatted cost reports in text, JSON, or Markdown formats
-- **GitLab Integration** - Post cost analysis reports as comments on GitLab merge requests
+- **CI/CD Integration** - Post cost analysis reports as comments on GitHub pull requests and GitLab merge requests
 - **FinOps Awareness** - Help developers understand cost implications during the development cycle
 
 ## Quick Start
@@ -75,6 +76,9 @@ aws configure
 # Analyze a single CloudFormation template
 cdk-cost-analyzer analyze template.json --region us-east-1
 
+# Include cost optimization recommendations
+cdk-cost-analyzer analyze template.json --recommendations --min-savings 50
+
 # Compare two CloudFormation templates
 cdk-cost-analyzer compare base.json target.json --region eu-central-1
 
@@ -111,6 +115,7 @@ console.log(`Total monthly cost: ${result.totalMonthlyCost} ${result.currency}`)
 ### Reference
 
 - [Resource Calculator Reference](CALCULATORS.md) - Detailed cost calculation methods and assumptions
+- [Cost Optimization Recommendations](RECOMMENDATIONS.md) - Actionable cost-saving suggestions
 - [Single Template Analysis](SINGLE-TEMPLATE-ANALYSIS.md) - Analyze individual templates without comparison
 - [NAT Gateway Testing](NAT_GATEWAY_TESTING.md) - Testing and debugging NAT Gateway pricing
 
@@ -122,26 +127,51 @@ console.log(`Total monthly cost: ${result.totalMonthlyCost} ${result.currency}`)
 
 ## Supported Resource Types
 
-### Compute & Storage
+### Compute
 - AWS::EC2::Instance
-- AWS::S3::Bucket
-- AWS::Lambda::Function
-- AWS::RDS::DBInstance
-- AWS::DynamoDB::Table
+- AWS::EC2::LaunchTemplate
+- AWS::AutoScaling::AutoScalingGroup
+- AWS::EKS::Cluster
 - AWS::ECS::Service
+- AWS::Lambda::Function
+
+### Database
+- AWS::RDS::DBInstance
+- AWS::RDS::DBCluster (Aurora Serverless v1/v2)
+- AWS::DynamoDB::Table
+- AWS::ElastiCache::CacheCluster
+
+### Storage
+- AWS::S3::Bucket
+- AWS::EFS::FileSystem
 
 ### Networking
 - AWS::EC2::NatGateway
 - AWS::ElasticLoadBalancingV2::LoadBalancer (ALB & NLB)
 - AWS::EC2::VPCEndpoint
+- AWS::EC2::TransitGateway
+- AWS::EC2::TransitGatewayAttachment
+- AWS::Route53::HostedZone
+- AWS::Route53::HealthCheck
+- AWS::Route53::RecordSet
 
-### API & Content Delivery
+### API and Content Delivery
 - AWS::ApiGateway::RestApi
 - AWS::ApiGatewayV2::Api (HTTP & WebSocket)
 - AWS::CloudFront::Distribution
 
-### Caching
-- AWS::ElastiCache::CacheCluster
+### Messaging
+- AWS::SQS::Queue
+- AWS::SNS::Topic
+
+### Analytics
+- AWS::Kinesis::Stream
+- AWS::KinesisFirehose::DeliveryStream
+- AWS::KinesisAnalyticsV2::Application
+
+### Other
+- AWS::StepFunctions::StateMachine
+- AWS::SecretsManager::Secret
 
 See the [Calculator Reference](CALCULATORS.md) for complete details on cost calculation methods and assumptions.
 
