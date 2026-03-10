@@ -5,14 +5,17 @@ This document provides detailed information about all supported AWS resource typ
 ## Table of Contents
 
 - [Overview](#overview)
-- [Compute Resources](#compute-resources)
-- [Storage Resources](#storage-resources)
-- [Database Resources](#database-resources)
-- [Networking Resources](#networking-resources)
-- [Messaging Resources](#messaging-resources)
-- [Content Delivery Resources](#content-delivery-resources)
-- [Serverless Resources](#serverless-resources)
-- [Container Resources](#container-resources)
+- [Compute Resources](#compute-resources) - EC2, AutoScaling, LaunchTemplate, EKS
+- [Storage Resources](#storage-resources) - S3, EFS
+- [Database Resources](#database-resources) - RDS, DynamoDB, Aurora Serverless
+- [Networking Resources](#networking-resources) - NAT Gateway, ALB, NLB, VPC Endpoint, Transit Gateway
+- [DNS and Routing Resources](#dns-and-routing-resources) - Route 53
+- [Messaging Resources](#messaging-resources) - SQS, SNS
+- [Content Delivery Resources](#content-delivery-resources) - CloudFront, ElastiCache
+- [Analytics Resources](#analytics-resources) - Kinesis Streams, Firehose, Analytics
+- [Security Resources](#security-resources) - Secrets Manager
+- [Serverless Resources](#serverless-resources) - Lambda, API Gateway, Step Functions
+- [Container Resources](#container-resources) - ECS
 - [Customizing Assumptions](#customizing-assumptions)
 
 ## Overview
@@ -902,6 +905,97 @@ Total: $0.65/month
 - Deletion protection can prevent accidental secret deletion
 - Secrets can be rotated automatically using Lambda functions (Lambda costs separate)
 
+## Compute Resources (continued)
+
+### AWS::AutoScaling::AutoScalingGroup
+
+**Description:** Auto Scaling Group for managing fleets of EC2 instances
+
+**Cost Components:**
+- EC2 instance hourly rate x desired capacity x 730 hours/month
+
+**Default Assumptions:**
+- Desired capacity: 1 (if not specified in template)
+- Instance type resolved from associated LaunchConfiguration or LaunchTemplate
+- 730 hours/month (always running)
+- Linux operating system, shared tenancy
+- On-demand pricing
+
+**Detection Logic:**
+- Resolves instance type from LaunchConfigurationName, LaunchTemplate, or MixedInstancesPolicy
+- Handles CloudFormation `{ Ref: 'LogicalId' }` references by searching template resources
+
+**Example:**
+```
+Instance Type: t3.medium (from LaunchTemplate)
+Desired Capacity: 4
+Hourly Rate: $0.0416
+Monthly Cost: $0.0416 × 730 × 4 = $121.47
+```
+
+**Notes:**
+- Cost equals desired capacity multiplied by per-instance cost
+- EBS volumes from LaunchTemplate not included
+- Scaling events (min/max capacity) not factored in
+- Spot pricing not calculated (see Recommendations for Spot suggestions)
+
+### AWS::EC2::LaunchTemplate
+
+**Description:** Launch Template defining EC2 instance configuration
+
+**Cost Components:**
+- Instance hourly rate x 730 hours/month (per instance)
+- EBS storage from BlockDeviceMappings
+
+**Default Assumptions:**
+- 730 hours/month (always running)
+- Linux operating system, shared tenancy
+- Default volume: 8 GB gp3 (if no block device mappings specified)
+- On-demand pricing
+
+**Detection Logic:**
+- Instance type from `LaunchTemplateData.InstanceType`
+- EBS volumes from `LaunchTemplateData.BlockDeviceMappings`
+- Volume type defaults to gp3 if not specified
+- Volume size defaults to 8 GB if not specified
+
+**Example:**
+```
+Instance Type: m5.large
+Hourly Rate: $0.096
+Instance Cost: $0.096 × 730 = $70.08
+EBS Storage: 100 GB gp3 × $0.08/GB = $8.00
+Total: $78.08/month (per instance)
+```
+
+**Notes:**
+- Launch Templates have no direct cost; this calculates per-instance reference cost
+- Provisioned IOPS (io1/io2) detailed costs excluded
+- Additional gp3 throughput beyond 125 MB/s baseline excluded
+- Confidence level is low (template defines potential instances, not running ones)
+
+### AWS::EKS::Cluster
+
+**Description:** Amazon EKS Kubernetes control plane
+
+**Cost Components:**
+- Control plane hourly rate x 730 hours/month
+
+**Default Assumptions:**
+- 730 hours/month (always running)
+- Fallback price: $0.10/hour if API unavailable
+
+**Example:**
+```
+Control Plane Rate: $0.10/hour
+Monthly Cost: $0.10 × 730 = $73.00
+```
+
+**Notes:**
+- Worker node costs are not included (calculated separately as EC2 or Fargate)
+- EKS add-ons and managed node groups not calculated
+- One cluster = one control plane charge
+
 ## Container Resources
 
 ### AWS::ECS::Service
@@ -944,6 +1038,278 @@ Total: $9.01/month per task
 - Task count multiplies cost
 - Fargate Spot ~70% cheaper
 - EC2 launch type uses EC2 pricing
+- Data transfer costs not included
+
+## Analytics Resources
+
+### AWS::Kinesis::Stream
+
+**Description:** Amazon Kinesis Data Streams for real-time data streaming
+
+**Cost Components:**
+
+**Provisioned Mode:**
+- Shard hours: shard count x hourly rate x 730 hours/month
+
+**On-Demand Mode:**
+- Data ingestion: GB ingested x rate
+- Data retrieval: GB retrieved x rate
+
+**Default Assumptions (Provisioned):**
+- 2 shards
+- Fallback price: $0.015/shard-hour
+
+**Default Assumptions (On-Demand):**
+- 1,000 GB data ingested per month
+- 2,000 GB data retrieved per month
+- Fallback ingestion price: $0.040/GB
+- Fallback retrieval price: $0.015/GB
+
+**Detection Logic:**
+- Stream mode from `StreamModeDetails.StreamMode` (defaults to PROVISIONED)
+- Shard count from `ShardCount` property
+
+**Example (Provisioned):**
+```
+Shards: 2
+Shard Rate: $0.015/hour
+Monthly Cost: 2 × $0.015 × 730 = $21.90
+```
+
+**Example (On-Demand):**
+```
+Ingestion: 1,000 GB × $0.040 = $40.00
+Retrieval: 2,000 GB × $0.015 = $30.00
+Total: $70.00/month
+```
+
+**Notes:**
+- Extended data retention costs not included
+- Enhanced fan-out consumer costs not included
+
+### AWS::KinesisFirehose::DeliveryStream
+
+**Description:** Amazon Kinesis Data Firehose for data delivery
+
+**Cost Components:**
+- Data ingestion: GB ingested x rate
+
+**Default Assumptions:**
+- 1,000 GB data ingested per month
+- Fallback price: $0.029/GB
+
+**Example:**
+```
+Data Ingestion: 1,000 GB × $0.029 = $29.00/month
+```
+
+**Notes:**
+- Format conversion and data transformation costs not included
+- Destination-specific costs (S3, Redshift) calculated separately
+
+### AWS::KinesisAnalyticsV2::Application
+
+**Description:** Amazon Kinesis Data Analytics for stream processing
+
+**Cost Components:**
+- KPU-hours: KPU count x hourly rate x 730 hours/month
+
+**Default Assumptions:**
+- 2 KPUs (Kinesis Processing Units)
+- Fallback price: $0.11/KPU-hour
+
+**Example:**
+```
+KPUs: 2
+KPU Rate: $0.11/hour
+Monthly Cost: 2 × $0.11 × 730 = $160.60
+```
+
+**Notes:**
+- Running application storage and durable application backup costs not included
+- Orchestration overhead KPU not included
+
+## DNS and Routing Resources
+
+### AWS::Route53::HostedZone
+
+**Description:** Amazon Route 53 DNS hosted zone
+
+**Cost Components:**
+- Fixed monthly charge per hosted zone
+
+**Pricing:**
+- $0.50/month per hosted zone
+
+**Example:**
+```
+Monthly Cost: $0.50
+```
+
+**Notes:**
+- First 25 hosted zones: $0.50/month each
+- Additional hosted zones: $0.10/month each (volume pricing not calculated)
+- DNS query costs are calculated on RecordSet resources
+
+### AWS::Route53::HealthCheck
+
+**Description:** Amazon Route 53 health check for endpoint monitoring
+
+**Cost Components:**
+- Fixed monthly charge per health check
+
+**Pricing:**
+
+| Health Check Type | Monthly Cost |
+|-------------------|-------------|
+| Basic (HTTP, TCP) | $0.50 |
+| Advanced (HTTPS, HTTP_STR_MATCH, HTTPS_STR_MATCH) | $1.00 |
+
+**Detection Logic:**
+- Health check type from `HealthCheckConfig.Type` (defaults to HTTP)
+
+**Example (Basic):**
+```
+Health Check Type: HTTP
+Monthly Cost: $0.50
+```
+
+**Example (Advanced):**
+```
+Health Check Type: HTTPS_STR_MATCH
+Monthly Cost: $1.00
+```
+
+### AWS::Route53::RecordSet
+
+**Description:** Amazon Route 53 DNS record
+
+**Cost Components:**
+- DNS query charges per million queries
+
+**Default Assumptions:**
+- 1,000,000 queries per month
+
+**Pricing by Routing Type:**
+
+| Routing Type | Price per Million Queries |
+|-------------|------------------------|
+| Standard | $0.40 |
+| Latency-based | $0.60 |
+| Geolocation | $0.70 |
+| Alias | $0.00 (free) |
+
+**Detection Logic:**
+- Alias records: `AliasTarget` property present (free, no query charges)
+- Latency routing: `Region` property present
+- Geolocation routing: `GeoLocation` property present
+- Standard routing: default
+
+**Example (Standard):**
+```
+Queries: 1,000,000 × $0.40/1M = $0.40/month
+```
+
+**Example (Alias):**
+```
+Monthly Cost: $0.00 (alias queries are free)
+```
+
+## Networking Resources (continued)
+
+### AWS::EC2::TransitGateway
+
+**Description:** AWS Transit Gateway for connecting VPCs and on-premises networks
+
+**Cost Components:**
+- Attachment hourly fees x number of attachments x 730 hours/month
+- Data processing: GB processed x rate
+
+**Default Assumptions:**
+- 3 attachments
+- 1,000 GB data processed per month
+- Fallback attachment price: $0.05/hour
+- Fallback data processing price: $0.02/GB
+
+**Example:**
+```
+Attachments: 3 × $0.05/hour × 730 = $109.50
+Data Processing: 1,000 GB × $0.02 = $20.00
+Total: $129.50/month
+```
+
+**Notes:**
+- VPN and Direct Connect attachments have additional costs
+- Cross-region peering attachments priced separately
+
+### AWS::EC2::TransitGatewayAttachment
+
+**Description:** Transit Gateway VPC attachment
+
+**Cost Components:**
+- Attachment hourly fee x 730 hours/month
+
+**Default Assumptions:**
+- Fallback price: $0.05/hour
+
+**Example:**
+```
+Attachment Rate: $0.05/hour
+Monthly Cost: $0.05 × 730 = $36.50
+```
+
+**Notes:**
+- Data processing costs tracked on the parent Transit Gateway resource
+
+## Database Resources (continued)
+
+### AWS::RDS::DBCluster (Aurora Serverless)
+
+**Description:** Amazon Aurora Serverless for auto-scaling relational databases
+
+**Cost Components:**
+1. Compute: ACU-hours (Aurora Capacity Units)
+2. Storage: GB-month
+3. I/O requests (Serverless v2 only)
+
+**Default Assumptions:**
+- Minimum ACUs: 0.5
+- Maximum ACUs: 16
+- Storage: 100 GB
+- I/O requests: 100,000,000/month (v2 only)
+- Fallback ACU price: $0.12/ACU-hour (v2), $0.06/ACU-hour (v1)
+- Storage price: $0.10/GB-month
+- I/O price: $0.20/million requests
+
+**Detection Logic:**
+- Serverless v2: `ServerlessV2ScalingConfiguration` property present
+- Serverless v1: `EngineMode` === "serverless"
+- ACU min/max from `ServerlessV2ScalingConfiguration.MinCapacity` and `MaxCapacity`
+
+**Pricing Model:**
+- Compute uses average of min and max ACU: `(minACU + maxACU) / 2 × hourly rate × 730`
+
+**Example (Serverless v2):**
+```
+Average ACUs: (0.5 + 16) / 2 = 8.25
+Compute: 8.25 × $0.12 × 730 = $722.70
+Storage: 100 GB × $0.10 = $10.00
+I/O: 100M / 1M × $0.20 = $20.00
+Total: $752.70/month
+```
+
+**Example (Serverless v1):**
+```
+Average ACUs: (0.5 + 16) / 2 = 8.25
+Compute: 8.25 × $0.06 × 730 = $361.35
+Storage: 100 GB × $0.10 = $10.00
+Total: $371.35/month
+```
+
+**Notes:**
+- Actual ACU usage varies with workload; estimate uses midpoint
+- Aurora Serverless v1 does not charge for I/O
+- Backup storage costs not included
 - Data transfer costs not included
 
 ## Customizing Assumptions
