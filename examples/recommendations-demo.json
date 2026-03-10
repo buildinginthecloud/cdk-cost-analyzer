@@ -1,0 +1,74 @@
+{
+  "Resources": {
+    "WebServer": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType": "m5.2xlarge"
+      }
+    },
+    "ProductionDB": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "DBInstanceClass": "db.r5.xlarge",
+        "Engine": "postgres",
+        "AllocatedStorage": 100
+      }
+    },
+    "CacheCluster": {
+      "Type": "AWS::ElastiCache::CacheCluster",
+      "Properties": {
+        "CacheNodeType": "cache.m5.large",
+        "Engine": "redis",
+        "NumCacheNodes": 1
+      }
+    },
+    "DataVolume": {
+      "Type": "AWS::EC2::Volume",
+      "Properties": {
+        "VolumeType": "gp2",
+        "Size": 500,
+        "AvailabilityZone": "eu-central-1a"
+      }
+    },
+    "AppBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {}
+    },
+    "NATGateway1": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {}
+    },
+    "NATGateway2": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {}
+    },
+    "WorkerASG": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "MinSize": "2",
+        "MaxSize": "10",
+        "DesiredCapacity": "4"
+      }
+    },
+    "ApiFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Runtime": "nodejs20.x",
+        "Handler": "index.handler",
+        "MemorySize": 1024
+      }
+    },
+    "UsersTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "BillingMode": "PAY_PER_REQUEST",
+        "AttributeDefinitions": [
+          { "AttributeName": "id", "AttributeType": "S" }
+        ],
+        "KeySchema": [
+          { "AttributeName": "id", "KeyType": "HASH" }
+        ]
+      }
+    }
+  }
+}

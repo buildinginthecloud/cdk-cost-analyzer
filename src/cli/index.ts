@@ -30,8 +30,10 @@ program
   .option('--region <region>', 'AWS region for pricing', 'eu-central-1')
   .option('--format <format>', 'Output format: text|json|markdown', 'text')
   .option('--config <path>', 'Path to configuration file')
+  .option('--recommendations', 'Include cost optimization recommendations')
+  .option('--min-savings <amount>', 'Minimum monthly savings to show (USD)', parseFloat)
   .option('--debug', 'Enable verbose debug logging for pricing API calls')
-  .action(async (templatePath: string, options: { region: string; format: string; config?: string; debug?: boolean }) => {
+  .action(async (templatePath: string, options: { region: string; format: string; config?: string; recommendations?: boolean; minSavings?: number; debug?: boolean }) => {
     try {
       // Enable debug logging if flag is set
       if (options.debug) {
@@ -53,10 +55,20 @@ program
         template,
         region: options.region,
         format: options.format as 'text' | 'json' | 'markdown',
+        config: {
+          recommendations: options.recommendations,
+          minimumSavingsThreshold: options.minSavings,
+        },
       });
 
-      // Output the results (summary already contains formatted output)
+      // Output the results
+      // For text/markdown, summary already includes recommendations via SingleTemplateReporter
       console.log(result.summary);
+
+      // For JSON format, append recommendations as structured data
+      if (options.format === 'json' && options.recommendations && result.recommendations) {
+        console.log(JSON.stringify({ recommendations: result.recommendations }, null, 2));
+      }
 
       process.exit(0);
     } catch (error) {

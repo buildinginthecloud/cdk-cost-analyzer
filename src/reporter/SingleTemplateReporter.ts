@@ -3,6 +3,10 @@ import {
   SingleTemplateReportOptions,
 } from '../api/single-template-types';
 import { getTrendIndicator, extractServiceName } from './markdownUtils';
+import {
+  formatRecommendationsText,
+  formatRecommendationsMarkdown,
+} from './RecommendationReporter';
 
 /**
  * Reporter for generating formatted output for single template cost analysis
@@ -125,6 +129,11 @@ export class SingleTemplateReporter {
     report += 'Legend: ✓ High confidence  ~ Medium confidence  ? Low confidence  ✗ Unknown/Unsupported\n';
     report += '='.repeat(80) + '\n';
 
+    // Recommendations
+    if (result.recommendations) {
+      report += formatRecommendationsText(result.recommendations);
+    }
+
     return report;
   }
 
@@ -229,6 +238,12 @@ export class SingleTemplateReporter {
         report += `- ${assumption}\n`;
       }
       report += '\n</details>\n\n';
+    }
+
+    // Recommendations
+    if (result.recommendations) {
+      report += formatRecommendationsMarkdown(result.recommendations);
+      report += '\n';
     }
 
     // Footer

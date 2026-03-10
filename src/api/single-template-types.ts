@@ -10,6 +10,7 @@ export interface AnalysisConfig {
   excludedResourceTypes?: string[];
   cacheConfig?: CacheConfig;
   recommendations?: boolean;
+  minimumSavingsThreshold?: number;
 }
 
 /**
