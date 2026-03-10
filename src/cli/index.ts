@@ -30,8 +30,10 @@ program
   .option('--region <region>', 'AWS region for pricing', 'eu-central-1')
   .option('--format <format>', 'Output format: text|json|markdown', 'text')
   .option('--config <path>', 'Path to configuration file')
+  .option('--recommendations', 'Include cost optimization recommendations')
+  .option('--min-savings <amount>', 'Minimum monthly savings to show (USD)', parseFloat)
   .option('--debug', 'Enable verbose debug logging for pricing API calls')
-  .action(async (templatePath: string, options: { region: string; format: string; config?: string; debug?: boolean }) => {
+  .action(async (templatePath: string, options: { region: string; format: string; config?: string; recommendations?: boolean; minSavings?: number; debug?: boolean }) => {
     try {
       // Enable debug logging if flag is set
       if (options.debug) {
@@ -53,10 +55,26 @@ program
         template,
         region: options.region,
         format: options.format as 'text' | 'json' | 'markdown',
+        config: {
+          recommendations: options.recommendations,
+        },
       });
 
       // Output the results (summary already contains formatted output)
       console.log(result.summary);
+
+      // Output recommendations if requested
+      if (options.recommendations && result.recommendations) {
+        const { formatRecommendationsText, formatRecommendationsMarkdown } = await import('../reporter/RecommendationReporter');
+        const format = options.format as string;
+        if (format === 'json') {
+          console.log(JSON.stringify(result.recommendations, null, 2));
+        } else if (format === 'markdown') {
+          console.log(formatRecommendationsMarkdown(result.recommendations, options.minSavings));
+        } else {
+          console.log(formatRecommendationsText(result.recommendations, options.minSavings));
+        }
+      }
 
       process.exit(0);
     } catch (error) {
