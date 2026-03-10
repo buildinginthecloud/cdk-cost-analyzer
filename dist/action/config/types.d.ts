@@ -127,6 +127,56 @@ export interface UsageAssumptionsConfig {
         /** Number of API calls per month (default: 10,000) */
         monthlyApiCalls?: number;
     };
+    /**
+     * Aurora Serverless usage assumptions for cost estimation.
+     *
+     * @see https://aws.amazon.com/rds/aurora/pricing/
+     */
+    auroraServerless?: {
+        /** Minimum ACU capacity (default: 0.5) */
+        minACU?: number;
+        /** Maximum ACU capacity (default: 16) */
+        maxACU?: number;
+        /** Storage size in GB (default: 100) */
+        storageGB?: number;
+    };
+    /**
+     * Transit Gateway usage assumptions for cost estimation.
+     *
+     * @see https://aws.amazon.com/transit-gateway/pricing/
+     */
+    transitGateway?: {
+        /** Number of VPC/VPN attachments (default: 3) */
+        attachments?: number;
+        /** Monthly data processed in GB (default: 1000) */
+        monthlyDataGB?: number;
+    };
+    /**
+     * Route 53 usage assumptions for cost estimation.
+     *
+     * @see https://aws.amazon.com/route53/pricing/
+     */
+    route53?: {
+        /** Monthly DNS queries (default: 1,000,000) */
+        monthlyQueries?: number;
+    };
+    /**
+     * Kinesis usage assumptions for cost estimation.
+     *
+     * @see https://aws.amazon.com/kinesis/pricing/
+     */
+    kinesis?: {
+        /** Number of shards for provisioned streams (default: 2) */
+        shardCount?: number;
+        /** Monthly data ingestion in GB for on-demand streams (default: 1000) */
+        ingestionGB?: number;
+        /** Monthly data retrieval in GB for on-demand streams (default: 2000) */
+        retrievalGB?: number;
+        /** Monthly data ingestion in GB for Firehose (default: 1000) */
+        firehoseGB?: number;
+        /** Number of Kinesis Processing Units for Analytics (default: 2) */
+        kpus?: number;
+    };
 }
 export interface SynthesisConfig {
     appPath?: string;
