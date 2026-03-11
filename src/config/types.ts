@@ -167,6 +167,15 @@ export interface UsageAssumptionsConfig {
     monthlyQueries?: number;
   };
   /**
+   * CloudWatch usage assumptions for cost estimation.
+   *
+   * @see https://aws.amazon.com/cloudwatch/pricing/
+   */
+  cloudwatch?: {
+    /** Monthly log ingestion volume in GB per log group (default: 10) */
+    logsIngestionGB?: number;
+  };
+  /**
    * Kinesis usage assumptions for cost estimation.
    *
    * @see https://aws.amazon.com/kinesis/pricing/

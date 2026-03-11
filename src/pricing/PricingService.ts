@@ -3,6 +3,7 @@ import { ALBCalculator } from './calculators/ALBCalculator';
 import { APIGatewayCalculator } from './calculators/APIGatewayCalculator';
 import { AutoScalingGroupCalculator } from './calculators/AutoScalingGroupCalculator';
 import { CloudFrontCalculator } from './calculators/CloudFrontCalculator';
+import { CloudWatchLogsCalculator, CloudWatchAlarmCalculator, CloudWatchDashboardCalculator } from './calculators/CloudWatchCalculator';
 import { DynamoDBCalculator } from './calculators/DynamoDBCalculator';
 import { EC2Calculator } from './calculators/EC2Calculator';
 import { ECSCalculator } from './calculators/ECSCalculator';
@@ -134,6 +135,11 @@ export class PricingService implements IPricingService {
         usageAssumptions?.kinesis?.firehoseGB,
         usageAssumptions?.kinesis?.kpus,
       ),
+      new CloudWatchLogsCalculator(
+        usageAssumptions?.cloudwatch?.logsIngestionGB,
+      ),
+      new CloudWatchAlarmCalculator(),
+      new CloudWatchDashboardCalculator(),
     ];
   }
 
