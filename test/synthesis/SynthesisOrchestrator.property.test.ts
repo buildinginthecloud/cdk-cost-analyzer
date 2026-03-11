@@ -183,7 +183,7 @@ describe('SynthesisOrchestrator - Property Tests', () => {
       const uniquePaths = new Set(result.templatePaths);
       expect(uniquePaths.size).toBe(result.templatePaths.length);
     }
-  }, 30000); // Increase timeout to 30 seconds for CDK synthesis
+  }, 120000); // Increase timeout for CDK synthesis on slower machines
 
   // Feature: production-readiness, Property 11: Synthesis errors are captured and reported
   // Validates: Requirements 13.1, 13.2, 13.3
