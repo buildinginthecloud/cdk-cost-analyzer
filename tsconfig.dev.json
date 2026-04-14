@@ -24,6 +24,11 @@
     "strictPropertyInitialization": true,
     "stripInternal": true,
     "target": "ES2022",
+    "types": [
+      "jest",
+      "js-yaml",
+      "node"
+    ],
     "outDir": "./dist",
     "rootDir": "./src",
     "skipLibCheck": true,
