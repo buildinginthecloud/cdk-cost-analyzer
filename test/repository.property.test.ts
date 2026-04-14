@@ -242,6 +242,7 @@ describe('Repository Structure - Property Tests', () => {
       'docs',
       'examples',
       'demo', // Demo CDK project showcasing cdk-cost-analyzer usage
+      'presentation', // AWS Summit presentation generator
       'test-cdk-project', // Legacy test project, kept for backwards compatibility
       'coverage', // Jest coverage reports
       'test-reports', // Test output reports
