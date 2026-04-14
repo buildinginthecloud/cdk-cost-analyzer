@@ -26,6 +26,11 @@
     "strictPropertyInitialization": true,
     "stripInternal": true,
     "target": "ES2022",
+    "types": [
+      "jest",
+      "js-yaml",
+      "node"
+    ],
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
