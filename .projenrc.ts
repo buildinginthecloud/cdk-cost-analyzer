@@ -525,6 +525,8 @@ project.addTask('prepare', {
 
 // Enable npm Trusted Publishing via OIDC instead of a long-lived NPM_TOKEN.
 // publib-npm requires NPM_TRUSTED_PUBLISHER=true when no token is provided.
+// npm CLI >= 11.5.1 is required for OIDC; Node 20.18.1 ships with npm 10.x,
+// so we upgrade npm in the publish step before calling publib-npm.
 // The GitHub→npm trust is configured at:
 // https://www.npmjs.com/package/cdk-cost-analyzer/access
 const releaseWorkflow = project.tryFindObjectFile('.github/workflows/release.yml');
@@ -532,6 +534,10 @@ if (releaseWorkflow) {
   releaseWorkflow.addOverride(
     'jobs.release_npm.steps.3.env.NPM_TRUSTED_PUBLISHER',
     'true',
+  );
+  releaseWorkflow.addOverride(
+    'jobs.release_npm.steps.3.run',
+    'npm install -g npm@latest\nnpx -p publib@latest publib-npm',
   );
 }
 
