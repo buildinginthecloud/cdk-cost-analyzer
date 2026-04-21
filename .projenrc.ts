@@ -523,4 +523,16 @@ project.addTask('prepare', {
 // The repository does not track CHANGELOG.md - refer to GitHub Releases for version history:
 // https://github.com/buildinginthecloud/cdk-cost-analyzer/releases
 
+// Enable npm Trusted Publishing via OIDC instead of a long-lived NPM_TOKEN.
+// publib-npm requires NPM_TRUSTED_PUBLISHER=true when no token is provided.
+// The GitHub→npm trust is configured at:
+// https://www.npmjs.com/package/cdk-cost-analyzer/access
+const releaseWorkflow = project.tryFindObjectFile('.github/workflows/release.yml');
+if (releaseWorkflow) {
+  releaseWorkflow.addOverride(
+    'jobs.release_npm.steps.3.env.NPM_TRUSTED_PUBLISHER',
+    'true',
+  );
+}
+
 project.synth();
