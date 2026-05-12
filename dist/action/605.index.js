@@ -228,6 +228,27 @@ var fromHttp_1 = __webpack_require__(8712);
 Object.defineProperty(exports, "fromHttp", ({ enumerable: true, get: function () { return fromHttp_1.fromHttp; } }));
 
 
+/***/ }),
+
+/***/ 4252:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isBlob = exports.isReadableStream = exports.splitStream = exports.sdkStreamMixin = exports.headStream = exports.getAwsChunkedEncodingStream = exports.createBufferedReadable = exports.createChecksumStream = exports.ChecksumStream = exports.Uint8ArrayBlobAdapter = void 0;
+var serde_1 = __webpack_require__(2430);
+Object.defineProperty(exports, "Uint8ArrayBlobAdapter", ({ enumerable: true, get: function () { return serde_1.Uint8ArrayBlobAdapter; } }));
+Object.defineProperty(exports, "ChecksumStream", ({ enumerable: true, get: function () { return serde_1.ChecksumStream; } }));
+Object.defineProperty(exports, "createChecksumStream", ({ enumerable: true, get: function () { return serde_1.createChecksumStream; } }));
+Object.defineProperty(exports, "createBufferedReadable", ({ enumerable: true, get: function () { return serde_1.createBufferedReadable; } }));
+Object.defineProperty(exports, "getAwsChunkedEncodingStream", ({ enumerable: true, get: function () { return serde_1.getAwsChunkedEncodingStream; } }));
+Object.defineProperty(exports, "headStream", ({ enumerable: true, get: function () { return serde_1.headStream; } }));
+Object.defineProperty(exports, "sdkStreamMixin", ({ enumerable: true, get: function () { return serde_1.sdkStreamMixin; } }));
+Object.defineProperty(exports, "splitStream", ({ enumerable: true, get: function () { return serde_1.splitStream; } }));
+Object.defineProperty(exports, "isReadableStream", ({ enumerable: true, get: function () { return serde_1.isReadableStream; } }));
+Object.defineProperty(exports, "isBlob", ({ enumerable: true, get: function () { return serde_1.isBlob; } }));
+
+
 /***/ })
 
 };
