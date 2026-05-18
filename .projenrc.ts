@@ -439,7 +439,9 @@ if (project.github) {
         name: 'Setup Node.js',
         uses: 'actions/setup-node@v5',
         with: {
-          'node-version': '20.18.1',
+          // Node 22+ avoids the AWS SDK NodeVersionSupportWarning
+          // that would otherwise leak into the PR cost-report comment.
+          'node-version': '22',
         },
       },
       {
