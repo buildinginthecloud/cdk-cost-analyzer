@@ -115,7 +115,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: 20.18.1
+          node-version: "22"
       - name: Install dependencies
         run: npm install
       - name: Build cdk-cost-analyzer
