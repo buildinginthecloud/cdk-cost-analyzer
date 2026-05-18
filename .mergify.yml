@@ -11,5 +11,6 @@ pull_request_rules:
     actions:
       merge:
         method: squash
+      delete_head_branch: {}
 merge_queue:
   max_parallel_checks: 1
