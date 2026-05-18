@@ -188,7 +188,9 @@ if (project.github) {
           merge: {
             method: 'squash',
           },
-          delete_head_branch: {},
+          // The delete_head_branch action is deprecated by Mergify
+          // (sunset 2026-07-31). GitHub's repository setting
+          // "Automatically delete head branches" replaces it.
         },
       },
     ],
