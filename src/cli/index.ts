@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import { suppressNodeDeprecationWarning } from '../utils/suppressNodeWarnings';
+suppressNodeDeprecationWarning();
+
 import * as fs from 'fs';
 import * as path from 'path';
 import { Command } from 'commander';
