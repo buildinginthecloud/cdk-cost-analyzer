@@ -1,0 +1,37 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Implement WAF, Glue, and Athena calculators with tests and docs. These three calculators are independent of each other and can all be implemented in one batch.",
+  "status": "in_progress",
+  "steps": [
+    "Create src/pricing/calculators/WAFCalculator.ts implementing ResourceCostCalculator interface. supports() returns true for 'AWS::WAFv2::WebACL'. No resource properties needed (fixed + request-based pricing). Constructor takes optional customRequestsPerMonth parameter. calculateCost() queries pricingClient.getPrice() for serviceCode 'AWSWAF' with productFamily filter 'WAF'. Fixed costs: $5/month per ACL + $1/month per rule (read from resource.properties.Rules array length, default 0 rules). Usage cost: $0.60 per million requests (default 1M requests/month). Since WAF pricing is complex in the API, use fallback pricing: webACLCost=5.0 fixed, rulesCost = ruleCount * 1.0 fixed, requestCost = (requestsPerMonth/1000000) * 0.60. Return confidence:'medium' with clear assumptions listing the fixed pricing model.",
+    "Create src/pricing/calculators/GlueCalculator.ts implementing ResourceCostCalculator interface. supports() returns true for 'AWS::Glue::Job' OR 'AWS::Glue::Crawler'. Constructor takes optional customDPUHours parameter (default 100 DPU-hours/month). calculateCost() uses fixed fallback pricing ($0.44 per DPU-hour) since Glue pricing API is complex. Monthly cost = dPUHours * 0.44. Return confidence:'medium'. Also add $1.00/month fixed cost for Data Catalog if it's a Job resource (catalog usage). Assumptions should note: DPU-hours per month assumption, price per DPU-hour, no Data Catalog request costs beyond first 1M (free tier).",
+    "Create src/pricing/calculators/AthenaCalculator.ts implementing ResourceCostCalculator interface. supports() returns true for 'AWS::Athena::WorkGroup' OR 'AWS::Athena::NamedQuery'. Constructor takes optional customTBScannedPerMonth parameter (default 1 TB/month). calculateCost() uses fallback pricing ($5.00 per TB scanned). Monthly cost = tbScanned * 5.00. For NamedQuery resources, return $0 cost with assumption 'Named queries have no direct cost - cost incurred on execution'. For WorkGroup, use TB scanned pricing. Return confidence:'medium'. Assumptions note: TB of data scanned per month, DDL queries are free.",
+    "Add tests in test/pricing/WAFCalculator.test.ts following the RDSCalculator.test.ts pattern. Test: supports() returns true for AWS::WAFv2::WebACL and false for others; calculateCost() with default assumptions (0 rules, 1M requests) produces correct amount; with custom rules count from properties; with custom requests; handles properties with Rules array; error handling returns confidence:'unknown'.",
+    "Add tests in test/pricing/GlueCalculator.test.ts. Test: supports() for both Glue::Job and Glue::Crawler; calculateCost() with default DPU-hours; with custom DPU-hours constructor param; error handling.",
+    "Add tests in test/pricing/AthenaCalculator.test.ts. Test: supports() for WorkGroup and NamedQuery; WorkGroup calculateCost() with default TB and custom TB; NamedQuery returns $0 cost; error handling.",
+    "Register WAFCalculator, GlueCalculator, AthenaCalculator in src/pricing/PricingService.ts: add import statements at the top, add constructor params for custom assumptions (waf.requestsPerMonth, glue.dPUHoursPerMonth, athena.tbScannedPerMonth), add instances to this.calculators array.",
+    "Add usage assumption config entries in src/config/types.ts UsageAssumptionsConfig interface: waf?: { requestsPerMonth?: number }, glue?: { dPUHoursPerMonth?: number }, athena?: { tbScannedPerMonth?: number }.",
+    "Add documentation sections for WAF, Glue, and Athena to docs/CALCULATORS.md following the existing format (Description, Cost Components, Default Assumptions, Configuration, Example, Notes sections)."
+  ],
+  "acceptance_criteria": [
+    "WAFCalculator.ts exists in src/pricing/calculators/ and implements ResourceCostCalculator",
+    "GlueCalculator.ts exists in src/pricing/calculators/ and implements ResourceCostCalculator",
+    "AthenaCalculator.ts exists in src/pricing/calculators/ and implements ResourceCostCalculator",
+    "All three calculators are imported and registered in PricingService.ts",
+    "src/config/types.ts has waf, glue, athena entries in UsageAssumptionsConfig",
+    "test/pricing/WAFCalculator.test.ts exists with at least 6 test cases",
+    "test/pricing/GlueCalculator.test.ts exists with at least 5 test cases",
+    "test/pricing/AthenaCalculator.test.ts exists with at least 5 test cases",
+    "docs/CALCULATORS.md updated with WAF, Glue, Athena sections",
+    "TypeScript syntax is valid (no tsc compilation errors in the new files)"
+  ],
+  "verification": [
+    "NODE_OPTIONS=\"\" tsc --noEmit --project tsconfig.json 2>&1 (check that no new errors appear related to the new files)",
+    "Grep for WAFCalculator, GlueCalculator, AthenaCalculator in PricingService.ts to confirm registration",
+    "Grep for 'waf' and 'glue' and 'athena' in src/config/types.ts to confirm config entries",
+    "Verify test files exist: ls test/pricing/WAFCalculator.test.ts test/pricing/GlueCalculator.test.ts test/pricing/AthenaCalculator.test.ts"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

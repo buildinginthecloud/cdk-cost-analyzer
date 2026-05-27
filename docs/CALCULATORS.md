@@ -12,8 +12,8 @@ This document provides detailed information about all supported AWS resource typ
 - [DNS and Routing Resources](#dns-and-routing-resources) - Route 53
 - [Messaging Resources](#messaging-resources) - SQS, SNS
 - [Content Delivery Resources](#content-delivery-resources) - CloudFront, ElastiCache
-- [Analytics Resources](#analytics-resources) - Kinesis Streams, Firehose, Analytics
-- [Security Resources](#security-resources) - Secrets Manager
+- [Analytics Resources](#analytics-resources) - Kinesis Streams, Firehose, Analytics, Glue, Athena
+- [Security Resources](#security-resources) - Secrets Manager, WAF
 - [Serverless Resources](#serverless-resources) - Lambda, API Gateway, Step Functions
 - [Container Resources](#container-resources) - ECS
 - [Customizing Assumptions](#customizing-assumptions)
@@ -859,6 +859,41 @@ Total: $0.02/month
 
 ## Security Resources
 
+### AWS::WAFv2::WebACL
+
+**Description:** AWS WAF Web Application Firewall for protecting web applications
+
+**Cost Components:**
+- Web ACL: $5.00/month (fixed)
+- Rules: $1.00/month per rule
+- Requests: $0.60 per million requests
+
+**Default Assumptions:**
+- Rules: read from `Rules` array in CloudFormation template (default: 0 rules)
+- 1,000,000 requests per month
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  waf:
+    requestsPerMonth: 1000000
+```
+
+**Example:**
+```
+Web ACL: $5.00/month
+Rules: 3 rules × $1.00 = $3.00/month
+Requests: 1,000,000 × $0.60/million = $0.60/month
+Total: $8.60/month
+```
+
+**Notes:**
+- Rule count is read directly from the CloudFormation template `Rules` property
+- AWS Managed Rules and custom rules are both counted at the same rate
+- Bot Control and Fraud Control rules have additional charges (not calculated)
+- Shield Advanced integration costs not included
+- Uses fixed fallback pricing (WAF Pricing API is complex)
+
 ### AWS::SecretsManager::Secret
 
 **Description:** AWS Secrets Manager for credential and secret storage
@@ -1128,6 +1163,112 @@ Monthly Cost: 2 × $0.11 × 730 = $160.60
 **Notes:**
 - Running application storage and durable application backup costs not included
 - Orchestration overhead KPU not included
+
+### AWS::Glue::Job
+
+**Description:** AWS Glue ETL job for data transformation and loading
+
+**Cost Components:**
+- DPU-hours: $0.44 per DPU-hour
+
+**Default Assumptions:**
+- 100 DPU-hours per month
+- Data Catalog: first 1M objects and requests are free (not included)
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  glue:
+    dPUHoursPerMonth: 100
+```
+
+**Example:**
+```
+DPU-hours: 100 × $0.44/DPU-hour = $44.00/month
+```
+
+**Notes:**
+- DPU-hours represent the processing capacity consumed by your job
+- 1 DPU = 4 vCPUs and 16 GB of memory
+- ETL jobs and crawlers use the same $0.44/DPU-hour rate
+- Development endpoint costs not included
+- Job bookmarks and triggers have no direct cost
+- Uses fixed fallback pricing (Glue Pricing API is complex)
+
+### AWS::Glue::Crawler
+
+**Description:** AWS Glue crawler for discovering and cataloging data
+
+**Cost Components:**
+- DPU-hours: $0.44 per DPU-hour
+
+**Default Assumptions:**
+- 100 DPU-hours per month
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  glue:
+    dPUHoursPerMonth: 100
+```
+
+**Example:**
+```
+DPU-hours: 100 × $0.44/DPU-hour = $44.00/month
+```
+
+**Notes:**
+- Shares the same `dPUHoursPerMonth` configuration as Glue Jobs
+- Crawlers and jobs use the same pricing rate
+- Data Catalog storage costs covered by free tier (first 1M objects free)
+- Uses fixed fallback pricing (Glue Pricing API is complex)
+
+### AWS::Athena::WorkGroup
+
+**Description:** Amazon Athena workgroup for running SQL queries on data in S3
+
+**Cost Components:**
+- Data scanned: $5.00 per TB of data scanned
+
+**Default Assumptions:**
+- 1 TB of data scanned per month
+- DDL queries are free (not included)
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  athena:
+    tbScannedPerMonth: 1
+```
+
+**Example:**
+```
+Data Scanned: 1 TB × $5.00/TB = $5.00/month
+```
+
+**Notes:**
+- DDL statements (CREATE TABLE, DROP TABLE, etc.) are free
+- Using columnar formats (Parquet, ORC) and compression can significantly reduce scanned data
+- Query results cached in S3 incur S3 storage costs (calculated separately)
+- Workgroup configuration (output location, encryption) does not affect pricing
+- Uses fixed fallback pricing (Athena Pricing API is complex)
+
+### AWS::Athena::NamedQuery
+
+**Description:** Amazon Athena named query (saved SQL query)
+
+**Cost Components:**
+- No direct cost (queries are free to save; cost is incurred at execution time)
+
+**Example:**
+```
+Monthly Cost: $0.00
+```
+
+**Notes:**
+- Named queries themselves have no cost
+- Cost is incurred when the query is executed (see AWS::Athena::WorkGroup)
+- Returns $0 with `high` confidence
 
 ## DNS and Routing Resources
 

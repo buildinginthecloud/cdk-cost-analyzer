@@ -192,6 +192,30 @@ export interface UsageAssumptionsConfig {
     /** Number of Kinesis Processing Units for Analytics (default: 2) */
     kpus?: number;
   };
+  /**
+   * WAF (Web Application Firewall) usage assumptions.
+   * @see https://aws.amazon.com/waf/pricing/
+   */
+  waf?: {
+    /** Monthly request count (default: 1,000,000) */
+    requestsPerMonth?: number;
+  };
+  /**
+   * AWS Glue usage assumptions for ETL jobs and crawlers.
+   * @see https://aws.amazon.com/glue/pricing/
+   */
+  glue?: {
+    /** DPU-hours per month for ETL jobs or crawlers (default: 100) */
+    dPUHoursPerMonth?: number;
+  };
+  /**
+   * Amazon Athena usage assumptions.
+   * @see https://aws.amazon.com/athena/pricing/
+   */
+  athena?: {
+    /** TB of data scanned per month (default: 1) */
+    tbScannedPerMonth?: number;
+  };
 }
 
 export interface SynthesisConfig {

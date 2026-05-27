@@ -25,6 +25,9 @@ import { AuroraServerlessCalculator } from './calculators/AuroraServerlessCalcul
 import { TransitGatewayCalculator } from './calculators/TransitGatewayCalculator';
 import { Route53Calculator } from './calculators/Route53Calculator';
 import { KinesisCalculator } from './calculators/KinesisCalculator';
+import { AthenaCalculator } from './calculators/AthenaCalculator';
+import { GlueCalculator } from './calculators/GlueCalculator';
+import { WAFCalculator } from './calculators/WAFCalculator';
 import { PricingClient } from './PricingClient';
 import {
   PricingService as IPricingService,
@@ -140,6 +143,9 @@ export class PricingService implements IPricingService {
       ),
       new CloudWatchAlarmCalculator(),
       new CloudWatchDashboardCalculator(),
+      new WAFCalculator(usageAssumptions?.waf?.requestsPerMonth),
+      new GlueCalculator(usageAssumptions?.glue?.dPUHoursPerMonth),
+      new AthenaCalculator(usageAssumptions?.athena?.tbScannedPerMonth),
     ];
   }
 
