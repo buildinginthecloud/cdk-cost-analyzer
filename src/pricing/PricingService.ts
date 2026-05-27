@@ -26,7 +26,10 @@ import { TransitGatewayCalculator } from './calculators/TransitGatewayCalculator
 import { Route53Calculator } from './calculators/Route53Calculator';
 import { KinesisCalculator } from './calculators/KinesisCalculator';
 import { AthenaCalculator } from './calculators/AthenaCalculator';
+import { DocumentDBCalculator } from './calculators/DocumentDBCalculator';
+import { FSxCalculator } from './calculators/FSxCalculator';
 import { GlueCalculator } from './calculators/GlueCalculator';
+import { NeptuneCalculator } from './calculators/NeptuneCalculator';
 import { WAFCalculator } from './calculators/WAFCalculator';
 import { PricingClient } from './PricingClient';
 import {
@@ -146,6 +149,9 @@ export class PricingService implements IPricingService {
       new WAFCalculator(usageAssumptions?.waf?.requestsPerMonth),
       new GlueCalculator(usageAssumptions?.glue?.dPUHoursPerMonth),
       new AthenaCalculator(usageAssumptions?.athena?.tbScannedPerMonth),
+      new FSxCalculator(usageAssumptions?.fsx?.storageGB),
+      new DocumentDBCalculator(),
+      new NeptuneCalculator(),
     ];
   }
 

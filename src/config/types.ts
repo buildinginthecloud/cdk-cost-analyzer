@@ -216,6 +216,30 @@ export interface UsageAssumptionsConfig {
     /** TB of data scanned per month (default: 1) */
     tbScannedPerMonth?: number;
   };
+  /**
+   * Amazon FSx usage assumptions for file storage cost estimation.
+   * @see https://aws.amazon.com/fsx/pricing/
+   */
+  fsx?: {
+    /** Storage capacity override in GB (default: read from resource or 32 GB) */
+    storageGB?: number;
+  };
+  /**
+   * Amazon DocumentDB usage assumptions.
+   * @see https://aws.amazon.com/documentdb/pricing/
+   */
+  documentdb?: {
+    /** Storage size in GB (default: 100 GB) */
+    storageGB?: number;
+  };
+  /**
+   * Amazon Neptune usage assumptions.
+   * @see https://aws.amazon.com/neptune/pricing/
+   */
+  neptune?: {
+    /** Storage size in GB (default: 100 GB) */
+    storageGB?: number;
+  };
 }
 
 export interface SynthesisConfig {

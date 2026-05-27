@@ -227,6 +227,49 @@ When `ThroughputMode: provisioned` is detected with a `ProvisionedThroughputInMi
 - Actual storage used may vary from assumptions
 - IA request cost assumes 10% of IA data is accessed monthly
 
+### AWS::FSx::FileSystem
+
+**Description:** Amazon FSx managed file storage (Windows File Server and Lustre)
+
+**Cost Components:**
+- Storage: GB-month at file system type rate
+
+**Default Assumptions:**
+- File system type: WINDOWS (if not specified in template)
+- 32 GB storage capacity (if not specified in template)
+- SSD storage pricing
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  fsx:
+    storageGB: 32
+```
+
+**Pricing Model:**
+| File System Type | Price (us-east-1) |
+|------------------|-------------------|
+| Windows SSD      | $0.013/GB-month   |
+| Lustre SSD       | $0.145/GB-month   |
+
+**Example (Windows):**
+```
+Storage: 32 GB × $0.013/GB = $0.42/month
+```
+
+**Example (Lustre):**
+```
+Storage: 1,200 GB × $0.145/GB = $174.00/month
+```
+
+**Notes:**
+- File system type and storage capacity are read from the CloudFormation template
+- Constructor `storageGB` overrides the template's `StorageCapacity` property
+- Uses fixed fallback pricing (no AWS Pricing API call)
+- HDD storage pricing not currently supported
+- Backup storage costs not included
+- Data transfer costs not included
+
 ## Database Resources
 
 ### AWS::RDS::DBInstance
@@ -321,6 +364,84 @@ Total: $3.75/month
 - DynamoDB Streams not calculated
 - Backup costs not included
 - Storage costs not included in current implementation
+
+### AWS::DocDB::DBCluster
+
+**Description:** Amazon DocumentDB cluster (MongoDB-compatible)
+
+**Notes:**
+- The cluster resource itself has no direct cost
+- All costs are calculated on individual `AWS::DocDB::DBInstance` resources
+
+### AWS::DocDB::DBInstance
+
+**Description:** Amazon DocumentDB managed document database instance
+
+**Cost Components:**
+- Instance hourly rate × 730 hours/month
+- Storage: default 100 GB at $0.10/GB-month
+
+**Default Assumptions:**
+- Instance class: db.r6g.large (if not specified in template)
+- 730 hours/month (always running)
+- 100 GB of storage
+
+**Pricing:**
+- Fallback hourly rate: $0.24/hour for db.r6g.large (used when API data unavailable)
+
+**Example:**
+```
+Instance: db.r6g.large
+Hourly Rate: $0.24
+Instance Cost: $0.24 × 730 = $175.20
+Storage: 100 GB × $0.10/GB = $10.00
+Total: $185.20/month
+```
+
+**Notes:**
+- Instance class read from the `DBInstanceClass` property in the template
+- Confidence is 'high' when API pricing is available, 'medium' when using fallback
+- Backup storage costs not included
+- I/O costs not included
+
+### AWS::Neptune::DBCluster
+
+**Description:** Amazon Neptune graph database cluster
+
+**Notes:**
+- The cluster resource itself has no direct cost
+- All costs are calculated on individual `AWS::Neptune::DBInstance` resources
+
+### AWS::Neptune::DBInstance
+
+**Description:** Amazon Neptune managed graph database instance
+
+**Cost Components:**
+- Instance hourly rate × 730 hours/month
+- Storage: default 100 GB at $0.10/GB-month
+
+**Default Assumptions:**
+- Instance class: db.r5.large (if not specified in template)
+- 730 hours/month (always running)
+- 100 GB of storage
+
+**Pricing:**
+- Fallback hourly rate: $0.348/hour for db.r5.large (used when API data unavailable)
+
+**Example:**
+```
+Instance: db.r5.large
+Hourly Rate: $0.348
+Instance Cost: $0.348 × 730 = $254.04
+Storage: 100 GB × $0.10/GB = $10.00
+Total: $264.04/month
+```
+
+**Notes:**
+- Instance class read from the `DBInstanceClass` property in the template
+- Confidence is 'high' when API pricing is available, 'medium' when using fallback
+- Backup storage costs not included
+- I/O costs not included
 
 ## Networking Resources
 
