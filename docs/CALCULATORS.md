@@ -1221,7 +1221,7 @@ Monthly Cost: $0.10 × 730 = $73.00
 **Description:** AWS App Runner for automatically building and deploying containerized web applications
 
 **Cost Components:**
-- vCPU: vCPU count × $0.040/vCPU-hour × 730 hours/month
+- vCPU: vCPU count × $0.064/vCPU-hour × 730 hours/month
 - Memory: GB × $0.007/GB-hour × 730 hours/month
 - Requests: per million HTTP requests
 
@@ -1236,6 +1236,7 @@ Monthly Cost: $0.10 × 730 = $73.00
 usageAssumptions:
   appRunner:
     requestsPerMonth: 1000000
+    hoursPerMonth: 730
 ```
 
 **Detection Logic:**
@@ -1244,10 +1245,10 @@ usageAssumptions:
 
 **Example:**
 ```
-vCPU: 1 × $0.040/hour × 730 = $29.20
+vCPU: 1 × $0.064/hour × 730 = $46.72
 Memory: 2 GB × $0.007/hour × 730 = $10.22
-Requests: 1,000,000 × $0.10/million = $0.10
-Total: $39.52/month
+Requests: 1M × $0.10/million = $0.10
+Total: $46.72 + $10.22 + $0.10 = $57.04/month
 ```
 
 **Notes:**
