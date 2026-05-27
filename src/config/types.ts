@@ -240,6 +240,32 @@ export interface UsageAssumptionsConfig {
     /** Storage size in GB (default: 100 GB) */
     storageGB?: number;
   };
+  /**
+   * Amazon SageMaker usage assumptions.
+   * @see https://aws.amazon.com/sagemaker/pricing/
+   */
+  sagemaker?: {
+    /** Hours per month the instance runs (default: 730) */
+    hoursPerMonth?: number;
+  };
+  /**
+   * AWS App Runner usage assumptions.
+   * @see https://aws.amazon.com/apprunner/pricing/
+   */
+  appRunner?: {
+    /** Monthly request count (default: 1,000,000) */
+    requestsPerMonth?: number;
+    /** Hours per month the service runs (default: 730) */
+    hoursPerMonth?: number;
+  };
+  /**
+   * AWS Batch usage assumptions.
+   * @see https://aws.amazon.com/batch/pricing/
+   */
+  batch?: {
+    /** Hours per month the compute environment runs (default: 100) */
+    hoursPerMonth?: number;
+  };
 }
 
 export interface SynthesisConfig {

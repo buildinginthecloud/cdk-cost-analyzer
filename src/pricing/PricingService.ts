@@ -25,11 +25,14 @@ import { AuroraServerlessCalculator } from './calculators/AuroraServerlessCalcul
 import { TransitGatewayCalculator } from './calculators/TransitGatewayCalculator';
 import { Route53Calculator } from './calculators/Route53Calculator';
 import { KinesisCalculator } from './calculators/KinesisCalculator';
+import { AppRunnerCalculator } from './calculators/AppRunnerCalculator';
 import { AthenaCalculator } from './calculators/AthenaCalculator';
+import { BatchCalculator } from './calculators/BatchCalculator';
 import { DocumentDBCalculator } from './calculators/DocumentDBCalculator';
 import { FSxCalculator } from './calculators/FSxCalculator';
 import { GlueCalculator } from './calculators/GlueCalculator';
 import { NeptuneCalculator } from './calculators/NeptuneCalculator';
+import { SageMakerCalculator } from './calculators/SageMakerCalculator';
 import { WAFCalculator } from './calculators/WAFCalculator';
 import { PricingClient } from './PricingClient';
 import {
@@ -152,6 +155,9 @@ export class PricingService implements IPricingService {
       new FSxCalculator(usageAssumptions?.fsx?.storageGB),
       new DocumentDBCalculator(),
       new NeptuneCalculator(),
+      new SageMakerCalculator(usageAssumptions?.sagemaker?.hoursPerMonth),
+      new AppRunnerCalculator(usageAssumptions?.appRunner?.requestsPerMonth),
+      new BatchCalculator(usageAssumptions?.batch?.hoursPerMonth),
     ];
   }
 

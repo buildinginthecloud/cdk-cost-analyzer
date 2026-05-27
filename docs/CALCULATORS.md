@@ -5,7 +5,7 @@ This document provides detailed information about all supported AWS resource typ
 ## Table of Contents
 
 - [Overview](#overview)
-- [Compute Resources](#compute-resources) - EC2, AutoScaling, LaunchTemplate, EKS
+- [Compute Resources](#compute-resources) - EC2, AutoScaling, LaunchTemplate, EKS, Batch
 - [Storage Resources](#storage-resources) - S3, EFS
 - [Database Resources](#database-resources) - RDS, DynamoDB, Aurora Serverless
 - [Networking Resources](#networking-resources) - NAT Gateway, ALB, NLB, VPC Endpoint, Transit Gateway
@@ -15,7 +15,8 @@ This document provides detailed information about all supported AWS resource typ
 - [Analytics Resources](#analytics-resources) - Kinesis Streams, Firehose, Analytics, Glue, Athena
 - [Security Resources](#security-resources) - Secrets Manager, WAF
 - [Serverless Resources](#serverless-resources) - Lambda, API Gateway, Step Functions
-- [Container Resources](#container-resources) - ECS
+- [Container Resources](#container-resources) - ECS, App Runner
+- [Machine Learning Resources](#machine-learning-resources) - SageMaker
 - [Customizing Assumptions](#customizing-assumptions)
 
 ## Overview
@@ -93,6 +94,67 @@ Monthly Cost: $0.0416 × 730 = $30.37
 - Different pricing for Windows, RHEL, SUSE
 - Spot instances not supported
 - Reserved Instance discounts not applied
+
+### AWS::Batch::JobDefinition
+
+**Description:** AWS Batch job definition (configuration template for batch jobs)
+
+**Cost Components:**
+- No additional charge for job definitions
+
+**Example:**
+```
+Monthly Cost: $0.00
+```
+
+**Notes:**
+- Job definitions themselves have no cost
+- Costs are incurred when jobs run on compute environments
+- Returns $0 with 'high' confidence
+
+### AWS::Batch::ComputeEnvironment
+
+**Description:** AWS Batch compute environment for running batch jobs
+
+**Cost Components (Fargate):**
+- vCPU: 1 vCPU × $0.04048/vCPU-hour × hours/month
+- Memory: 2 GB × $0.004445/GB-hour × hours/month
+
+**Cost Components (EC2):**
+- No additional charge (underlying EC2 instance costs apply)
+
+**Default Assumptions:**
+- Compute type: FARGATE (if not specified)
+- 1 vCPU, 2 GB memory per job
+- 100 hours/month active runtime
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  batch:
+    hoursPerMonth: 100
+```
+
+**Detection Logic:**
+- Compute type from `ComputeResources.Type` (EC2, SPOT, FARGATE, FARGATE_SPOT)
+
+**Example (Fargate):**
+```
+vCPU: 1 × $0.04048/hour × 100 = $4.05
+Memory: 2 GB × $0.004445/hour × 100 = $0.89
+Total: $4.94/month
+```
+
+**Example (EC2):**
+```
+Monthly Cost: $0.00 (see EC2 instance costs)
+```
+
+**Notes:**
+- Uses fixed fallback pricing (no AWS Pricing API call)
+- Actual cost depends on job resource requirements and run frequency
+- EC2-based compute environments use underlying EC2 instance pricing
+- SPOT pricing not calculated separately (uses FARGATE pricing for FARGATE_SPOT)
 
 ## Storage Resources
 
@@ -1154,6 +1216,45 @@ Monthly Cost: $0.10 × 730 = $73.00
 
 ## Container Resources
 
+### AWS::AppRunner::Service
+
+**Description:** AWS App Runner for automatically building and deploying containerized web applications
+
+**Cost Components:**
+- vCPU: vCPU count × $0.040/vCPU-hour × 730 hours/month
+- Memory: GB × $0.007/GB-hour × 730 hours/month
+- Requests: per million HTTP requests
+
+**Default Assumptions:**
+- 1 vCPU
+- 2 GB memory
+- 1,000,000 requests per month
+- 730 hours/month (always running)
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  appRunner:
+    requestsPerMonth: 1000000
+```
+
+**Detection Logic:**
+- CPU from `InstanceConfiguration.Cpu` (e.g., '1 vCPU', '0.25 vCPU', '2 vCPU')
+- Memory from `InstanceConfiguration.Memory` (e.g., '2 GB', '0.5 GB')
+
+**Example:**
+```
+vCPU: 1 × $0.040/hour × 730 = $29.20
+Memory: 2 GB × $0.007/hour × 730 = $10.22
+Requests: 1,000,000 × $0.10/million = $0.10
+Total: $39.52/month
+```
+
+**Notes:**
+- Uses fixed fallback pricing (no AWS Pricing API call)
+- Actual cost depends on provisioned capacity and active time
+- Data transfer costs not included
+
 ### AWS::ECS::Service
 
 **Description:** Elastic Container Service for Docker containers
@@ -1572,6 +1673,75 @@ Total: $371.35/month
 - Actual ACU usage varies with workload; estimate uses midpoint
 - Aurora Serverless v1 does not charge for I/O
 - Backup storage costs not included
+- Data transfer costs not included
+
+## Machine Learning Resources
+
+### AWS::SageMaker::Endpoint
+
+**Description:** Amazon SageMaker inference endpoint for deploying ML models
+
+**Cost Components:**
+- Instance hourly rate × hours/month
+
+**Default Assumptions:**
+- Instance type: ml.m5.large (fallback)
+- 730 hours/month (always running)
+- Fallback price: $0.269/hour for ml.m5.large
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  sagemaker:
+    hoursPerMonth: 730
+```
+
+**Example:**
+```
+Instance: ml.m5.large
+Hourly Rate: $0.269
+Monthly Cost: $0.269 × 730 = $196.37
+```
+
+**Notes:**
+- Uses fixed fallback pricing (no AWS Pricing API call)
+- Actual cost depends on endpoint configuration and instance type
+- Multi-model and multi-container endpoints priced separately
+- Data transfer costs not included
+
+### AWS::SageMaker::NotebookInstance
+
+**Description:** Amazon SageMaker Jupyter notebook instance for ML development
+
+**Cost Components:**
+- Instance hourly rate × hours/month
+
+**Default Assumptions:**
+- Instance type: ml.t3.medium (if not specified in template)
+- 730 hours/month (always running)
+- Fallback price: $0.0582/hour for ml.t3.medium
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  sagemaker:
+    hoursPerMonth: 730
+```
+
+**Detection Logic:**
+- Instance type from `InstanceType` property in the CloudFormation template
+
+**Example:**
+```
+Instance: ml.t3.medium
+Hourly Rate: $0.0582
+Monthly Cost: $0.0582 × 730 = $42.49
+```
+
+**Notes:**
+- Queries AWS Pricing API for the instance type; falls back to ml.t3.medium rate if unavailable
+- Confidence is 'high' when API pricing is available, 'medium' when using fallback
+- EBS storage volumes not included
 - Data transfer costs not included
 
 ## Customizing Assumptions
