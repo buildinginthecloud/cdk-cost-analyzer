@@ -38,11 +38,11 @@ describe('AppRunnerCalculator', () => {
 
       const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
 
-      // vcpuCost = 1 * 0.040 * 730 = 29.20
+      // vcpuCost = 1 * 0.064 * 730 = 46.72
       // memoryCost = 2 * 0.007 * 730 = 10.22
       // requestCost = (1e6 / 1e6) * 0.10 = 0.10
-      // total = 39.52
-      expect(result.amount).toBeCloseTo(39.52, 2);
+      // total = 57.04
+      expect(result.amount).toBeCloseTo(57.04, 2);
       expect(result.confidence).toBe('medium');
       expect(result.currency).toBe('USD');
     });
@@ -61,11 +61,11 @@ describe('AppRunnerCalculator', () => {
 
       const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
 
-      // vcpuCost = 0.25 * 0.040 * 730 = 7.30
+      // vcpuCost = 0.25 * 0.064 * 730 = 11.68
       // memoryCost = 2 * 0.007 * 730 = 10.22
       // requestCost = 0.10
-      // total = 17.62
-      expect(result.amount).toBeCloseTo(17.62, 2);
+      // total = 22.00
+      expect(result.amount).toBeCloseTo(22.00, 2);
     });
 
     it('should parse 0.5 GB memory correctly', async () => {
@@ -82,11 +82,11 @@ describe('AppRunnerCalculator', () => {
 
       const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
 
-      // vcpuCost = 1 * 0.040 * 730 = 29.20
+      // vcpuCost = 1 * 0.064 * 730 = 46.72
       // memoryCost = 0.5 * 0.007 * 730 = 2.555
       // requestCost = 0.10
-      // total = 31.855
-      expect(result.amount).toBeCloseTo(31.86, 2);
+      // total = 49.375
+      expect(result.amount).toBeCloseTo(49.38, 2);
     });
 
     it('should apply defaults when InstanceConfiguration is missing', async () => {
@@ -99,8 +99,8 @@ describe('AppRunnerCalculator', () => {
       const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
 
       // defaults: 1 vCPU, 2 GB, 1M requests
-      // total = 39.52
-      expect(result.amount).toBeCloseTo(39.52, 2);
+      // total = 57.04
+      expect(result.amount).toBeCloseTo(57.04, 2);
     });
 
     it('should use custom requests per month from constructor', async () => {
@@ -119,11 +119,11 @@ describe('AppRunnerCalculator', () => {
 
       const result = await customCalc.calculateCost(resource, 'us-east-1', mockPricingClient);
 
-      // vcpuCost = 1 * 0.040 * 730 = 29.20
+      // vcpuCost = 1 * 0.064 * 730 = 46.72
       // memoryCost = 2 * 0.007 * 730 = 10.22
       // requestCost = (10e6 / 1e6) * 0.10 = 1.00
-      // total = 40.42
-      expect(result.amount).toBeCloseTo(40.42, 2);
+      // total = 57.94
+      expect(result.amount).toBeCloseTo(57.94, 2);
     });
 
     it('should not call the pricing API', async () => {

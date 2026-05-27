@@ -3,6 +3,8 @@ import { ResourceCostCalculator, MonthlyCost, PricingClient } from '../types';
 
 const WINDOWS_PRICE_PER_GB = 0.013;
 const LUSTRE_PRICE_PER_GB = 0.145;
+const ONTAP_PRICE_PER_GB = 0.0336;   // FSx for NetApp ONTAP SSD
+const OPENZFS_PRICE_PER_GB = 0.090;  // FSx for OpenZFS SSD
 const DEFAULT_STORAGE_GB = 32;
 
 export class FSxCalculator implements ResourceCostCalculator {
@@ -24,8 +26,22 @@ export class FSxCalculator implements ResourceCostCalculator {
       (resource.properties.StorageCapacity as number) ??
       DEFAULT_STORAGE_GB;
 
-    const pricePerGB =
-      fileSystemType === 'LUSTRE' ? LUSTRE_PRICE_PER_GB : WINDOWS_PRICE_PER_GB;
+    let pricePerGB: number;
+    switch (fileSystemType) {
+      case 'LUSTRE':
+        pricePerGB = LUSTRE_PRICE_PER_GB;
+        break;
+      case 'ONTAP':
+        pricePerGB = ONTAP_PRICE_PER_GB;
+        break;
+      case 'OPENZFS':
+        pricePerGB = OPENZFS_PRICE_PER_GB;
+        break;
+      case 'WINDOWS':
+      default:
+        pricePerGB = WINDOWS_PRICE_PER_GB;
+        break;
+    }
 
     const cost = storageCapacity * pricePerGB;
 

@@ -134,8 +134,47 @@ describe('FSxCalculator', () => {
       expect(result.assumptions).toContain('Storage capacity: 32 GB');
     });
 
-    it('should NOT call mockPricingClient.getPrice', async () => {
+    it('should calculate cost for ONTAP filesystem', async () => {
       const calculator = new FSxCalculator();
+      const resource = {
+        logicalId: 'MyFSx',
+        type: 'AWS::FSx::FileSystem',
+        properties: {
+          FileSystemType: 'ONTAP',
+          StorageCapacity: 1024,
+        },
+      };
+
+      const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
+
+      // 1024 GB * $0.0336/GB = $34.41
+      expect(result.amount).toBeCloseTo(34.41, 2);
+      expect(result.currency).toBe('USD');
+      expect(result.confidence).toBe('medium');
+      expect(mockPricingClient.getPrice).not.toHaveBeenCalled();
+    });
+
+    it('should calculate cost for OPENZFS filesystem', async () => {
+      const calculator = new FSxCalculator();
+      const resource = {
+        logicalId: 'MyFSx',
+        type: 'AWS::FSx::FileSystem',
+        properties: {
+          FileSystemType: 'OPENZFS',
+          StorageCapacity: 512,
+        },
+      };
+
+      const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
+
+      // 512 GB * $0.090/GB = $46.08
+      expect(result.amount).toBeCloseTo(46.08, 2);
+      expect(result.currency).toBe('USD');
+      expect(result.confidence).toBe('medium');
+      expect(mockPricingClient.getPrice).not.toHaveBeenCalled();
+    });
+
+    it('should NOT call mockPricingClient.getPrice', async () => {      const calculator = new FSxCalculator();
       const resource = {
         logicalId: 'MyFSx',
         type: 'AWS::FSx::FileSystem',

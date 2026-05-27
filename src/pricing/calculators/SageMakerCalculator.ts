@@ -51,11 +51,12 @@ export class SageMakerCalculator implements ResourceCostCalculator {
     return {
       amount: cost,
       currency: 'USD',
-      confidence: 'medium',
+      confidence: 'low',
       assumptions: [
         'Instance type assumed ml.m5.large',
         `ml.m5.large: $${this.FALLBACK_ENDPOINT_HOURLY}/hour × ${hours} hours = $${cost.toFixed(2)}/month`,
         'Actual cost depends on endpoint configuration and instance type',
+        'Instance type cannot be read from Endpoint resource - it is defined on the linked EndpointConfig',
       ],
     };
   }

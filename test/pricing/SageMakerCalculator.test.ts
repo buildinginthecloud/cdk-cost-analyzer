@@ -37,7 +37,7 @@ describe('SageMakerCalculator', () => {
 
         // 0.269 * 730 = 196.37
         expect(result.amount).toBeCloseTo(196.37, 2);
-        expect(result.confidence).toBe('medium');
+        expect(result.confidence).toBe('low');
         expect(result.currency).toBe('USD');
       });
 

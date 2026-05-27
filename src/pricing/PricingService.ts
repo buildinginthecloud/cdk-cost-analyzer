@@ -153,10 +153,13 @@ export class PricingService implements IPricingService {
       new GlueCalculator(usageAssumptions?.glue?.dPUHoursPerMonth),
       new AthenaCalculator(usageAssumptions?.athena?.tbScannedPerMonth),
       new FSxCalculator(usageAssumptions?.fsx?.storageGB),
-      new DocumentDBCalculator(),
-      new NeptuneCalculator(),
+      new DocumentDBCalculator(usageAssumptions?.documentdb?.storageGB),
+      new NeptuneCalculator(usageAssumptions?.neptune?.storageGB),
       new SageMakerCalculator(usageAssumptions?.sagemaker?.hoursPerMonth),
-      new AppRunnerCalculator(usageAssumptions?.appRunner?.requestsPerMonth),
+      new AppRunnerCalculator(
+        usageAssumptions?.appRunner?.requestsPerMonth,
+        usageAssumptions?.appRunner?.hoursPerMonth,
+      ),
       new BatchCalculator(usageAssumptions?.batch?.hoursPerMonth),
     ];
   }

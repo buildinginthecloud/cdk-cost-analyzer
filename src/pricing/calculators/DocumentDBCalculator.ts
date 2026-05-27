@@ -9,6 +9,8 @@ const DEFAULT_STORAGE_GB = 100;
 const STORAGE_PRICE_PER_GB = 0.10;
 
 export class DocumentDBCalculator implements ResourceCostCalculator {
+  constructor(private readonly customStorageGB?: number) {}
+
   supports(resourceType: string): boolean {
     return (
       resourceType === 'AWS::DocDB::DBCluster' ||
@@ -46,7 +48,8 @@ export class DocumentDBCalculator implements ResourceCostCalculator {
       const usedFallback = hourlyRate === null;
       const rate = hourlyRate ?? FALLBACK_HOURLY_RATE;
       const instanceCost = rate * MONTHLY_HOURS;
-      const storageCost = DEFAULT_STORAGE_GB * STORAGE_PRICE_PER_GB;
+      const storageGB = this.customStorageGB ?? DEFAULT_STORAGE_GB;
+      const storageCost = storageGB * STORAGE_PRICE_PER_GB;
       const total = instanceCost + storageCost;
 
       return {
@@ -56,7 +59,7 @@ export class DocumentDBCalculator implements ResourceCostCalculator {
         assumptions: [
           `Instance class: ${instanceClass}`,
           `Assumes ${MONTHLY_HOURS} hours per month (24/7 operation)`,
-          `Assumes ${DEFAULT_STORAGE_GB} GB of storage at $${STORAGE_PRICE_PER_GB}/GB-month`,
+          `Assumes ${storageGB} GB of storage at $${STORAGE_PRICE_PER_GB}/GB-month`,
           ...(usedFallback
             ? [`Using fallback hourly rate: $${FALLBACK_HOURLY_RATE} (pricing API returned no data)`]
             : []),
