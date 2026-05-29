@@ -5,17 +5,18 @@ This document provides detailed information about all supported AWS resource typ
 ## Table of Contents
 
 - [Overview](#overview)
-- [Compute Resources](#compute-resources) - EC2, AutoScaling, LaunchTemplate, EKS
+- [Compute Resources](#compute-resources) - EC2, AutoScaling, LaunchTemplate, EKS, Batch
 - [Storage Resources](#storage-resources) - S3, EFS
 - [Database Resources](#database-resources) - RDS, DynamoDB, Aurora Serverless
 - [Networking Resources](#networking-resources) - NAT Gateway, ALB, NLB, VPC Endpoint, Transit Gateway
 - [DNS and Routing Resources](#dns-and-routing-resources) - Route 53
 - [Messaging Resources](#messaging-resources) - SQS, SNS
 - [Content Delivery Resources](#content-delivery-resources) - CloudFront, ElastiCache
-- [Analytics Resources](#analytics-resources) - Kinesis Streams, Firehose, Analytics
-- [Security Resources](#security-resources) - Secrets Manager
+- [Analytics Resources](#analytics-resources) - Kinesis Streams, Firehose, Analytics, Glue, Athena
+- [Security Resources](#security-resources) - Secrets Manager, WAF
 - [Serverless Resources](#serverless-resources) - Lambda, API Gateway, Step Functions
-- [Container Resources](#container-resources) - ECS
+- [Container Resources](#container-resources) - ECS, App Runner
+- [Machine Learning Resources](#machine-learning-resources) - SageMaker
 - [Customizing Assumptions](#customizing-assumptions)
 
 ## Overview
@@ -93,6 +94,70 @@ Monthly Cost: $0.0416 × 730 = $30.37
 - Different pricing for Windows, RHEL, SUSE
 - Spot instances not supported
 - Reserved Instance discounts not applied
+
+### AWS::Batch::JobDefinition
+
+**Description:** AWS Batch job definition (configuration template for batch jobs)
+
+**Cost Components:**
+- No additional charge for job definitions
+
+**Example:**
+```
+Monthly Cost: $0.00
+```
+
+**Notes:**
+- Job definitions themselves have no cost
+- Costs are incurred when jobs run on compute environments
+- Returns $0 with 'high' confidence
+
+### AWS::Batch::ComputeEnvironment
+
+**Description:** AWS Batch compute environment for running batch jobs
+
+**Cost Components (Fargate):**
+- vCPU: vCPUs × $0.04048/vCPU-hour × hours/month
+- Memory: vCPUs × 2 GB × $0.004445/GB-hour × hours/month (2 GB/vCPU ratio)
+
+**Cost Components (EC2):**
+- No additional charge (underlying EC2 instance costs apply)
+
+**Default Assumptions:**
+- Compute type: FARGATE (if not specified)
+- vCPUs: read from `ComputeResources.MaxvCpus`, then `DesiredvCpus`, otherwise default 1 vCPU
+- Memory: 2 GB per vCPU (typical Fargate ratio)
+- 100 hours/month active runtime
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  batch:
+    hoursPerMonth: 100
+```
+
+**Detection Logic:**
+- Compute type from `ComputeResources.Type` (EC2, SPOT, FARGATE, FARGATE_SPOT)
+- vCPUs from `ComputeResources.MaxvCpus` (preferred) or `ComputeResources.DesiredvCpus`
+- `MaxvCpus` represents peak capacity, not average utilization - lower `hoursPerMonth` if jobs only run intermittently
+
+**Example (Fargate):**
+```
+vCPU: 1 × $0.04048/hour × 100 = $4.05
+Memory: 2 GB × $0.004445/hour × 100 = $0.89
+Total: $4.94/month
+```
+
+**Example (EC2):**
+```
+Monthly Cost: $0.00 (see EC2 instance costs)
+```
+
+**Notes:**
+- Uses fixed fallback pricing (no AWS Pricing API call)
+- Actual cost depends on job resource requirements and run frequency
+- EC2-based compute environments use underlying EC2 instance pricing
+- SPOT pricing not calculated separately (uses FARGATE pricing for FARGATE_SPOT)
 
 ## Storage Resources
 
@@ -227,6 +292,52 @@ When `ThroughputMode: provisioned` is detected with a `ProvisionedThroughputInMi
 - Actual storage used may vary from assumptions
 - IA request cost assumes 10% of IA data is accessed monthly
 
+### AWS::FSx::FileSystem
+
+**Description:** Amazon FSx managed file storage (Windows, Lustre, ONTAP, OpenZFS)
+
+**Cost Components:**
+- Storage: GB-month at file system type rate
+
+**Default Assumptions:**
+- File system type: WINDOWS (if not specified in template)
+- 32 GB storage capacity (if not specified in template)
+- SSD storage pricing
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  fsx:
+    storageGB: 32
+```
+
+**Pricing Model:**
+| File System Type | Price (us-east-1) |
+|------------------|-------------------|
+| Windows SSD      | $0.013/GB-month   |
+| Lustre SSD       | $0.145/GB-month   |
+| ONTAP SSD        | $0.0336/GB-month  |
+| OpenZFS SSD      | $0.090/GB-month   |
+
+**Example (Windows):**
+```
+Storage: 32 GB × $0.013/GB = $0.42/month
+```
+
+**Example (Lustre):**
+```
+Storage: 1,200 GB × $0.145/GB = $174.00/month
+```
+
+**Notes:**
+- File system type and storage capacity are read from the CloudFormation template
+- The `usageAssumptions.fsx.storageGB` override applies to **every** `AWS::FSx::FileSystem` resource in the template - it does not differentiate by logical ID or file system type. If your template contains multiple FSx file systems with different sizes, leave the override unset and let each resource use its template `StorageCapacity`.
+- Constructor override takes priority over the template's `StorageCapacity` property
+- Uses fixed pricing (no AWS Pricing API call)
+- HDD storage pricing not currently supported
+- Backup storage costs not included
+- Data transfer costs not included
+
 ## Database Resources
 
 ### AWS::RDS::DBInstance
@@ -321,6 +432,84 @@ Total: $3.75/month
 - DynamoDB Streams not calculated
 - Backup costs not included
 - Storage costs not included in current implementation
+
+### AWS::DocDB::DBCluster
+
+**Description:** Amazon DocumentDB cluster (MongoDB-compatible)
+
+**Notes:**
+- The cluster resource itself has no direct cost
+- All costs are calculated on individual `AWS::DocDB::DBInstance` resources
+
+### AWS::DocDB::DBInstance
+
+**Description:** Amazon DocumentDB managed document database instance
+
+**Cost Components:**
+- Instance hourly rate × 730 hours/month
+- Storage: default 100 GB at $0.10/GB-month
+
+**Default Assumptions:**
+- Instance class: db.r6g.large (if not specified in template)
+- 730 hours/month (always running)
+- 100 GB of storage
+
+**Pricing:**
+- Fallback hourly rate: $0.24/hour for db.r6g.large (used when API data unavailable)
+
+**Example:**
+```
+Instance: db.r6g.large
+Hourly Rate: $0.24
+Instance Cost: $0.24 × 730 = $175.20
+Storage: 100 GB × $0.10/GB = $10.00
+Total: $185.20/month
+```
+
+**Notes:**
+- Instance class read from the `DBInstanceClass` property in the template
+- Confidence is 'high' when API pricing is available, 'medium' when using fallback
+- Backup storage costs not included
+- I/O costs not included
+
+### AWS::Neptune::DBCluster
+
+**Description:** Amazon Neptune graph database cluster
+
+**Notes:**
+- The cluster resource itself has no direct cost
+- All costs are calculated on individual `AWS::Neptune::DBInstance` resources
+
+### AWS::Neptune::DBInstance
+
+**Description:** Amazon Neptune managed graph database instance
+
+**Cost Components:**
+- Instance hourly rate × 730 hours/month
+- Storage: default 100 GB at $0.10/GB-month
+
+**Default Assumptions:**
+- Instance class: db.r5.large (if not specified in template)
+- 730 hours/month (always running)
+- 100 GB of storage
+
+**Pricing:**
+- Fallback hourly rate: $0.348/hour for db.r5.large (used when API data unavailable)
+
+**Example:**
+```
+Instance: db.r5.large
+Hourly Rate: $0.348
+Instance Cost: $0.348 × 730 = $254.04
+Storage: 100 GB × $0.10/GB = $10.00
+Total: $264.04/month
+```
+
+**Notes:**
+- Instance class read from the `DBInstanceClass` property in the template
+- Confidence is 'high' when API pricing is available, 'medium' when using fallback
+- Backup storage costs not included
+- I/O costs not included
 
 ## Networking Resources
 
@@ -859,6 +1048,41 @@ Total: $0.02/month
 
 ## Security Resources
 
+### AWS::WAFv2::WebACL
+
+**Description:** AWS WAF Web Application Firewall for protecting web applications
+
+**Cost Components:**
+- Web ACL: $5.00/month (fixed)
+- Rules: $1.00/month per rule
+- Requests: $0.60 per million requests
+
+**Default Assumptions:**
+- Rules: read from `Rules` array in CloudFormation template (default: 0 rules)
+- 1,000,000 requests per month
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  waf:
+    requestsPerMonth: 1000000
+```
+
+**Example:**
+```
+Web ACL: $5.00/month
+Rules: 3 rules × $1.00 = $3.00/month
+Requests: 1,000,000 × $0.60/million = $0.60/month
+Total: $8.60/month
+```
+
+**Notes:**
+- Rule count is read directly from the CloudFormation template `Rules` property
+- AWS Managed Rules and custom rules are both counted at the same rate
+- Bot Control and Fraud Control rules have additional charges (not calculated)
+- Shield Advanced integration costs not included
+- Uses fixed fallback pricing (WAF Pricing API is complex)
+
 ### AWS::SecretsManager::Secret
 
 **Description:** AWS Secrets Manager for credential and secret storage
@@ -998,6 +1222,49 @@ Monthly Cost: $0.10 × 730 = $73.00
 
 ## Container Resources
 
+### AWS::AppRunner::Service
+
+> **Maintenance mode (2026):** AWS App Runner stops accepting new customers after April 30, 2026 and has been moved to maintenance mode. Existing services keep running. The AWS-recommended replacement is **Amazon ECS Express Mode**. See the [official announcement](https://docs.aws.amazon.com/apprunner/latest/relnotes/relnotes.html).
+
+**Description:** AWS App Runner for automatically building and deploying containerized web applications
+
+**Cost Components:**
+- vCPU: vCPU count × $0.064/vCPU-hour × 730 hours/month
+- Memory: GB × $0.007/GB-hour × 730 hours/month
+- Requests: per million HTTP requests
+
+**Default Assumptions:**
+- 1 vCPU
+- 2 GB memory
+- 1,000,000 requests per month
+- 730 hours/month (always running)
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  appRunner:
+    requestsPerMonth: 1000000
+    hoursPerMonth: 730
+```
+
+**Detection Logic:**
+- CPU from `InstanceConfiguration.Cpu` (e.g., '1 vCPU', '0.25 vCPU', '2 vCPU')
+- Memory from `InstanceConfiguration.Memory` (e.g., '2 GB', '0.5 GB')
+
+**Example:**
+```
+vCPU: 1 × $0.064/hour × 730 = $46.72
+Memory: 2 GB × $0.007/hour × 730 = $10.22
+Requests: 1M × $0.10/million = $0.10
+Total: $46.72 + $10.22 + $0.10 = $57.04/month
+```
+
+**Notes:**
+- Uses fixed pricing (no AWS Pricing API call)
+- Unknown `Cpu`/`Memory` values fall back to numeric parsing and downgrade confidence to `low`
+- Actual cost depends on provisioned capacity and active time
+- Data transfer costs not included
+
 ### AWS::ECS::Service
 
 **Description:** Elastic Container Service for Docker containers
@@ -1128,6 +1395,127 @@ Monthly Cost: 2 × $0.11 × 730 = $160.60
 **Notes:**
 - Running application storage and durable application backup costs not included
 - Orchestration overhead KPU not included
+
+### AWS::Glue::Job
+
+**Description:** AWS Glue ETL job for data transformation and loading
+
+**Cost Components:**
+- DPU-hours: $0.44 per DPU-hour
+- Total: `DPUs × hoursPerMonth × $0.44`
+
+**DPU Detection (in priority order):**
+1. `WorkerType` + `NumberOfWorkers` from template:
+   - `G.025X` = 0.25 DPU/worker (streaming)
+   - `G.1X` = 1 DPU/worker
+   - `G.2X` = 2 DPU/worker
+   - `G.4X` = 4 DPU/worker
+   - `G.8X` = 8 DPU/worker
+   - `Standard` = 4 DPU/worker
+   - `Z.2X` = 2 DPU/worker
+2. `MaxCapacity` from template (legacy: Python shell or legacy Spark jobs)
+3. Default: 2 DPU
+
+**Default Assumptions:**
+- 50 hours/month runtime
+- DPUs derived from template (see above)
+- Data Catalog: first 1M objects and requests are free (not included)
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  glue:
+    hoursPerMonth: 50
+```
+
+**Example (G.2X × 10 workers):**
+```
+DPUs: 10 × G.2X (2 DPU/worker) = 20 DPU
+Cost: 20 DPU × 50h × $0.44 = $440.00/month
+```
+
+**Notes:**
+- 1 DPU = 4 vCPUs and 16 GB of memory
+- ETL jobs and crawlers use the same $0.44/DPU-hour rate
+- Development endpoint costs not included
+- Job bookmarks and triggers have no direct cost
+- Uses fixed pricing (no AWS Pricing API call)
+
+### AWS::Glue::Crawler
+
+**Description:** AWS Glue crawler for discovering and cataloging data
+
+**Cost Components:**
+- DPU-hours: $0.44 per DPU-hour
+
+**Default Assumptions:**
+- 2 DPU (crawlers do not expose DPU configuration in CloudFormation)
+- 50 hours/month runtime
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  glue:
+    hoursPerMonth: 50
+```
+
+**Example:**
+```
+Cost: 2 DPU × 50h × $0.44 = $44.00/month
+```
+
+**Notes:**
+- Shares the same `hoursPerMonth` configuration as Glue Jobs
+- Crawlers and jobs use the same pricing rate
+- Data Catalog storage costs covered by free tier (first 1M objects free)
+- Uses fixed pricing (no AWS Pricing API call)
+
+### AWS::Athena::WorkGroup
+
+**Description:** Amazon Athena workgroup for running SQL queries on data in S3
+
+**Cost Components:**
+- Data scanned: $5.00 per TB of data scanned
+
+**Default Assumptions:**
+- 1 TB of data scanned per month
+- DDL queries are free (not included)
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  athena:
+    tbScannedPerMonth: 1
+```
+
+**Example:**
+```
+Data Scanned: 1 TB × $5.00/TB = $5.00/month
+```
+
+**Notes:**
+- DDL statements (CREATE TABLE, DROP TABLE, etc.) are free
+- Using columnar formats (Parquet, ORC) and compression can significantly reduce scanned data
+- Query results cached in S3 incur S3 storage costs (calculated separately)
+- Workgroup configuration (output location, encryption) does not affect pricing
+- Uses fixed fallback pricing (Athena Pricing API is complex)
+
+### AWS::Athena::NamedQuery
+
+**Description:** Amazon Athena named query (saved SQL query)
+
+**Cost Components:**
+- No direct cost (queries are free to save; cost is incurred at execution time)
+
+**Example:**
+```
+Monthly Cost: $0.00
+```
+
+**Notes:**
+- Named queries themselves have no cost
+- Cost is incurred when the query is executed (see AWS::Athena::WorkGroup)
+- Returns $0 with `high` confidence
 
 ## DNS and Routing Resources
 
@@ -1310,6 +1698,75 @@ Total: $371.35/month
 - Actual ACU usage varies with workload; estimate uses midpoint
 - Aurora Serverless v1 does not charge for I/O
 - Backup storage costs not included
+- Data transfer costs not included
+
+## Machine Learning Resources
+
+### AWS::SageMaker::Endpoint
+
+**Description:** Amazon SageMaker inference endpoint for deploying ML models
+
+**Cost Components:**
+- Instance hourly rate × hours/month
+
+**Default Assumptions:**
+- Instance type: ml.m5.large (fallback)
+- 730 hours/month (always running)
+- Fallback price: $0.269/hour for ml.m5.large
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  sagemaker:
+    hoursPerMonth: 730
+```
+
+**Example:**
+```
+Instance: ml.m5.large
+Hourly Rate: $0.269
+Monthly Cost: $0.269 × 730 = $196.37
+```
+
+**Notes:**
+- Uses fixed fallback pricing (no AWS Pricing API call)
+- Actual cost depends on endpoint configuration and instance type
+- Multi-model and multi-container endpoints priced separately
+- Data transfer costs not included
+
+### AWS::SageMaker::NotebookInstance
+
+**Description:** Amazon SageMaker Jupyter notebook instance for ML development
+
+**Cost Components:**
+- Instance hourly rate × hours/month
+
+**Default Assumptions:**
+- Instance type: ml.t3.medium (if not specified in template)
+- 730 hours/month (always running)
+- Fallback price: $0.0582/hour for ml.t3.medium
+
+**Configuration:**
+```yaml
+usageAssumptions:
+  sagemaker:
+    hoursPerMonth: 730
+```
+
+**Detection Logic:**
+- Instance type from `InstanceType` property in the CloudFormation template
+
+**Example:**
+```
+Instance: ml.t3.medium
+Hourly Rate: $0.0582
+Monthly Cost: $0.0582 × 730 = $42.49
+```
+
+**Notes:**
+- Queries AWS Pricing API for the instance type; falls back to ml.t3.medium rate if unavailable
+- Confidence is 'high' when API pricing is available, 'medium' when using fallback
+- EBS storage volumes not included
 - Data transfer costs not included
 
 ## Customizing Assumptions

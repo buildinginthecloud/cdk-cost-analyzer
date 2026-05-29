@@ -188,6 +188,80 @@ export interface UsageAssumptionsConfig {
         /** Number of Kinesis Processing Units for Analytics (default: 2) */
         kpus?: number;
     };
+    /**
+     * WAF (Web Application Firewall) usage assumptions.
+     * @see https://aws.amazon.com/waf/pricing/
+     */
+    waf?: {
+        /** Monthly request count (default: 1,000,000) */
+        requestsPerMonth?: number;
+    };
+    /**
+     * AWS Glue usage assumptions for ETL jobs and crawlers.
+     * @see https://aws.amazon.com/glue/pricing/
+     */
+    glue?: {
+        /** Hours per month the job/crawler runs; DPUs are read from the template (default: 50) */
+        hoursPerMonth?: number;
+    };
+    /**
+     * Amazon Athena usage assumptions.
+     * @see https://aws.amazon.com/athena/pricing/
+     */
+    athena?: {
+        /** TB of data scanned per month (default: 1) */
+        tbScannedPerMonth?: number;
+    };
+    /**
+     * Amazon FSx usage assumptions for file storage cost estimation.
+     * @see https://aws.amazon.com/fsx/pricing/
+     */
+    fsx?: {
+        /** Storage capacity override in GB (default: read from resource or 32 GB) */
+        storageGB?: number;
+    };
+    /**
+     * Amazon DocumentDB usage assumptions.
+     * @see https://aws.amazon.com/documentdb/pricing/
+     */
+    documentdb?: {
+        /** Storage size in GB (default: 100 GB) */
+        storageGB?: number;
+    };
+    /**
+     * Amazon Neptune usage assumptions.
+     * @see https://aws.amazon.com/neptune/pricing/
+     */
+    neptune?: {
+        /** Storage size in GB (default: 100 GB) */
+        storageGB?: number;
+    };
+    /**
+     * Amazon SageMaker usage assumptions.
+     * @see https://aws.amazon.com/sagemaker/pricing/
+     */
+    sagemaker?: {
+        /** Hours per month the instance runs (default: 730) */
+        hoursPerMonth?: number;
+    };
+    /**
+     * AWS App Runner usage assumptions.
+     * @see https://aws.amazon.com/apprunner/pricing/
+     */
+    appRunner?: {
+        /** Monthly request count (default: 1,000,000) */
+        requestsPerMonth?: number;
+        /** Hours per month the service runs (default: 730) */
+        hoursPerMonth?: number;
+    };
+    /**
+     * AWS Batch usage assumptions.
+     * @see https://aws.amazon.com/batch/pricing/
+     */
+    batch?: {
+        /** Hours per month the compute environment runs (default: 100) */
+        hoursPerMonth?: number;
+    };
 }
 export interface SynthesisConfig {
     appPath?: string;
