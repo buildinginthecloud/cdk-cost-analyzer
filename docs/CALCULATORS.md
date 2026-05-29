@@ -294,7 +294,7 @@ When `ThroughputMode: provisioned` is detected with a `ProvisionedThroughputInMi
 
 ### AWS::FSx::FileSystem
 
-**Description:** Amazon FSx managed file storage (Windows File Server and Lustre)
+**Description:** Amazon FSx managed file storage (Windows, Lustre, ONTAP, OpenZFS)
 
 **Cost Components:**
 - Storage: GB-month at file system type rate
@@ -316,6 +316,8 @@ usageAssumptions:
 |------------------|-------------------|
 | Windows SSD      | $0.013/GB-month   |
 | Lustre SSD       | $0.145/GB-month   |
+| ONTAP SSD        | $0.0336/GB-month  |
+| OpenZFS SSD      | $0.090/GB-month   |
 
 **Example (Windows):**
 ```
@@ -329,8 +331,9 @@ Storage: 1,200 GB × $0.145/GB = $174.00/month
 
 **Notes:**
 - File system type and storage capacity are read from the CloudFormation template
-- Constructor `storageGB` overrides the template's `StorageCapacity` property
-- Uses fixed fallback pricing (no AWS Pricing API call)
+- The `usageAssumptions.fsx.storageGB` override applies to **every** `AWS::FSx::FileSystem` resource in the template - it does not differentiate by logical ID or file system type. If your template contains multiple FSx file systems with different sizes, leave the override unset and let each resource use its template `StorageCapacity`.
+- Constructor override takes priority over the template's `StorageCapacity` property
+- Uses fixed pricing (no AWS Pricing API call)
 - HDD storage pricing not currently supported
 - Backup storage costs not included
 - Data transfer costs not included

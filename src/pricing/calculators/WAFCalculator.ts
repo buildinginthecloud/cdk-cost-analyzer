@@ -57,7 +57,10 @@ export class WAFCalculator implements ResourceCostCalculator {
     _region: string,
     _pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
-    const rules = (resource.properties.Rules as unknown[])?.length ?? 0;
+    const rules = Array.isArray(resource.properties.Rules)
+      ? resource.properties.Rules.length
+      : 0;
+    const scope = (resource.properties.Scope as string | undefined) ?? 'REGIONAL';
     const requests = this.customRequestsPerMonth ?? this.DEFAULT_REQUESTS_PER_MONTH;
 
     const webACLCost = this.WEB_ACL_COST;
@@ -66,6 +69,7 @@ export class WAFCalculator implements ResourceCostCalculator {
     const totalCost = webACLCost + rulesCost + requestCost;
 
     const assumptions = [
+      `Scope: ${scope} (per-ACL/rule/request pricing is identical for REGIONAL and CLOUDFRONT)`,
       `Web ACL fixed cost: $${webACLCost.toFixed(2)}/month`,
       `Rules: ${rules} × $${this.RULE_COST_PER_RULE.toFixed(2)}/rule = $${rulesCost.toFixed(2)}/month`,
       `Requests: ${requests.toLocaleString()} × $${this.REQUEST_COST_PER_MILLION}/million = $${requestCost.toFixed(2)}/month`,

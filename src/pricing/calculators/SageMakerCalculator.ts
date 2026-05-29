@@ -21,19 +21,10 @@ export class SageMakerCalculator implements ResourceCostCalculator {
     pricingClient: PricingClient,
   ): Promise<MonthlyCost> {
     try {
-      switch (resource.type) {
-        case 'AWS::SageMaker::Endpoint':
-          return this.calculateEndpointCost(resource);
-        case 'AWS::SageMaker::NotebookInstance':
-          return await this.calculateNotebookCost(resource, region, pricingClient);
-        default:
-          return {
-            amount: 0,
-            currency: 'USD',
-            confidence: 'unknown',
-            assumptions: [`Unsupported SageMaker resource type: ${resource.type}`],
-          };
+      if (resource.type === 'AWS::SageMaker::Endpoint') {
+        return this.calculateEndpointCost(resource);
       }
+      return await this.calculateNotebookCost(resource, region, pricingClient);
     } catch (error) {
       return {
         amount: 0,
