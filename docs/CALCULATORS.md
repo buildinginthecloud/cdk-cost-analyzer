@@ -1402,7 +1402,7 @@ Monthly Cost: 2 × $0.11 × 730 = $160.60
 ```yaml
 usageAssumptions:
   glue:
-    dPUHoursPerMonth: 100
+    dpuHoursPerMonth: 100
 ```
 
 **Example:**
@@ -1432,7 +1432,7 @@ DPU-hours: 100 × $0.44/DPU-hour = $44.00/month
 ```yaml
 usageAssumptions:
   glue:
-    dPUHoursPerMonth: 100
+    dpuHoursPerMonth: 100
 ```
 
 **Example:**
@@ -1441,7 +1441,7 @@ DPU-hours: 100 × $0.44/DPU-hour = $44.00/month
 ```
 
 **Notes:**
-- Shares the same `dPUHoursPerMonth` configuration as Glue Jobs
+- Shares the same `dpuHoursPerMonth` configuration as Glue Jobs
 - Crawlers and jobs use the same pricing rate
 - Data Catalog storage costs covered by free tier (first 1M objects free)
 - Uses fixed fallback pricing (Glue Pricing API is complex)

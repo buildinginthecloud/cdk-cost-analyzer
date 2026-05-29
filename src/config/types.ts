@@ -206,7 +206,7 @@ export interface UsageAssumptionsConfig {
    */
   glue?: {
     /** DPU-hours per month for ETL jobs or crawlers (default: 100) */
-    dPUHoursPerMonth?: number;
+    dpuHoursPerMonth?: number;
   };
   /**
    * Amazon Athena usage assumptions.

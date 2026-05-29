@@ -86,7 +86,7 @@ describe('AppRunnerCalculator', () => {
       // memoryCost = 0.5 * 0.007 * 730 = 2.555
       // requestCost = 0.10
       // total = 49.375
-      expect(result.amount).toBeCloseTo(49.38, 2);
+      expect(result.amount).toBeCloseTo(49.375, 3);
     });
 
     it('should apply defaults when InstanceConfiguration is missing', async () => {

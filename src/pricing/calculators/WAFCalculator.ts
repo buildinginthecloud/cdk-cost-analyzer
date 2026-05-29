@@ -48,8 +48,8 @@ export class WAFCalculator implements ResourceCostCalculator {
    * - 1,000,000 requests per month
    *
    * @param resource - CloudFormation resource (reads Rules array length)
-   * @param _region - AWS region (not used for WAF fallback pricing)
-   * @param _pricingClient - Pricing client (not called for WAF fallback pricing)
+   * @param _region - AWS region (not used; WAF pricing is uniform)
+   * @param _pricingClient - Pricing client (not called; fixed pricing model)
    * @returns Monthly cost estimate with assumptions and confidence level
    */
   async calculateCost(
@@ -69,7 +69,7 @@ export class WAFCalculator implements ResourceCostCalculator {
       `Web ACL fixed cost: $${webACLCost.toFixed(2)}/month`,
       `Rules: ${rules} × $${this.RULE_COST_PER_RULE.toFixed(2)}/rule = $${rulesCost.toFixed(2)}/month`,
       `Requests: ${requests.toLocaleString()} × $${this.REQUEST_COST_PER_MILLION}/million = $${requestCost.toFixed(2)}/month`,
-      'Using fixed fallback pricing (WAF Pricing API is complex)',
+      'Using fixed pricing model (WAF pricing is uniform across regions)',
     ];
 
     if (this.customRequestsPerMonth !== undefined) {

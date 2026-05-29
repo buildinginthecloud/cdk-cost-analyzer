@@ -137,6 +137,7 @@ const project = new typescript.TypeScriptProject({
     'examples/*/custom.out/',
     'examples/*/*.out/',
     'test-cdk-project/',
+    '.agents/', // Agent task state, not for version control
     'CHANGELOG.md', // Generated locally, not tracked in git - see GitHub releases for changelog
   ],
 

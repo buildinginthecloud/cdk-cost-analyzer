@@ -150,7 +150,7 @@ export class PricingService implements IPricingService {
       new CloudWatchAlarmCalculator(),
       new CloudWatchDashboardCalculator(),
       new WAFCalculator(usageAssumptions?.waf?.requestsPerMonth),
-      new GlueCalculator(usageAssumptions?.glue?.dPUHoursPerMonth),
+      new GlueCalculator(usageAssumptions?.glue?.dpuHoursPerMonth),
       new AthenaCalculator(usageAssumptions?.athena?.tbScannedPerMonth),
       new FSxCalculator(usageAssumptions?.fsx?.storageGB),
       new DocumentDBCalculator(usageAssumptions?.documentdb?.storageGB),

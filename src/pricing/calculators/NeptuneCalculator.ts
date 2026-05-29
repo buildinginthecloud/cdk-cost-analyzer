@@ -42,26 +42,41 @@ export class NeptuneCalculator implements ResourceCostCalculator {
       const hourlyRate = await pricingClient.getPrice({
         serviceCode: 'AmazonNeptune',
         region: normalizeRegion(region),
-        filters: [{ field: 'instanceType', value: instanceClass }],
+        filters: [
+          { field: 'productFamily', value: 'Database Instance' },
+          { field: 'instanceType', value: instanceClass },
+        ],
       });
 
       const usedFallback = hourlyRate === null;
+      const fallbackMatchesClass = instanceClass === DEFAULT_INSTANCE_CLASS;
       const rate = hourlyRate ?? FALLBACK_HOURLY_RATE;
       const instanceCost = rate * MONTHLY_HOURS;
       const storageGB = this.customStorageGB ?? DEFAULT_STORAGE_GB;
       const storageCost = storageGB * STORAGE_PRICE_PER_GB;
       const total = instanceCost + storageCost;
 
+      // When the API returns null and the requested instance class differs from
+      // the fallback's baseline class, the estimate is unreliable — mark it low.
+      const confidence: MonthlyCost['confidence'] = usedFallback
+        ? (fallbackMatchesClass ? 'medium' : 'low')
+        : 'high';
+
       return {
         amount: total,
         currency: 'USD',
-        confidence: usedFallback ? 'medium' : 'high',
+        confidence,
         assumptions: [
           `Instance class: ${instanceClass}`,
           `Assumes ${MONTHLY_HOURS} hours per month (24/7 operation)`,
           `Assumes ${storageGB} GB of storage at $${STORAGE_PRICE_PER_GB}/GB-month`,
           ...(usedFallback
-            ? [`Using fallback hourly rate: $${FALLBACK_HOURLY_RATE} (pricing API returned no data)`]
+            ? [
+              `Using fallback hourly rate: $${FALLBACK_HOURLY_RATE} (pricing API returned no data)`,
+              ...(fallbackMatchesClass
+                ? []
+                : [`Fallback rate is calibrated for ${DEFAULT_INSTANCE_CLASS} - actual ${instanceClass} cost will differ`]),
+            ]
             : []),
         ],
       };
