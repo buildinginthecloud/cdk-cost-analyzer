@@ -59,7 +59,7 @@
     "jest": "^30.4.2",
     "jest-junit": "^17",
     "lint-staged": "^15.0.0",
-    "projen": "^0.99.65",
+    "projen": "^0.99.70",
     "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
