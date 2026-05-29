@@ -10,4 +10,5 @@ export declare class BatchCalculator implements ResourceCostCalculator {
     calculateCost(resource: ResourceWithId, _region: string, _pricingClient: PricingClient): Promise<MonthlyCost>;
     private calculateJobDefinitionCost;
     private calculateComputeEnvironmentCost;
+    private resolveVcpus;
 }

@@ -522,59 +522,109 @@ Environment variables for GitHub integration:
 
 ## Supported Resource Types
 
-### Core Resources (Phase 1 & 2)
+See [docs/CALCULATORS.md](docs/CALCULATORS.md) for the full per-resource reference, including pricing model, default assumptions, and configuration options.
 
-- **AWS::EC2::Instance** - EC2 instances with on-demand pricing
-- **AWS::S3::Bucket** - S3 buckets with storage and request costs
-- **AWS::Lambda::Function** - Lambda functions with invocation and duration costs
-- **AWS::RDS::DBInstance** - RDS database instances
-- **AWS::DynamoDB::Table** - DynamoDB tables with provisioned or on-demand billing
-- **AWS::ECS::Service** - ECS services with Fargate or EC2 launch types
-- **AWS::ApiGateway::RestApi** - API Gateway REST APIs
-- **AWS::ApiGatewayV2::Api** - API Gateway HTTP and WebSocket APIs
+### Compute
 
-### Networking Resources (Phase 3 - Current)
+- **AWS::EC2::Instance** - On-demand pricing, configurable hours per month
+- **AWS::AutoScaling::AutoScalingGroup** - Sums underlying EC2 cost
+- **AWS::EC2::LaunchTemplate** - Linked to ASG cost
+- **AWS::EKS::Cluster** - Control plane + node group cost
+- **AWS::Lambda::Function** - Invocation and duration costs
+- **AWS::Batch::JobDefinition** / **AWS::Batch::ComputeEnvironment** - Fargate vCPU/memory (EC2-backed delegates to EC2 pricing)
+- **AWS::AppRunner::Service** - vCPU, memory, request costs *(AWS App Runner is in maintenance mode as of 2026; consider migrating to ECS Express Mode)*
 
-- **AWS::EC2::NatGateway** - NAT Gateways with hourly and data processing costs
-- **AWS::ElasticLoadBalancingV2::LoadBalancer** - Application and Network Load Balancers with LCU costs
-- **AWS::EC2::VPCEndpoint** - VPC Endpoints (interface and gateway types)
+### Containers
 
-### Content Delivery & Caching (Phase 3 - Current)
+- **AWS::ECS::Service** - Fargate or EC2 launch types
+- **AWS::ECS::TaskDefinition** - Fargate task sizing
 
-- **AWS::CloudFront::Distribution** - CloudFront distributions with data transfer and request costs
+### Storage
+
+- **AWS::S3::Bucket** - Storage and request costs
+- **AWS::EFS::FileSystem** - Storage with Infrequent Access tier
+- **AWS::FSx::FileSystem** - Windows, Lustre, ONTAP, OpenZFS
+
+### Database
+
+- **AWS::RDS::DBInstance** - Instance + storage
+- **AWS::RDS::DBCluster** (Aurora Serverless v2) - ACU-based pricing
+- **AWS::DynamoDB::Table** - Provisioned or on-demand billing
+- **AWS::DocDB::DBCluster** / **AWS::DocDB::DBInstance** - DocumentDB clusters and instances
+- **AWS::Neptune::DBCluster** / **AWS::Neptune::DBInstance** - Neptune graph database
+
+### Networking
+
+- **AWS::EC2::NatGateway** - Hourly + data processing
+- **AWS::ElasticLoadBalancingV2::LoadBalancer** - ALB and NLB with LCU costs
+- **AWS::EC2::VPCEndpoint** - Interface and gateway endpoints
+- **AWS::EC2::TransitGateway** - Attachments + data processed
+- **AWS::Route53::HostedZone** - Hosted zone + query costs
+
+### Content Delivery & Caching
+
+- **AWS::CloudFront::Distribution** - Data transfer + requests
+- **AWS::ElastiCache::CacheCluster** / **AWS::ElastiCache::ReplicationGroup** - Node hours
+
+### API Gateway & Serverless
+
+- **AWS::ApiGateway::RestApi** - REST API requests
+- **AWS::ApiGatewayV2::Api** - HTTP and WebSocket APIs
+- **AWS::StepFunctions::StateMachine** - Standard and Express workflows
+
+### Messaging & Streaming
+
+- **AWS::SNS::Topic** - Publish + delivery costs by protocol
+- **AWS::SQS::Queue** - Standard and FIFO request costs
+- **AWS::Kinesis::Stream** / **AWS::KinesisFirehose::DeliveryStream** / **AWS::KinesisAnalyticsV2::Application** - Shards, ingestion, KPUs
+
+### Analytics
+
+- **AWS::Glue::Job** / **AWS::Glue::Crawler** - DPU-hour pricing, DPUs derived from WorkerType/NumberOfWorkers/MaxCapacity
+- **AWS::Athena::WorkGroup** - Per-TB scanned pricing
+- **AWS::Athena::NamedQuery** - Zero cost (charged at query execution time)
+
+### Security
+
+- **AWS::SecretsManager::Secret** - Secret storage + API call costs
+- **AWS::WAFv2::WebACL** - Fixed ACL + per-rule + request costs
+
+### Machine Learning
+
+- **AWS::SageMaker::Endpoint** - Instance-hour estimate (low confidence; instance type is on linked EndpointConfig)
+- **AWS::SageMaker::NotebookInstance** - Instance-hour pricing
+
+### Monitoring
+
+- **AWS::Logs::LogGroup** - Log ingestion
+- **AWS::CloudWatch::Alarm** - Per-alarm cost
+- **AWS::CloudWatch::Dashboard** - Per-dashboard cost
 
 ### Coming Soon
 
-- ElastiCache clusters
-- EKS clusters
-- And more...
+- **AWS::ECS::Service** with Express Mode (AppRunner replacement)
+- And more — track planned support via [open issues](https://github.com/buildinginthecloud/cdk-cost-analyzer/issues)
 
 ## Cost Calculation Assumptions
 
-For resources with usage-based pricing, the following default assumptions are used:
+For resources with usage-based pricing, default assumptions are applied. Each resource section in [docs/CALCULATORS.md](docs/CALCULATORS.md) lists the defaults and how to override them via the `usageAssumptions` block in your configuration file.
 
-### Phase 1 Resources
-- **S3 Buckets**: 100 GB standard storage, 10,000 GET requests/month
-- **Lambda Functions**: 1 million invocations/month, average 1-second duration
-- **RDS Instances**: 100 GB storage, single-AZ deployment
-- **EC2 Instances**: 730 hours/month (full month), on-demand pricing
+A small sample:
 
-### Phase 2 Resources
-- **DynamoDB Tables (Provisioned)**: 5 read capacity units, 5 write capacity units
-- **DynamoDB Tables (On-Demand)**: 10M read requests, 1M write requests per month (configurable)
-- **ECS Services (Fargate)**: 0.25 vCPU, 0.5 GB memory per task
-- **API Gateway (REST)**: 1M requests per month
-- **API Gateway (HTTP)**: 1M requests per month
-- **API Gateway (WebSocket)**: 1M messages, 100K connection minutes per month
+- **EC2 Instance**: 730 hours/month, on-demand Linux pricing
+- **Lambda**: 1M invocations/month, 1-second average duration
+- **S3 Bucket**: 100 GB standard storage, 10,000 GET requests/month
+- **NAT Gateway**: 500 GB data processed/month
+- **CloudFront**: 100 GB data transfer, 1M requests/month
+- **Glue Job/Crawler**: DPUs from template, 50 hours/month runtime
+- **Batch (Fargate)**: 1 vCPU peak (or `MaxvCpus` from template), 100 hours/month
+- **App Runner**: 1 vCPU, 2 GB memory, 1M requests/month, 730 hours/month
+- **Athena WorkGroup**: 1 TB scanned/month
+- **WAF Web ACL**: 1M requests/month
+- **FSx**: storage from template (default 32 GB)
+- **DocumentDB / Neptune Instance**: 730 hours/month, 100 GB storage
 
-### Phase 3 Resources
-- **NAT Gateway**: 500 GB data processed per month
-- **Application Load Balancer**: 50 new connections/sec, 5,000 active connections/min, 1,000 GB processed
-- **Network Load Balancer**: 100 new connections/sec, 10,000 active connections/min, 1,000 GB processed
-- **VPC Endpoint (Interface)**: 100 GB data processed per month
-- **CloudFront Distribution**: 100 GB data transfer out, 1M HTTP/HTTPS requests per month
-
-These assumptions are documented in cost reports and can be customized via configuration file or by extending the calculator classes.
+Override any of these in your config file (see [Configuration](#configuration)) or set them per-resource via `cdk-cost-analyzer.yml`.
 
 ## Report Formats
 

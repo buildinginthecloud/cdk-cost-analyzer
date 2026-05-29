@@ -49,8 +49,8 @@ describe('Fixed-rate new calculators: property tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.nat({ max: 1_000 }),
-          async (dpuHours) => {
-            const calc = new GlueCalculator(dpuHours);
+          async (hoursPerMonth) => {
+            const calc = new GlueCalculator(hoursPerMonth);
             const resource = {
               logicalId: 'TestGlueJob',
               type: 'AWS::Glue::Job',
@@ -71,8 +71,8 @@ describe('Fixed-rate new calculators: property tests', () => {
       await fc.assert(
         fc.asyncProperty(
           fc.nat({ max: 1_000 }),
-          async (dpuHours) => {
-            const calc = new GlueCalculator(dpuHours);
+          async (hoursPerMonth) => {
+            const calc = new GlueCalculator(hoursPerMonth);
             const resource = {
               logicalId: 'TestGlueCrawler',
               type: 'AWS::Glue::Crawler',

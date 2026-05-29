@@ -201,8 +201,8 @@ export interface UsageAssumptionsConfig {
      * @see https://aws.amazon.com/glue/pricing/
      */
     glue?: {
-        /** DPU-hours per month for ETL jobs or crawlers (default: 100) */
-        dpuHoursPerMonth?: number;
+        /** Hours per month the job/crawler runs; DPUs are read from the template (default: 50) */
+        hoursPerMonth?: number;
     };
     /**
      * Amazon Athena usage assumptions.

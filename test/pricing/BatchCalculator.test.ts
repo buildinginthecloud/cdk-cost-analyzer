@@ -43,7 +43,7 @@ describe('BatchCalculator', () => {
     });
 
     describe('AWS::Batch::ComputeEnvironment', () => {
-      it('should calculate Fargate cost with default hours (100)', async () => {
+      it('should calculate Fargate cost with default hours and default 1 vCPU', async () => {
         const resource = {
           logicalId: 'MyComputeEnv',
           type: 'AWS::Batch::ComputeEnvironment',
@@ -72,6 +72,42 @@ describe('BatchCalculator', () => {
 
         expect(result.amount).toBeCloseTo(4.94, 2);
         expect(result.confidence).toBe('medium');
+      });
+
+      it('should use MaxvCpus from template as peak capacity', async () => {
+        const resource = {
+          logicalId: 'MyComputeEnv',
+          type: 'AWS::Batch::ComputeEnvironment',
+          properties: {
+            ComputeResources: { Type: 'FARGATE', MaxvCpus: 16 },
+          },
+        };
+
+        const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
+
+        // vcpuCost = 16 * 0.04048 * 100 = 64.768
+        // memoryCost = 32 * 0.004445 * 100 = 14.224
+        // total = 78.992
+        expect(result.amount).toBeCloseTo(78.99, 2);
+        expect(result.assumptions.some(a => a.includes('MaxvCpus from template'))).toBe(true);
+      });
+
+      it('should fall back to DesiredvCpus when MaxvCpus is absent', async () => {
+        const resource = {
+          logicalId: 'MyComputeEnv',
+          type: 'AWS::Batch::ComputeEnvironment',
+          properties: {
+            ComputeResources: { Type: 'FARGATE', DesiredvCpus: 4 },
+          },
+        };
+
+        const result = await calculator.calculateCost(resource, 'us-east-1', mockPricingClient);
+
+        // vcpuCost = 4 * 0.04048 * 100 = 16.192
+        // memoryCost = 8 * 0.004445 * 100 = 3.556
+        // total = 19.748
+        expect(result.amount).toBeCloseTo(19.75, 2);
+        expect(result.assumptions.some(a => a.includes('DesiredvCpus from template'))).toBe(true);
       });
 
       it('should return $0 with high confidence for EC2 compute environments', async () => {

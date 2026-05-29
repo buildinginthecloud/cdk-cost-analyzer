@@ -1,5 +1,14 @@
 import { ResourceWithId } from '../../diff/types';
 import { ResourceCostCalculator, MonthlyCost, PricingClient } from '../types';
+/**
+ * Calculator for AWS App Runner service costs.
+ *
+ * NOTE: AWS App Runner is in maintenance mode as of 2026. No new customers
+ * are accepted after April 30, 2026. Existing services continue to operate.
+ * The AWS-recommended replacement is Amazon ECS Express Mode.
+ *
+ * @see https://aws.amazon.com/apprunner/pricing/
+ */
 export declare class AppRunnerCalculator implements ResourceCostCalculator {
     private readonly customRequestsPerMonth?;
     private readonly customHoursPerMonth?;

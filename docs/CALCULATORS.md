@@ -117,15 +117,16 @@ Monthly Cost: $0.00
 **Description:** AWS Batch compute environment for running batch jobs
 
 **Cost Components (Fargate):**
-- vCPU: 1 vCPU × $0.04048/vCPU-hour × hours/month
-- Memory: 2 GB × $0.004445/GB-hour × hours/month
+- vCPU: vCPUs × $0.04048/vCPU-hour × hours/month
+- Memory: vCPUs × 2 GB × $0.004445/GB-hour × hours/month (2 GB/vCPU ratio)
 
 **Cost Components (EC2):**
 - No additional charge (underlying EC2 instance costs apply)
 
 **Default Assumptions:**
 - Compute type: FARGATE (if not specified)
-- 1 vCPU, 2 GB memory per job
+- vCPUs: read from `ComputeResources.MaxvCpus`, then `DesiredvCpus`, otherwise default 1 vCPU
+- Memory: 2 GB per vCPU (typical Fargate ratio)
 - 100 hours/month active runtime
 
 **Configuration:**
@@ -137,6 +138,8 @@ usageAssumptions:
 
 **Detection Logic:**
 - Compute type from `ComputeResources.Type` (EC2, SPOT, FARGATE, FARGATE_SPOT)
+- vCPUs from `ComputeResources.MaxvCpus` (preferred) or `ComputeResources.DesiredvCpus`
+- `MaxvCpus` represents peak capacity, not average utilization - lower `hoursPerMonth` if jobs only run intermittently
 
 **Example (Fargate):**
 ```
@@ -1218,6 +1221,8 @@ Monthly Cost: $0.10 × 730 = $73.00
 
 ### AWS::AppRunner::Service
 
+> **Maintenance mode (2026):** AWS App Runner stops accepting new customers after April 30, 2026 and has been moved to maintenance mode. Existing services keep running. The AWS-recommended replacement is **Amazon ECS Express Mode**. See the [official announcement](https://docs.aws.amazon.com/apprunner/latest/relnotes/relnotes.html).
+
 **Description:** AWS App Runner for automatically building and deploying containerized web applications
 
 **Cost Components:**
@@ -1252,7 +1257,8 @@ Total: $46.72 + $10.22 + $0.10 = $57.04/month
 ```
 
 **Notes:**
-- Uses fixed fallback pricing (no AWS Pricing API call)
+- Uses fixed pricing (no AWS Pricing API call)
+- Unknown `Cpu`/`Memory` values fall back to numeric parsing and downgrade confidence to `low`
 - Actual cost depends on provisioned capacity and active time
 - Data transfer costs not included
 
@@ -1393,30 +1399,44 @@ Monthly Cost: 2 × $0.11 × 730 = $160.60
 
 **Cost Components:**
 - DPU-hours: $0.44 per DPU-hour
+- Total: `DPUs × hoursPerMonth × $0.44`
+
+**DPU Detection (in priority order):**
+1. `WorkerType` + `NumberOfWorkers` from template:
+   - `G.025X` = 0.25 DPU/worker (streaming)
+   - `G.1X` = 1 DPU/worker
+   - `G.2X` = 2 DPU/worker
+   - `G.4X` = 4 DPU/worker
+   - `G.8X` = 8 DPU/worker
+   - `Standard` = 4 DPU/worker
+   - `Z.2X` = 2 DPU/worker
+2. `MaxCapacity` from template (legacy: Python shell or legacy Spark jobs)
+3. Default: 2 DPU
 
 **Default Assumptions:**
-- 100 DPU-hours per month
+- 50 hours/month runtime
+- DPUs derived from template (see above)
 - Data Catalog: first 1M objects and requests are free (not included)
 
 **Configuration:**
 ```yaml
 usageAssumptions:
   glue:
-    dpuHoursPerMonth: 100
+    hoursPerMonth: 50
 ```
 
-**Example:**
+**Example (G.2X × 10 workers):**
 ```
-DPU-hours: 100 × $0.44/DPU-hour = $44.00/month
+DPUs: 10 × G.2X (2 DPU/worker) = 20 DPU
+Cost: 20 DPU × 50h × $0.44 = $440.00/month
 ```
 
 **Notes:**
-- DPU-hours represent the processing capacity consumed by your job
 - 1 DPU = 4 vCPUs and 16 GB of memory
 - ETL jobs and crawlers use the same $0.44/DPU-hour rate
 - Development endpoint costs not included
 - Job bookmarks and triggers have no direct cost
-- Uses fixed fallback pricing (Glue Pricing API is complex)
+- Uses fixed pricing (no AWS Pricing API call)
 
 ### AWS::Glue::Crawler
 
@@ -1426,25 +1446,26 @@ DPU-hours: 100 × $0.44/DPU-hour = $44.00/month
 - DPU-hours: $0.44 per DPU-hour
 
 **Default Assumptions:**
-- 100 DPU-hours per month
+- 2 DPU (crawlers do not expose DPU configuration in CloudFormation)
+- 50 hours/month runtime
 
 **Configuration:**
 ```yaml
 usageAssumptions:
   glue:
-    dpuHoursPerMonth: 100
+    hoursPerMonth: 50
 ```
 
 **Example:**
 ```
-DPU-hours: 100 × $0.44/DPU-hour = $44.00/month
+Cost: 2 DPU × 50h × $0.44 = $44.00/month
 ```
 
 **Notes:**
-- Shares the same `dpuHoursPerMonth` configuration as Glue Jobs
+- Shares the same `hoursPerMonth` configuration as Glue Jobs
 - Crawlers and jobs use the same pricing rate
 - Data Catalog storage costs covered by free tier (first 1M objects free)
-- Uses fixed fallback pricing (Glue Pricing API is complex)
+- Uses fixed pricing (no AWS Pricing API call)
 
 ### AWS::Athena::WorkGroup
 
